@@ -1,0 +1,51 @@
+/**
+ * The Tegaki hanko seal — Design.md §2.4, candidate B.
+ *
+ * A circular seal: thick vermilion rim with 手 ("te", hand) centred inside.
+ * Chosen over the three alternatives because it stays legible at 16px, and
+ * the mark does triple duty as nav lockup, favicon and OG stamp.
+ *
+ * The glyph is a real outline extracted from Noto Serif JP (SIL OFL) rather
+ * than live text, so the mark renders identically whether or not a webfont
+ * has loaded — a logo that reflows mid-paint is not a logo. Regenerate with
+ * fontTools' SVGPathPen if the mark ever changes.
+ *
+ * Colour comes from `currentColor`, so the seal inherits from its context:
+ * vermilion on the dark ground, but cream when it sits inside a filled
+ * button or on a washi surface.
+ */
+
+const GLYPH_TE =
+  'M24 54.37H67.91L70.79 50.89Q70.79 50.89 71.32 51.3Q71.85 51.72 72.68 52.35Q73.51 52.99 74.37 53.74Q75.22 54.49 76 55.15Q75.78 56.04 74.5 56.04H24.44ZM27.65 41.97H64.81L67.64 38.54Q67.64 38.54 68.14 38.95Q68.63 39.37 69.44 40Q70.24 40.64 71.1 41.36Q71.96 42.08 72.68 42.75Q72.51 43.58 71.24 43.58H28.1ZM65.76 24.69 70.07 28.73Q69.69 29.07 68.94 29.07Q68.19 29.07 67.08 28.62Q63.37 29.45 58.72 30.26Q54.07 31.06 48.92 31.67Q43.77 32.28 38.37 32.69Q32.97 33.11 27.65 33.17L27.43 32.11Q32.58 31.73 37.98 30.95Q43.38 30.17 48.56 29.15Q53.74 28.13 58.17 26.99Q62.6 25.86 65.76 24.69ZM48.31 29.84H52.08V69.55Q52.08 71.04 51.63 72.23Q51.19 73.42 49.72 74.23Q48.26 75.03 45.27 75.31Q45.15 74.42 44.77 73.7Q44.38 72.98 43.66 72.54Q42.77 72.04 41.33 71.65Q39.89 71.27 37.4 70.99V70.16Q37.4 70.16 38.2 70.21Q39.01 70.27 40.23 70.35Q41.44 70.43 42.75 70.55Q44.05 70.66 45.13 70.71Q46.21 70.77 46.65 70.77Q47.59 70.77 47.95 70.43Q48.31 70.1 48.31 69.33Z'
+
+type SealProps = {
+  /** Rendered width and height in px. */
+  size?: number
+  /** Accessible name. Pass null for a purely decorative mark beside a wordmark. */
+  title?: string | null
+  className?: string
+}
+
+export function Seal({ size = 24, title = 'Tegaki', className }: SealProps) {
+  // Below ~20px the fine interior strokes start to fill in, so the rim
+  // thickens slightly to keep the silhouette reading as a seal rather than a
+  // smudge. Design.md §2.4 calls for exactly this at favicon sizes.
+  const rim = size < 20 ? 9 : 7.5
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      fill="none"
+      className={className}
+      role={title ? 'img' : undefined}
+      aria-label={title ?? undefined}
+      aria-hidden={title ? undefined : true}
+      focusable="false"
+    >
+      <circle cx="50" cy="50" r={50 - rim / 2} stroke="currentColor" strokeWidth={rim} />
+      <path d={GLYPH_TE} fill="currentColor" />
+    </svg>
+  )
+}

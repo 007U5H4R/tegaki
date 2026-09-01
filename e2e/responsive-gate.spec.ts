@@ -2,13 +2,17 @@ import { expect, test } from '@playwright/test'
 
 /**
  * The mandatory responsive gate from Design.md §5.2, applied to every page as
- * it lands. Right now that is only the token specimen; each later ticket adds
- * its routes to PAGES rather than writing a fresh copy of this test.
+ * it lands. Each ticket adds its routes here rather than writing a fresh copy
+ * of this test.
  *
  * "No horizontal scroll at 375px" is the PRD's stated bar, and it is the
  * failure that most often ships unnoticed because desktop looks fine.
+ *
+ * /styleguide earns its place here beyond its own sake: it renders every
+ * primitive at once, so if any single component overflows on a phone, this
+ * catches it before a real screen ever uses that component.
  */
-const PAGES = ['/'] as const
+const PAGES = ['/', '/sign-in', '/styleguide'] as const
 
 test.describe('responsive gate', () => {
   for (const path of PAGES) {
