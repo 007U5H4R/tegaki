@@ -6,8 +6,44 @@ import { Card, DashedRule, MicroLabel } from '@/components/ui/card'
 import { StatusChip } from '@/components/ui/status-chip'
 import { Stepper } from '@/components/ui/stepper'
 import { EmptyState, SkeletonList } from '@/components/ui/states'
+import { OrderCard } from '@/components/orders/order-card'
+import type { Order } from '@/lib/orders/queries'
 import { ORDER_STATUSES } from '@/lib/orders/status'
 import { Buttons, ErrorSpecimen, Fields, Upload } from './interactive'
+
+/** Fixed dates so the specimens do not churn the visual diff every day. */
+const SPECIMEN_ORDERS: Order[] = [
+  {
+    id: 'a1b2c3d4-0000-4000-8000-000000000001',
+    buyer_id: 'specimen',
+    status: 'draft',
+    tier: null,
+    wizard_stage: 1,
+    submitted_at: null,
+    created_at: '2026-08-28T09:00:00.000Z',
+    updated_at: '2026-08-28T09:00:00.000Z',
+  },
+  {
+    id: 'a1b2c3d4-0000-4000-8000-000000000002',
+    buyer_id: 'specimen',
+    status: 'analysis_in_progress',
+    tier: 'core',
+    wizard_stage: 4,
+    submitted_at: '2026-08-25T09:00:00.000Z',
+    created_at: '2026-08-24T09:00:00.000Z',
+    updated_at: '2026-08-25T09:00:00.000Z',
+  },
+  {
+    id: 'a1b2c3d4-0000-4000-8000-000000000003',
+    buyer_id: 'specimen',
+    status: 'completed',
+    tier: 'comprehensive',
+    wizard_stage: 4,
+    submitted_at: '2026-08-14T09:00:00.000Z',
+    created_at: '2026-08-13T09:00:00.000Z',
+    updated_at: '2026-08-21T09:00:00.000Z',
+  },
+]
 
 export const metadata: Metadata = {
   title: 'Styleguide — Tegaki',
@@ -112,6 +148,18 @@ export default function StyleguidePage() {
         <div className="flex flex-wrap gap-3">
           {ORDER_STATUSES.map((status) => (
             <StatusChip key={status} status={status} />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Order cards">
+        <p className="text-washi-300 mb-6 text-sm">
+          Fixture data. The card grows as later tickets can populate it — subject with the wizard,
+          the progress rail with T08, the report download with T09.
+        </p>
+        <div className="flex flex-col gap-4">
+          {SPECIMEN_ORDERS.map((order) => (
+            <OrderCard key={order.id} order={order} />
           ))}
         </div>
       </Section>

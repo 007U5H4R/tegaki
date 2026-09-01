@@ -1,6 +1,14 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
+import { Seal } from '@/components/brand/seal'
+import { OrderCard } from '@/components/orders/order-card'
+import { Button } from '@/components/ui/button'
+import { MicroLabel } from '@/components/ui/card'
+import { EmptyState, SkeletonList } from '@/components/ui/states'
 import { signOut } from '@/lib/auth/actions'
+import { createDraftOrder } from '@/lib/orders/actions'
+import { getMyOrders } from '@/lib/orders/queries'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
@@ -19,9 +27,6 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/sign-in')
 
-  // Reading through the user's own client, so RLS is doing the work here. If
-  // the policy were wrong this query would return nothing rather than someone
-  // else's row.
   const { data: profile } = await supabase
     .from('profiles')
     .select('email, full_name, role')
@@ -30,32 +35,68 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-      <p className="text-shu-500 font-mono text-xs tracking-[0.08em] uppercase">
-        Tegaki · 手書き
-        {profile?.role === 'admin' ? ' · admin' : ''}
-      </p>
+      <MicroLabel>Tegaki · 手書き{profile?.role === 'admin' ? ' · admin' : ''}</MicroLabel>
 
-      <h1 className="text-washi-50 mt-4 text-4xl">Your assessments</h1>
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-washi-50 font-serif text-4xl">Your assessments</h1>
+          <p className="text-washi-300 mt-2">
+            Signed in as {profile?.full_name ? `${profile.full_name} · ` : ''}
+            {profile?.email ?? user.email}
+          </p>
+        </div>
 
-      <p className="text-washi-300 mt-3">
-        Signed in as {profile?.full_name ? `${profile.full_name} · ` : ''}
-        {profile?.email ?? user.email}
-      </p>
-
-      <div className="border-ink-700 mt-10 rounded-2xl border p-6">
-        <p className="text-washi-300">
-          Your orders will appear here. The submission wizard arrives in the next ticket.
-        </p>
+        <form action={createDraftOrder}>
+          <Button type="submit">New request</Button>
+        </form>
       </div>
 
-      <form action={signOut} className="mt-8">
-        <button
-          type="submit"
-          className="border-washi-300/40 text-washi-50 duration-press hover:border-washi-50 rounded-full border px-5 py-2 text-sm font-semibold transition-[transform,border-color] ease-out active:scale-[0.97]"
-        >
+      {/* Streamed, so the page shell and the New request button are usable
+          before the list resolves — the skeleton is what people see while it
+          does, not a blank screen. */}
+      <div className="mt-10">
+        <Suspense fallback={<SkeletonList count={2} />}>
+          <OrderList />
+        </Suspense>
+      </div>
+
+      <form action={signOut} className="mt-12">
+        <Button variant="ghost" size="sm" type="submit">
           Sign out
-        </button>
+        </Button>
       </form>
     </main>
+  )
+}
+
+async function OrderList() {
+  const orders = await getMyOrders()
+
+  if (orders.length === 0) {
+    return (
+      <EmptyState
+        icon={<Seal size={72} title={null} />}
+        title="Your first assessment begins with a handwriting sample."
+        body={
+          <>
+            Two pages on unlined paper and three signatures. We will walk you through exactly what
+            to write, and your sample stays visible only to you and your analyst.
+          </>
+        }
+        action={
+          <form action={createDraftOrder}>
+            <Button type="submit">Begin your assessment</Button>
+          </form>
+        }
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {orders.map((order) => (
+        <OrderCard key={order.id} order={order} />
+      ))}
+    </div>
   )
 }
