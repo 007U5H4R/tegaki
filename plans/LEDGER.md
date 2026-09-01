@@ -17,9 +17,10 @@
 | A3 · Scaffold Next.js | **done** | Opus | `eeeb521`. Next 16.3.3 / React 19.2.8 / Tailwind 4.3.3. Non-empty dir → scaffolded in temp, rsynced in, reinstalled (pnpm store differs across volumes). Removed the scaffold's placeholder SVGs |
 | A4 · TS strict + lint/format | **done** | Opus | `strict` + `noUncheckedIndexedAccess` + unused-symbol checks; Prettier + tailwind plugin; scripts typecheck/format/test/test:e2e |
 | A5 · Design tokens + fonts | **done** | Opus | Full OKLCH scale, radius, motion, base surface, focus ring, reduced-motion. **3 spec corrections — see decisions below** |
-| B1 · Env config | **done** | Opus | `ff69cf3`. `.env.example` documents all 6 vars incl. why the service-role key is confined to cron + tests |
-| B2–B5 · Supabase CLI + profiles + RLS | **blocked** | | Needs **H1** |
-| C1–C2 · Client factories + proxy | **blocked** | | Needs H1 for real values. ⚠️ C2 is `proxy.ts` in Next 16, not `middleware.ts` |
+| B1 · Env config | **done** | Opus | `ff69cf3` + `dfdb2cb`. `.env.local` written with the real project URL + publishable key. Uses Supabase's **current** naming (publishable/secret), not the retired anon/service_role |
+| B2 · Supabase CLI init | **done** | Opus | `supabase/config.toml` committed. ⚠️ CLI **not yet linked** — needs Tushar (DB password is interactive) |
+| B3–B5 · profiles + trigger + RLS | **written, not applied** | Opus | `supabase/migrations/20260901120000_profiles.sql`. Role resolved inside a `security definer` trigger from a DB setting, so a client cannot self-promote; `role` also excluded from the UPDATE grant. **Awaiting `db push`** |
+| C1–C2 · Client factories + proxy | **done** | Opus | `env.ts` fails loudly on missing config; server client created per request (never hoisted — would leak sessions). ⚠️ C2 is **`src/proxy.ts`**, the Next 16 rename of middleware |
 | C3 · Google provider | **blocked** | | Needs **H2** |
 | C4–C7 · Auth UI + protected route | **blocked** | | Needs H1/H2 |
 | C8 · Admin role helper | **done** | Opus | `resolveRole()` + 6 unit tests; fails closed on missing email / empty allowlist / blank slot from a trailing comma. Real value needs **H4** |
@@ -43,7 +44,9 @@
 
 | # | Needed for | What Tushar must do |
 |---|---|---|
-| **H1** | T01/B1–B5 | Create the Supabase project (region nearest India); provide project URL, anon key, service-role key |
+| ~~H1~~ | ~~T01/B1–B5~~ | ✅ **Done 2026-09-01.** Project `tegaki-pilot`, ref `rgawqxdfvgbocgatjrlg`, ap-south-1 (Mumbai), Healthy. Publishable key in `.env.local` |
+| **H1b** | applying every migration | **Link the CLI** — Docker is unavailable on this machine, so there is no local stack and migrations go straight to the remote project. Run in the terminal (the DB password is interactive, so it never passes through Claude): `pnpm supabase login` · `pnpm supabase link --project-ref rgawqxdfvgbocgatjrlg` · `pnpm supabase db push` |
+| **H1c** | T01/D4 RLS tests | Paste the **secret key** into `SUPABASE_SECRET_KEY` in `.env.local` (dashboard → Settings → API Keys → Secret keys → reveal) |
 | **H2** | T01/C3 | Create a Google Cloud OAuth client; provide client ID + secret; set redirect URI |
 | **H3** | T01/E1–E4 | Create the GitHub repo; link the Vercel project; confirm the production URL |
 | **H4** | T01/C8 | Confirm the admin allowlist email(s) |
