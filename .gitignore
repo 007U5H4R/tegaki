@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Environment — never commit real values
+.env
+.env*.local
+
+# Vercel / Supabase local
+.vercel/
+supabase/.temp/
+supabase/.branches/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# ── Project-specific ──────────────────────────────────────────────
+
+# REAL CLIENT DATA — never leaves this machine.
+# Contains named individuals' personality assessments and a handwriting
+# scan. Sensitive personal data under the project's own privacy policy;
+# the repo is destined for GitHub, so these stay local.
+Sample Reports/
+
+# Hero film masters: large and regenerable from the Higgsfield job ids
+# recorded in Hero-Video-Prompts.md. Derived web assets (frames, poster,
+# mobile loop) ARE committed.
+assets/hero/*.mp4
+assets/hero/*.png
+
+# Parked 2022 trait-card decks — kept locally, no confirmed product role.
+Graphodeck/
+graphocards/
+
+# Local Claude Code settings (machine-specific)
+.claude/settings.local.json
