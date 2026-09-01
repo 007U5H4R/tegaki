@@ -1,7 +1,7 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-01** (end of t-design stage).
-> Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — **not a git repo yet** (init before the build stage).
+> **Read this first in any new session.** Last updated: **2026-09-01** (end of T03).
+> Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
 ---
@@ -18,7 +18,7 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 in progress · T01 8/19 tasks done · ⏳ BLOCKED ON H1–H4 ⏳
+   → BUILD ▶ Phase 1 ✅ (T01, T02) · Phase 2 in progress (T03 ✅ → T04 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
@@ -42,7 +42,7 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **Hero film (C5): ✅ COMPLETE.** The 15s v3 re-shoot fixed the text defect (page reads exactly the intended sentence; verified frame-by-frame) and the pen stays sharp through the rise. Keeper: `assets/hero/master-v3-15s-KEEPER.mp4` + 2K upscale + sliced frames in `assets/hero/frames/`. Credits: ~89 remaining, reserved for C4 (or Tushar photographs real scan-guide examples for free — ask him).
 
-**Open now:** Tushar's build-start approval (phase 1 begins with T01/H1–H4, which need him at the keyboard).
+**Open for Tushar (neither blocking):** sign in on production to see it himself; add pilot users as Google *test users* while the OAuth app is in Testing status.
 
 **Note:** there is no `/to-tickets` skill installed on this machine (checked 2026-09-01). The stage was executed manually per the CLAUDE.md spec. Same is true of `/handoff` — this file is maintained by hand.
 
@@ -55,7 +55,7 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 | `Solution-PRD.md` | **The product truth.** Final scope, tiers, wizard, dashboard, admin, status machine, architecture, fulfillment runbook | Approved (implicitly, by ordering t-design) |
 | `Discovery-PRD.md` | Audit trail — 3 grilling rounds, research findings, why each decision was made | Historical reference |
 | `Design.md` | **The design truth.** OKLCH tokens, typography, components, motion, a11y/QA gates. Downstream stages implement it *verbatim* | v1.0 — **APPROVED 2026-09-01** |
-| `tickets.md` | **The build truth.** 15 code tickets + 5 content tickets as a tracer-bullet DAG, with phases, blocking edges, and standing gates. Consumed by the planning stage | v1.0 draft — awaiting granularity sign-off |
+| `tickets.md` | **The build truth.** 15 code tickets + 5 content tickets as a tracer-bullet DAG, with phases, blocking edges, and standing gates. Consumed by the planning stage | v1.0 — SIGNED OFF |
 | `Hero-Video-Prompts.md` | Seedance 2.5 prompt kit for the hero film: start image → draft pass → 30s master → upscale/slice → build instruction | Ready to run |
 | `Graphology Prompt.docx` | **Master Prompt v2.0** — the core report-generation IP (16-section premium report) | Source for the 3 tier variants (build deliverable) |
 | `Sample Reports/` | Varun + Nancy full reports, a raw handwriting scan (`HW NS.pdf`) | Proof the manual pipeline works; tier-3 sample candidate |
