@@ -56,3 +56,6 @@ next-env.d.ts
 
 # Playwright artifacts
 /e2e/.auth/
+
+# Bulk env file for pasting into Vercel — contains real secrets.
+vercel-env.txt
