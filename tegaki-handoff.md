@@ -17,10 +17,14 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 ## 2. Pipeline position
 
 ```
-grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅ COMPLETE (2026-09-01, Tushar asked for the full set up front)
-   → ⏳ AWAITING BUILD APPROVAL ⏳ → subagent build (per plans/BUILD-ORCHESTRATION.md)
+grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
+   → BUILD ▶ Phase 1 in progress · T01 8/19 tasks done · ⏳ BLOCKED ON H1–H4 ⏳
    → /code-review + /security-review + /impeccable → pilot live
 ```
+
+**Build state (2026-09-01):** branch `build/pilot`, 4 commits, `main` untouched. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3 scaffolded; the full `Design.md` token system installed; Vitest + Playwright (desktop **and** mobile) wired; the 375px no-horizontal-scroll gate written and **proved to fail on real overflow**. All suites green: typecheck, lint, 6 unit tests, 6 e2e tests, production build. **Live progress: `plans/LEDGER.md`.**
+
+**Blocked on H1–H4** (§5) — everything remaining in T01 needs Supabase, Google OAuth, or Vercel, which only Tushar can create.
 
 **The plan set:** `plans/T01…T15` (one per code ticket), `plans/C1-C4-content-plans.md`, and `plans/BUILD-ORCHESTRATION.md` (workspace/ledger, dispatch model, review + fix loop, QA gates per phase, model assignment, human-in-the-loop list). `plans/T01-walking-skeleton.md` locks the stack decisions every plan inherits (pnpm, `@supabase/ssr`, Supabase CLI migrations, Vitest + Playwright, status machine as a Postgres definer function with column grants, media masters out of git) and the four setup items only Tushar can do (H1–H4: Supabase project, Google OAuth client, GitHub/Vercel link, admin email).
 
