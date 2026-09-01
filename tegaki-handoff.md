@@ -32,7 +32,7 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **Phase 1 is complete.** T02 shipped the design system: every primitive from `Design.md` with `/styleguide` as its regression surface (34 e2e tests). The hanko seal carries a real glyph outline extracted from Noto Serif JP, so the mark never reflows while a font loads. Nav, modal and toast are deliberately deferred to the tickets that first need them.
 
-**T03 is done** — `orders` with the status machine enforced in Postgres, and the dashboard listing. **Next: T04** (`plans/T04-private-sample-upload.md`), the riskiest slice in the build: private storage, RLS and signed URLs for handwriting samples. No blockers. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully).
+**T03 and T04 are done.** `orders` carries the status machine in Postgres; handwriting samples live in a private bucket whose access rules are proven by 13 tests attacking it from every angle. **Next: T05** (`plans/T05-wizard-shell-stage1.md`) — the wizard shell, resume, and stage 1 with the consent gate. It must also delete the temporary `/upload-demo/[orderId]` route and mount SampleUploader at `/wizard/[orderId]/upload`. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully).
 
 **Before Phase 2 closes, a QA agent should run the phase gate** per `plans/BUILD-ORCHESTRATION.md`: a stranger's account completing sign-in → submitted order on the deployed URL.
 

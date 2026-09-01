@@ -79,6 +79,21 @@
 
 **Note for T05:** the dashboard's "New request" currently creates a draft and returns to the dashboard. Point it at the wizard once that route exists.
 
+### T04 · Private sample upload — **done** (`27208f3`) ⚠️ the riskiest slice
+| Task | Status | Note |
+|---|---|---|
+| A1–A3 · `order_files`, RLS, bucket, storage policies | **done** | Migration `20260901160000_order_files.sql`. Bucket **private**, 20 MB cap, three MIME types. **The path is the boundary:** `samples/{buyer_uid}/{order_id}/v{n}/{uuid}.{ext}` — every policy checks segment 1 against `auth.uid()`, and the upload policy proves segment 2 names an order the caller owns *and* that is open for uploads. **No anon policy exists at all** |
+| B1 · Validate / paths / signed URLs | **done** | Limits shared by validator, CHECK constraints and bucket config, so the browser cannot accept what the database will reject. Signed URLs are 10 min and minted through the *caller's* client, so policies decide who may see what |
+| B2 · Server actions | **done** | `recordUpload` re-derives and re-checks the path rather than trusting it; `removeUpload` deletes the object before the row, so a re-run tidies any half-state instead of orphaning bytes |
+| C1 · `SampleUploader` | **done** | Standalone, so T08's re-upload panel mounts the identical interface. **Real upload progress** via XHR against the Storage REST endpoint — supabase-js has no progress callback, and a faked bar on a 20 MB phone upload would be worse than none |
+| C2 · Guardrails checklist | **done** | Four PRD points, persisted on the order (survives resume, and is auditable for a service handling third-party consent). Dropzone stays locked and **says why** |
+| C3 · Ideal-vs-rejected gallery | **deferred** | Waiting on **C4** imagery. Placeholder tiles would teach nothing; the guardrail text carries the requirement meanwhile |
+| C4 · Demo route | **done** | `/upload-demo/[orderId]`, temporary. **T05 must delete it** when the wizard mounts the uploader at `/wizard/[orderId]/upload` |
+| D1 · Storage security suite | **done** | **13 tests.** Owner reads; another user is refused download, signed URL, and listing; anonymous refused entirely; signed URL 200 then expired; upload into another's folder refused; upload naming another's order refused; upload to a submitted order refused; file rows hidden cross-account. Plus the hand-built XHR request, which a typo would otherwise only break in a browser |
+| D2 · E2E upload walkthrough | **open** | Same blocker as T01/E4 — the extension cannot drive Google's consent screen, so no signed-in browser session. Components are proven on `/styleguide`, logic by unit tests, security directly against the live project. **Tushar can close this in 30 seconds:** sign in, then visit `/upload-demo/<order id>` |
+
+**Suites after T04:** typecheck ✓ · lint ✓ · **67 unit** ✓ · **34 e2e** ✓ · build ✓
+
 ---
 
 ## Open human-in-the-loop items
