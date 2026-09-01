@@ -90,9 +90,10 @@ Enable RLS. Policies: `select` where `auth.uid() = id`; `update` where `auth.uid
 `src/lib/supabase/client.ts` (browser), `src/lib/supabase/server.ts` (server components/actions, cookie-aware), `src/lib/supabase/middleware.ts` (session refresh helper) — all via `@supabase/ssr`.
 *Gate:* `pnpm typecheck` passes; each factory returns a typed client.
 
-**C2 · Middleware**
-`src/middleware.ts` refreshing the session and matching all routes except static assets and images.
-*Gate:* loading any page sets/refreshes the Supabase auth cookie.
+**C2 · Proxy (session refresh)** — ⚠️ **corrected 2026-09-01 against the installed Next.js 16 docs**
+Next 16 **deprecated `middleware.ts` and renamed it to `proxy.ts`** (`node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`; codemod: `npx @next/codemod@canary middleware-to-proxy .`). Create **`src/proxy.ts`** exporting a `proxy` function (named or default) plus a `config.matcher` covering all routes except static assets and images.
+The same docs state proxy is for *optimistic* checks and **not** a session-management or authorization solution — so it only refreshes the Supabase cookie here. Real authorization stays in server components and server actions (C7, and `assertAdmin()` in T07). That two-layer split is deliberate, not redundant.
+*Gate:* loading any page refreshes the Supabase auth cookie; no authorization decision lives in `proxy.ts`.
 
 **C3 · Google provider configuration** *(needs H2)*
 Enable Google in Supabase Auth; set the redirect URI to `<site>/auth/callback`; add both the Vercel production URL and `http://localhost:3000` to allowed redirects.

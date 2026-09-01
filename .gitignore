@@ -48,3 +48,8 @@ graphocards/
 
 # Local Claude Code settings (machine-specific)
 .claude/settings.local.json
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+*.pem

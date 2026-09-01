@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Tegaki design tokens — implements Design.md §2 verbatim.
+   Single committed theme: warm-dark ("ink") ground, cream ("washi") content,
+   vermilion ("shu") as the only saturated hue.
+   ========================================================================== */
+
+@theme {
+  /* Ink — warm dark ground (figure-ground: ground) */
+  --color-ink-950: oklch(0.15 0.012 85); /* page void */
+  --color-ink-900: oklch(0.2 0.015 80); /* raised surface / cards */
+  --color-ink-800: oklch(0.25 0.018 80); /* elevated: modals, popovers, admin rows */
+  --color-ink-700: oklch(0.32 0.018 78); /* hairline borders, dashed rules */
+  --color-ink-500: oklch(0.58 0.03 78); /* disabled text, placeholder, metadata */
+
+  /* Washi — paper light (figure) */
+  --color-washi-50: oklch(0.94 0.03 85); /* primary text, report-paper surface */
+  --color-washi-300: oklch(0.78 0.04 82); /* secondary text, captions */
+
+  /* Shu — vermilion seal (the ONLY saturated hue) */
+  --color-shu-500: oklch(0.6 0.19 32); /* seal mark, accents, focus ring */
+  --color-shu-600: oklch(0.53 0.175 31); /* filled CTA background */
+  --color-shu-700: oklch(0.46 0.155 30); /* CTA hover/pressed */
+  --color-shu-900: oklch(0.25 0.06 30); /* vermilion wash: selected tint, chip bg */
+
+  /* State — always paired with an icon and text, never colour alone */
+  --color-ok-500: oklch(0.65 0.1 150); /* approved / completed */
+  --color-warn-500: oklch(0.75 0.12 80); /* under review / in progress */
+  --color-err-500: oklch(0.68 0.17 30); /* needs re-upload / errors */
+
+  /* Typography — families are wired to next/font in layout.tsx */
+  --font-serif: var(--font-instrument-serif), Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', monospace;
+  --font-jp: var(--font-noto-serif-jp), var(--font-serif);
+
+  /* Radius vocabulary (Design.md §2.3) — inputs 8, cards 16, buttons/chips pill */
+  --radius-lg: 8px;
+  --radius-2xl: 16px;
+
+  /* Motion (Design.md §4.1). These deliberately OVERRIDE Tailwind's built-in
+     --ease-out / --ease-in-out inside @theme rather than sitting alongside
+     them in :root. Tailwind ships ease-out as cubic-bezier(0, 0, .2, 1),
+     which is the weak curve Design.md rules out — defining ours here means
+     the `ease-out` utility itself resolves to the strong curve, so there is
+     one motion system rather than two that silently disagree. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Named as --duration-* so Tailwind emits duration-press, duration-modal … */
+  --duration-press: 140ms;
+  --duration-pop: 180ms;
+  --duration-modal: 280ms;
+  --duration-reveal: 800ms;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+body {
+  background: var(--color-ink-950);
+  color: var(--color-washi-50);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  text-wrap: balance;
+}
+
+/* Focus ring — 2px shu, 2px offset. Never removed (Design.md §5.2). */
+:focus-visible {
+  outline: 2px solid var(--color-shu-500);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: keep opacity and colour, drop movement (Design.md §4.4). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -67,24 +67,26 @@ Fictional sample-report subjects use **initial-medallions on washi tint** (not p
 
 ### 2.1 Color — OKLCH (hex fallbacks committed; state pairs pre-checked for contrast)
 
+> **Hex fallbacks corrected 2026-09-01 (T01/A5).** The OKLCH values are authoritative; the hexes below are now the **true computed conversions** taken from the compiled stylesheet, replacing the approximations in the original draft (which were off by enough to matter — `--ink-950` was written as `#131209` but actually resolves to `#0d0b06`). `theme-color` in the app tracks the computed value.
+
 ```css
 :root {
   /* Ink — warm dark ground (figure-ground: ground) */
-  --ink-950: oklch(0.15 0.012 85);  /* #131209  page void (approved dark-bg list) */
-  --ink-900: oklch(0.20 0.015 80);  /* #1F1B14  raised surface / cards */
-  --ink-800: oklch(0.25 0.018 80);  /* #2A241A  elevated: modals, popovers, admin rows */
-  --ink-700: oklch(0.32 0.018 78);  /* #3D352F  hairline borders, dashed rules */
-  --ink-500: oklch(0.58 0.030 78);  /* #8A7E6F  disabled text, placeholder, metadata */
+  --ink-950: oklch(0.15 0.012 85);  /* #0d0b06  page void */
+  --ink-900: oklch(0.20 0.015 80);  /* #1a150e  raised surface / cards */
+  --ink-800: oklch(0.25 0.018 80);  /* #262118  elevated: modals, popovers, admin rows */
+  --ink-700: oklch(0.32 0.018 78);  /* #383229  hairline borders, dashed rules */
+  --ink-500: oklch(0.58 0.030 78);  /* #847867  disabled text, placeholder, metadata */
 
   /* Washi — paper light (figure) */
-  --washi-50:  oklch(0.94 0.030 85); /* #F7EFE2  primary text, report-paper surface */
-  --washi-300: oklch(0.78 0.040 82); /* #C9B99F  secondary text, captions */
+  --washi-50:  oklch(0.94 0.030 85); /* #f4ead5  primary text, report-paper surface */
+  --washi-300: oklch(0.78 0.040 82); /* #c4b59b  secondary text, captions */
 
   /* Shu — vermilion seal (the ONLY saturated hue) */
-  --shu-500: oklch(0.60 0.190 32);  /* #D9482F  seal mark, accents, focus ring, active states */
-  --shu-600: oklch(0.53 0.175 31);  /* #B93A24  filled CTA background (AA with washi-50 text) */
-  --shu-700: oklch(0.46 0.155 30);  /* #9C3120  CTA hover/pressed */
-  --shu-900: oklch(0.25 0.060 30);  /* #3A1712  vermilion wash: selected-card tint, chip bg */
+  --shu-500: oklch(0.60 0.190 32);  /* #da452c  seal mark, accents, focus ring, active states */
+  --shu-600: oklch(0.53 0.175 31);  /* #bc3422  filled CTA background (AA with washi-50 text) */
+  --shu-700: oklch(0.46 0.155 30);  /* #9c271b  CTA hover/pressed */
+  --shu-900: oklch(0.25 0.060 30);  /* #39150f  vermilion wash: selected-card tint, chip bg */
 
   /* State (used only in chips/alerts, always icon + text, never color alone) */
   --ok-500:   oklch(0.65 0.100 150); /* #5FA377  approved / completed */
