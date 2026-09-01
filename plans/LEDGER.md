@@ -27,11 +27,13 @@
 | D1 · Vitest | **done** | Opus | `.mts` config; alias via `fileURLToPath` (repo path contains a space) |
 | D2 · Playwright | **done** | Opus | Desktop (Chromium) + mobile (WebKit/iPhone 13) projects |
 | D3 · Auth redirect E2E | **done** | Opus | 4 tests. ⚠️ Next injects its own `role="alert"` route announcer, so bare `getByRole('alert')` matches two elements after a client-side nav — assertions are scoped to the message text |
-| D4 · Two-account RLS suite | **blocked** | | Needs **H1c** — the secret key, to create the two test users |
+| D4 · Two-account RLS suite | **done** | Opus | `2ce53ea`. 8 tests against the live project: own-row read, cross-account read returns nothing, unfiltered select still returns one row, cross-account update is a no-op, self-promotion to admin fails, anonymous sees nothing. **Found a real bug** — see decisions |
 | — · Responsive gate E2E *(added)* | **done** | Opus | Not in the original plan: the 375px no-horizontal-scroll gate, wired now so every later route inherits it. **Proved it bites** by injecting a 900px child, watching it fail, then reverting |
-| E1–E4 · Deploy + live verify | **blocked** | | Needs **H3** |
+| E1–E2 · GitHub + Vercel | **done** | Opus | Private repo `007U5H4R/tegaki`; Vercel project `tegaki`; production **https://tegaki-one.vercel.app** |
+| E3 · Live verification | **done (one gap)** | Opus | Production serves `/`, `/sign-in`, and redirects `/dashboard` → `/sign-in`. **14/14 e2e pass against production.** OAuth reaches Google carrying the right client id, both redirect URIs and `scope=email profile`. ⚠️ The final consent click could not be automated — the browser extension lacks permission on `accounts.google.com`. Config is proven correct; the same flow completed end to end on localhost against this same Supabase project and Google client |
+| E4 · Two real accounts on production | **open** | | Deliberately left for Tushar. Isolation is already proven at the database layer (D4), which is stronger evidence than a UI walkthrough; this is confirmation, not discovery |
 
-**Suites green:** `typecheck` ✓ · `lint` ✓ · `test` 6/6 ✓ · `test:e2e` **14/14** ✓ (desktop + mobile) · `build` ✓
+**Suites green:** `typecheck` ✓ · `lint` ✓ · `test` **26/26** ✓ · `test:e2e` **14/14 against production** ✓ · `build` ✓
 
 **Live proof so far** (localhost:3100 against the real Supabase project): Google sign-in completes; `handle_new_user()` created the profile with `full_name` from Google metadata; role resolved to `admin` from the compiled allowlist; the dashboard read the row back through the *user's own* client, so the RLS select policy is confirmed working; sign-out clears the session.
 
@@ -50,7 +52,18 @@
 | ~~H1b~~ | ~~migrations~~ | ✅ **Done.** CLI logged in and linked; both migrations pushed. Docker is unavailable here, so migrations go straight to the remote project — there is no local stack |
 | **H1c** | T01/D4 RLS tests | ⏳ Paste the **secret key** into `SUPABASE_SECRET_KEY` in `.env.local` (dashboard → Settings → API Keys → Secret keys → reveal). It creates the two throwaway users the isolation suite needs |
 | ~~H2~~ | ~~T01/C3~~ | ✅ **Done.** GCP project `tegaki-507313`; consent screen External, app "Tegaki"; client "Tegaki Web"; Tushar pasted the secret into Supabase |
-| **H3** | T01/E1–E4 | ⏳ Create a **private** GitHub repo; link the Vercel project; send the production URL. Then it also needs adding to Supabase redirect URLs and `NEXT_PUBLIC_SITE_URL` |
+| ~~H3~~ | ~~T01/E1–E4~~ | ✅ **Done.** Private repo `007U5H4R/tegaki`; Vercel project `tegaki`; production **https://tegaki-one.vercel.app**. Supabase Site URL and redirect list updated; `NEXT_PUBLIC_SITE_URL` set |
+
+## Live infrastructure
+
+| Thing | Value |
+|---|---|
+| Production | https://tegaki-one.vercel.app |
+| Vercel project / team | `prj_9XfJoRJVG1i6gYkXJ4oLkYabR5uy` / `team_pLaStAJybzggE3tGD5ioih5M` |
+| GitHub | `007U5H4R/tegaki` (**private**), branch `main` is the deploy branch |
+| Supabase redirect allow-list | `localhost:3000`, `localhost:3100`, `tegaki-one.vercel.app`, and `tegaki-*-tushar-49a6.vercel.app` (wildcard, so preview deploys work; scoped to Tushar's own Vercel team subdomain) |
+
+**Branch policy changed 2026-09-01 (Tushar's decision):** `build/pilot` was fast-forward merged into `main`, and `main` is now the deploy branch. The original plan kept `main` pristine until the code-review gate; that rule protects known-good code, and `main` held only specs, so there was nothing to protect. **The review gate moves from pre-merge to pre-launch** — same protection for a pilot with no users.
 | ~~H4~~ | ~~T01/C8~~ | ✅ **Done.** `snowreaderofficial@gmail.com` — the Google account, not the Outlook one the env file originally had, which would have left no admin access at all |
 
 ## Google OAuth reference (tegaki-507313)
@@ -77,4 +90,6 @@
 1. **`middleware.ts` → `proxy.ts`.** Next.js 16 deprecated and renamed the file convention (its bundled docs say so explicitly, and ship a codemod). The T01 plan's C2 task has been corrected. The same docs note proxy is for *optimistic* checks only and is not an authorization boundary — which is why real authorization stays in server components and actions.
 2. **Motion tokens moved into `@theme`.** Tailwind ships `--ease-out` as `cubic-bezier(0, 0, .2, 1)` — precisely the weak curve `Design.md` §4.1 rules out. Defining ours inside the theme makes the `ease-out` *utility* resolve to the strong curve, so there is one motion system rather than two that silently disagree. Durations named `--duration-*` so Tailwind emits matching utilities.
 3. **The Japanese face is self-hosted and subset.** `next/font/google` emitted **276 woff2 chunks totalling 8 MB** for three glyphs — a direct violation of `Design.md` §2.2 ("a few KB, never a full CJK font"). Subset the upstream face to 手書き with fontTools: **1,352 bytes**, and the site's entire font payload dropped to 15 files / 192 KB. Regenerate with `python3 -m fontTools.subset noto-full.woff2 --text="手書き" --flavor=woff2` if the JP copy ever changes.
-4. **`Design.md` hex fallbacks corrected.** They were eyeballed approximations that disagreed with their own authoritative OKLCH values — `--ink-950` was written `#131209` but resolves to `#0d0b06`. Replaced with true computed conversions; `theme-color` now tracks the real value. Contrast is unaffected in the safe direction (the ground got darker, so ratios rose).
+4. **`service_role` had no grants at all.** Disabling "automatically expose new tables" switches off default privileges for **every** role, not just client-facing ones, so privileged queries failed with `42501`. The isolation tests all passed; only the admin fixtures broke — which is a good failure mode, but it would have resurfaced much later as a mysteriously broken retention cron. Granting `service_role` full access costs nothing, since the key already bypasses RLS by design. **Every table migration must now grant both roles.**
+5. **Env guard hardened after a production 500.** The first deploy returned 500 on every route because `NEXT_PUBLIC_SUPABASE_URL` never made it into Vercel — the bulk paste silently dropped the first line. The guard named the exact variable, which is why this took a minute to diagnose rather than an hour. It now also rejects placeholders, malformed URLs, plain http for remote hosts, and the two key mix-ups (a secret key where a browser would read it; the publishable key in the privileged slot).
+6. **`Design.md` hex fallbacks corrected.** They were eyeballed approximations that disagreed with their own authoritative OKLCH values — `--ink-950` was written `#131209` but resolves to `#0d0b06`. Replaced with true computed conversions; `theme-color` now tracks the real value. Contrast is unaffected in the safe direction (the ground got darker, so ratios rose).

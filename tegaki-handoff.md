@@ -22,11 +22,17 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
-**Build state (2026-09-01):** branch `build/pilot`, 8 commits, `main` untouched. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). **Authentication works end to end against the live Supabase project** — verified in a browser, not just in tests. Suites: typecheck ✓ lint ✓ 6 unit ✓ **14 e2e** ✓ build ✓. **Live progress: `plans/LEDGER.md`.**
+## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Infrastructure live:** Supabase `tegaki-pilot` (ref `rgawqxdfvgbocgatjrlg`, Mumbai) with both migrations applied · Google Cloud `tegaki-507313` with OAuth configured · Google sign-in enabled in Supabase.
+**Build state (2026-09-01):** `main` is the deploy branch (10 commits). Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). **Authentication works end to end** — verified in a browser against the live Supabase project. Suites: typecheck ✓ lint ✓ **26 unit** ✓ **14 e2e against production** ✓ build ✓.
 
-**Remaining blockers: H1c** (secret key, for the two-account RLS suite) and **H3** (GitHub + Vercel, for deployment). Everything else in T01 is done.
+**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 3 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
+
+**T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is already proven at the database layer by the 8-test isolation suite, which is stronger evidence than a UI walkthrough. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
+
+**Next ticket: T02** (design system) — `plans/T02-design-system.md`, no blockers.
+
+**Live progress: `plans/LEDGER.md`.**
 
 **The plan set:** `plans/T01…T15` (one per code ticket), `plans/C1-C4-content-plans.md`, and `plans/BUILD-ORCHESTRATION.md` (workspace/ledger, dispatch model, review + fix loop, QA gates per phase, model assignment, human-in-the-loop list). `plans/T01-walking-skeleton.md` locks the stack decisions every plan inherits (pnpm, `@supabase/ssr`, Supabase CLI migrations, Vitest + Playwright, status machine as a Postgres definer function with column grants, media masters out of git) and the four setup items only Tushar can do (H1–H4: Supabase project, Google OAuth client, GitHub/Vercel link, admin email).
 
