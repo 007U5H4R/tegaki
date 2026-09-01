@@ -19,19 +19,21 @@
 | A5 · Design tokens + fonts | **done** | Opus | Full OKLCH scale, radius, motion, base surface, focus ring, reduced-motion. **3 spec corrections — see decisions below** |
 | B1 · Env config | **done** | Opus | `ff69cf3` + `dfdb2cb`. `.env.local` written with the real project URL + publishable key. Uses Supabase's **current** naming (publishable/secret), not the retired anon/service_role |
 | B2 · Supabase CLI init | **done** | Opus | `supabase/config.toml` committed. ⚠️ CLI **not yet linked** — needs Tushar (DB password is interactive) |
-| B3–B5 · profiles + trigger + RLS | **written, not applied** | Opus | `supabase/migrations/20260901120000_profiles.sql`. Role resolved inside a `security definer` trigger from a DB setting, so a client cannot self-promote; `role` also excluded from the UPDATE grant. **Awaiting `db push`** |
-| C1–C2 · Client factories + proxy | **done** | Opus | `env.ts` fails loudly on missing config; server client created per request (never hoisted — would leak sessions). ⚠️ C2 is **`src/proxy.ts`**, the Next 16 rename of middleware |
-| C3 · Google provider | **blocked** | | Needs **H2** |
-| C4–C7 · Auth UI + protected route | **blocked** | | Needs H1/H2 |
-| C8 · Admin role helper | **done** | Opus | `resolveRole()` + 6 unit tests; fails closed on missing email / empty allowlist / blank slot from a trailing comma. Real value needs **H4** |
+| B3–B5 · profiles + trigger + RLS | **done** | Opus | `f2c0467`. Applied to remote; `migration list` shows local == remote. Trigger is `security definer`, so clients cannot invent a profile or choose a role; `role` excluded from the UPDATE grant as a second, independent lock |
+| C1–C2 · Client factories + proxy | **done** | Opus | `env.ts` fails loudly on missing config; server client created per request (never hoisted — would leak sessions). ⚠️ C2 is **`src/proxy.ts`**, the Next 16 rename of middleware. Build output confirms `ƒ Proxy (Middleware)` |
+| C3 · Google provider | **done** | Opus + Tushar | GCP project `tegaki-507313`, consent screen External, client "Tegaki Web". Supabase provider **Enabled**; Tushar pasted the secret. Redirect URLs added for :3000 and :3100 |
+| C4–C7 · Auth UI + protected route | **done** | Opus | `e2d7fa1`. **Verified in a real browser**: sign in → profile row created → dashboard reads it via RLS → sign out → `/dashboard` redirects again |
+| C8 · Admin role helper | **done** | Opus | `resolveRole()` + 6 unit tests. Live check passed — the dashboard rendered the `ADMIN` label for the allowlisted account |
 | D1 · Vitest | **done** | Opus | `.mts` config; alias via `fileURLToPath` (repo path contains a space) |
 | D2 · Playwright | **done** | Opus | Desktop (Chromium) + mobile (WebKit/iPhone 13) projects |
-| D3 · Auth redirect E2E | **blocked** | | Needs the dashboard (C7) |
-| D4 · Two-account RLS suite | **blocked** | | Needs **H1** |
+| D3 · Auth redirect E2E | **done** | Opus | 4 tests. ⚠️ Next injects its own `role="alert"` route announcer, so bare `getByRole('alert')` matches two elements after a client-side nav — assertions are scoped to the message text |
+| D4 · Two-account RLS suite | **blocked** | | Needs **H1c** — the secret key, to create the two test users |
 | — · Responsive gate E2E *(added)* | **done** | Opus | Not in the original plan: the 375px no-horizontal-scroll gate, wired now so every later route inherits it. **Proved it bites** by injecting a 900px child, watching it fail, then reverting |
 | E1–E4 · Deploy + live verify | **blocked** | | Needs **H3** |
 
-**Suites green at this point:** `typecheck` ✓ · `lint` ✓ · `test` 6/6 ✓ · `test:e2e` 6/6 ✓ (desktop + mobile) · `build` ✓
+**Suites green:** `typecheck` ✓ · `lint` ✓ · `test` 6/6 ✓ · `test:e2e` **14/14** ✓ (desktop + mobile) · `build` ✓
+
+**Live proof so far** (localhost:3100 against the real Supabase project): Google sign-in completes; `handle_new_user()` created the profile with `full_name` from Google metadata; role resolved to `admin` from the compiled allowlist; the dashboard read the row back through the *user's own* client, so the RLS select policy is confirmed working; sign-out clears the session.
 
 ### T02 · Design system
 | Task | Status | Model | Note |
@@ -44,12 +46,19 @@
 
 | # | Needed for | What Tushar must do |
 |---|---|---|
-| ~~H1~~ | ~~T01/B1–B5~~ | ✅ **Done 2026-09-01.** Project `tegaki-pilot`, ref `rgawqxdfvgbocgatjrlg`, ap-south-1 (Mumbai), Healthy. Publishable key in `.env.local` |
-| **H1b** | applying every migration | **Link the CLI** — Docker is unavailable on this machine, so there is no local stack and migrations go straight to the remote project. Run in the terminal (the DB password is interactive, so it never passes through Claude): `pnpm supabase login` · `pnpm supabase link --project-ref rgawqxdfvgbocgatjrlg` · `pnpm supabase db push` |
-| **H1c** | T01/D4 RLS tests | Paste the **secret key** into `SUPABASE_SECRET_KEY` in `.env.local` (dashboard → Settings → API Keys → Secret keys → reveal) |
-| **H2** | T01/C3 | Create a Google Cloud OAuth client; provide client ID + secret; set redirect URI |
-| **H3** | T01/E1–E4 | Create the GitHub repo; link the Vercel project; confirm the production URL |
-| **H4** | T01/C8 | Confirm the admin allowlist email(s) |
+| ~~H1~~ | ~~T01/B1–B5~~ | ✅ **Done.** Project `tegaki-pilot`, ref `rgawqxdfvgbocgatjrlg`, ap-south-1 (Mumbai), Healthy |
+| ~~H1b~~ | ~~migrations~~ | ✅ **Done.** CLI logged in and linked; both migrations pushed. Docker is unavailable here, so migrations go straight to the remote project — there is no local stack |
+| **H1c** | T01/D4 RLS tests | ⏳ Paste the **secret key** into `SUPABASE_SECRET_KEY` in `.env.local` (dashboard → Settings → API Keys → Secret keys → reveal). It creates the two throwaway users the isolation suite needs |
+| ~~H2~~ | ~~T01/C3~~ | ✅ **Done.** GCP project `tegaki-507313`; consent screen External, app "Tegaki"; client "Tegaki Web"; Tushar pasted the secret into Supabase |
+| **H3** | T01/E1–E4 | ⏳ Create a **private** GitHub repo; link the Vercel project; send the production URL. Then it also needs adding to Supabase redirect URLs and `NEXT_PUBLIC_SITE_URL` |
+| ~~H4~~ | ~~T01/C8~~ | ✅ **Done.** `snowreaderofficial@gmail.com` — the Google account, not the Outlook one the env file originally had, which would have left no admin access at all |
+
+## Google OAuth reference (tegaki-507313)
+
+- **Client ID:** `346888874267-re5inp03nc5b76bss0elbvb8b4en7hkh.apps.googleusercontent.com`
+- **Redirect URI registered with Google:** `https://rgawqxdfvgbocgatjrlg.supabase.co/auth/v1/callback`
+- **Supabase redirect allow-list:** `http://localhost:3000/auth/callback`, `http://localhost:3100/auth/callback`
+- **Publishing status: Testing.** Only listed test users can sign in (1 of 100 used). Either add each pilot user under *Audience → Test users*, or publish the app — publishing needs no Google verification for us, since we request only basic email/profile scopes.
 
 ---
 
