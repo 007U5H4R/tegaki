@@ -61,6 +61,26 @@
 
 ---
 
+## Phase 2 — Core loop
+
+### T03 · Draft order + dashboard — **done** (`abf3949`)
+| Task | Status | Note |
+|---|---|---|
+| A1–A2 · `orders` + RLS + grants | **done** | Migration `20260901150000_orders.sql`, applied. Buyer reads/creates own; edits confined to `draft`; may delete own draft (abandoning a mistake) but never a submitted order |
+| A3 · `transition_order()` | **done** | All seven PRD edges plus the actor entitled to each. `is_admin()` defined here so the machine could be written and tested whole; T07 adds only the policies that use it. `service_role` recognised as the trusted server context for cron and tests |
+| A4 · `lib/tiers.ts` | **done** | Prices, turnarounds and contents in one place; `formatPrice` uses `en-IN` grouping (₹1,999 groups differently from Western convention) |
+| A5 · Types + queries | **done** | `getMyOrders()` deliberately carries **no `buyer_id` predicate** — RLS does the filtering, so a broken policy fails the tests instead of hiding behind a correct-looking query |
+| B1 · `createDraftOrder` | **done** | `buyer_id` from the verified session, never from the caller |
+| B2 · Dashboard | **done** | Streams the list behind Suspense so the shell stays usable; `error.tsx` supplies the fourth state with Next's segment `reset()` as a real retry |
+| C1–C2 · Test suites | **done** | **39 unit tests.** The full 7×7 matrix: 42 illegal edges rejected, 7 legal accepted. Plus: a buyer cannot submit another's draft, and cannot approve their own sample |
+| C3 · E2E | **partial** | Order cards proven on `/styleguide` with fixtures. The signed-in walkthrough waits on the same blocker as T01/E4 — the browser extension cannot drive Google's consent screen |
+
+**Suites after T03:** typecheck ✓ · lint ✓ · **39 unit** ✓ · **34 e2e** ✓ · build ✓
+
+**Note for T05:** the dashboard's "New request" currently creates a draft and returns to the dashboard. Point it at the wizard once that route exists.
+
+---
+
 ## Open human-in-the-loop items
 
 | # | Needed for | What Tushar must do |
