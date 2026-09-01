@@ -52,6 +52,11 @@
 
 ## Decisions taken during the build
 
+- **2026-09-01 · `teachspark` paused to free a Supabase slot.** The free plan caps a user at **2 active projects** and Tushar was at the limit (`railcite` + `teachspark`; a third was already paused). Tushar chose to pause `teachspark` — reversible for up to a year, data retained, backups downloadable after that. Upgrading to Pro was declined because it breaks the pilot's ₹0/month premise.
+- **2026-09-01 · Project security toggles hardened at creation** (see the consequence note below):
+  - *Enable Data API* — **on** (supabase-js needs it).
+  - *Automatically expose new tables* — **OFF**. Supabase's own advice, and correct for a product whose top risk is unauthorised access to handwriting samples. **Consequence: every migration must now grant table privileges explicitly**; a new table is invisible to the API until it does.
+  - *Enable automatic RLS* — **ON**. An event trigger enables RLS on every new public-schema table. Our migrations enable it anyway; this is the belt-and-braces that catches a migration that forgets.
 - **`Sample Reports/` is gitignored.** It holds named individuals' personality assessments plus a handwriting scan — sensitive personal data under Tegaki's own privacy policy. The repo is destined for GitHub, so it stays local. **Flagged to Tushar.**
 - **pnpm installed globally** (11.25.0) — corepack was unavailable on this machine's Node 26.7.0.
 

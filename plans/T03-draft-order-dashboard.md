@@ -3,6 +3,8 @@
 > **Ticket:** T03 · **Phase 2 · Core loop** · **Blocked by:** T01, T02.
 > **Delivers:** the `orders` table with the complete status machine enforced **in the database**, a "New request" action creating a draft, and the dashboard listing the user's orders — with cross-account isolation proven.
 
+> ⚠️ **Project-wide migration rule (set at project creation, 2026-09-01).** The Supabase project has *Automatically expose new tables* **disabled** and *automatic RLS* **enabled**. So every migration that creates a table must **explicitly grant** what the API roles may do — e.g. `grant select, insert on <table> to authenticated;` — or the table is invisible to PostgREST. This is deliberate: nothing is reachable until we say so. It applies to T03, T04, T06, T09, T10 alike.
+
 ## Design decisions locked here
 
 - **The status machine lives in Postgres.** A `security definer` function `transition_order(order_id, new_status)` owns every status change, validating the edge against the PRD §6.6 matrix **and the caller's role**. Column-level grants prevent any direct `status` write by clients. App code never writes `status` — it calls the function. (*Invariants enforced closest to the data.*)
