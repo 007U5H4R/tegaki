@@ -30,7 +30,11 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is already proven at the database layer by the 8-test isolation suite, which is stronger evidence than a UI walkthrough. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
 
-**Next ticket: T02** (design system) — `plans/T02-design-system.md`, no blockers.
+**Phase 1 is complete.** T02 shipped the design system: every primitive from `Design.md` with `/styleguide` as its regression surface (34 e2e tests). The hanko seal carries a real glyph outline extracted from Noto Serif JP, so the mark never reflows while a font loads. Nav, modal and toast are deliberately deferred to the tickets that first need them.
+
+**Next: Phase 2, starting with T03** (`plans/T03-draft-order-dashboard.md`) — the `orders` table with the status machine enforced in Postgres, then the dashboard listing. No blockers. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully).
+
+**Before Phase 2 closes, a QA agent should run the phase gate** per `plans/BUILD-ORCHESTRATION.md`: a stranger's account completing sign-in → submitted order on the deployed URL.
 
 **Live progress: `plans/LEDGER.md`.**
 

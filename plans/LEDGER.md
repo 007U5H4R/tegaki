@@ -37,10 +37,27 @@
 
 **Live proof so far** (localhost:3100 against the real Supabase project): Google sign-in completes; `handle_new_user()` created the profile with `full_name` from Google metadata; role resolved to `admin` from the compiled allowlist; the dashboard read the row back through the *user's own* client, so the RLS select policy is confirmed working; sign-out clears the session.
 
-### T02 · Design system
-| Task | Status | Model | Note |
-|---|---|---|---|
-| all | — | | Blocked by T01 |
+### T02 · Design system — **done** (`937944f`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Tailwind theme | **done** | Landed in T01; verified in the compiled stylesheet |
+| A2 · Motion primitives | **done** | Tokens in `@theme`; grep confirms no `transition: all`, no `ease-in`, no raw cubic-bezier outside the token file |
+| A3 · Hanko seal | **done** | `components/brand/seal.tsx`. **Real 手 outline** extracted from Noto Serif JP via fontTools (939 bytes), not live text — the mark cannot reflow while a font loads. Rim thickens below 20px for favicon legibility. Verified at 16/24/48/96px |
+| A4 · Lockup + story-line | **done** | `components/brand/lockup.tsx`; 手書き is real text in the subset face, so it stays selectable and zoomable |
+| B1 · Button | **done** | primary/ghost/quiet × md/sm, plus loading (width preserved) and disabled. `:active` scale 0.97; hover gated to fine pointers |
+| B2 · Field/Input/Textarea | **done** | Labels always visible; errors wired via `aria-describedby`, never colour alone |
+| B3 · Checkbox + Toggle | **done** | Native input kept in the DOM (visually hidden, not removed) so keyboard, forms and assistive tech behave; whole label is the hit target |
+| B4 · Card + Status chip | **done** | Chips map 1:1 to PRD §6.6 plus `draft`; **every chip has an icon and text** |
+| B5 · Dashed rule + micro-label | **done** | The genkō yōshi motif and the "specimen label" voice |
+| C5 · Stepper | **done** | Shares the dashed-connector lineage with the how-it-works and status rails (§3.8 continuity) |
+| C6 · Dropzone + file rows | **done** | Presentation only; T04 wires uploads. Locked state **explains why** rather than greying out. Progress uses `scaleX`, skipping layout and paint |
+| D1–D3 · Screen states | **done** | Skeletons shaped like real content; empty state is a designed trust moment; `ErrorState` **requires** a message and a retry handler, so the useless variant cannot be built |
+| E1 · `/styleguide` | **done** | Every primitive in every state; `noindex` |
+| E2–E4 · a11y / responsive / fidelity | **done** | 6 new e2e gates + `/styleguide` added to the responsive gate |
+
+**Deferred deliberately:** nav (C1), mobile overlay (C2), modal (C3) and toast (C4). Nothing consumes them yet, and building screen chrome before the screens exist invites guessing. They land with T11 (nav) and T06 (toast/modal), against real requirements.
+
+**Suites after T02:** typecheck ✓ · lint ✓ · **26 unit** ✓ · **34 e2e** ✓ · build ✓
 
 ---
 
