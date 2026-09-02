@@ -51,6 +51,12 @@ const ALLOWED = new Set([
   'Insights are indicative and growth-oriented — never diagnostic.',
   'No, and we would rather say so plainly. Graphology is not an established science and this is not a psychological or medical assessment. What it offers is a structured, consistent reading of your writing, framed as something to reflect on. Everything in your report is written as an indication, never as a fact about you.',
   'No. Nothing here identifies a condition, and nothing here should be used in place of advice from a doctor, therapist or counsellor. If a report ever reads like it is doing that, we have written it badly.',
+
+  // The terms, where the two words appear inside a denial and a disclaimer —
+  // "is not a diagnosis", "availability is not guaranteed". Refusing a claim
+  // is the opposite of making one.
+  'Graphology is not an established science. Nothing in your report is a fact about you, a diagnosis, or a prediction, and nothing in it should be used in place of advice from a doctor, therapist, counsellor or lawyer. Every reading is written as an indication, and you are free to disagree with it.',
+  'This is a pilot run by one person. Availability is not guaranteed, orders may be paused when the queue is full, and the service may change or stop. If it stops while you are waiting on a report, you will be told and refunded.',
 ])
 
 /** Comments are where this rule gets explained, so they are not copy. */

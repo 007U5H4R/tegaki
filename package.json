@@ -13,7 +13,8 @@
     "test": "node scripts/check-claims.mjs && vitest run --exclude '**/admin-ops.test.ts' && vitest run tests/rls/admin-ops.test.ts",
     "test:watch": "vitest --exclude '**/admin-ops.test.ts'",
     "test:e2e": "playwright test",
-    "check:claims": "node scripts/check-claims.mjs"
+    "check:claims": "node scripts/check-claims.mjs",
+    "og": "node scripts/generate-og.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

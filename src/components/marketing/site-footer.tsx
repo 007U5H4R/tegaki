@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { BrandStoryLine, Lockup } from '@/components/brand/lockup'
 import { DashedRule } from '@/components/ui/card'
-import { CONTACT_EMAIL, DISCLAIMER } from '@/lib/copy'
+import { DISCLAIMER } from '@/lib/copy'
 
 /**
  * Footer — Design.md §3.2-10.
@@ -33,12 +33,9 @@ export function SiteFooter() {
           <Link href="/terms" className="text-washi-300 hover:text-washi-50 text-sm">
             Terms
           </Link>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="text-washi-300 hover:text-washi-50 text-sm"
-          >
+          <Link href="/contact" className="text-washi-300 hover:text-washi-50 text-sm">
             Contact
-          </a>
+          </Link>
         </nav>
       </div>
 

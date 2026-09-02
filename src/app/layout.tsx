@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { absoluteUrl, SITE_URL } from '@/lib/site'
 import { Geist_Mono, Instrument_Serif, Manrope } from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
@@ -42,12 +43,52 @@ const notoSerifJp = localFont({
   adjustFontFallback: false,
 })
 
+const DESCRIPTION =
+  'A personal, growth-oriented assessment of what your handwriting suggests about how you think and work. Read and written by hand, from ₹999.'
+
 export const metadata: Metadata = {
-  // The full Open Graph and Twitter Card set lands in T13, where it is
-  // verified against LinkedIn, opengraph.xyz and a real WhatsApp paste.
-  title: 'Tegaki — Handwriting Personality Assessment',
-  description:
-    'A personal, growth-oriented assessment of what your handwriting suggests about how you think and work.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Tegaki — Handwriting Personality Assessment',
+    template: '%s — Tegaki',
+  },
+  description: DESCRIPTION,
+  applicationName: 'Tegaki',
+
+  /**
+   * WhatsApp and Instagram sharing is the acquisition channel, so the unfurl
+   * is the storefront. Every URL here is absolute: a root-relative image
+   * silently fails on LinkedIn and WhatsApp, and the failure looks like no
+   * image rather than like a mistake.
+   */
+  openGraph: {
+    type: 'website',
+    siteName: 'Tegaki',
+    title: 'Tegaki — Handwriting Personality Assessment',
+    description: DESCRIPTION,
+    url: absoluteUrl('/'),
+    locale: 'en_IN',
+    images: [
+      {
+        url: absoluteUrl('/og-cover.png'),
+        width: 1200,
+        height: 630,
+        alt: 'Tegaki — what your handwriting suggests about you',
+      },
+    ],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tegaki — Handwriting Personality Assessment',
+    description: DESCRIPTION,
+    images: [absoluteUrl('/og-cover.png')],
+  },
+
+  // The signed-in surfaces set their own `robots: { index: false }`; the
+  // marketing pages are the only ones meant to be found.
+  robots: { index: true, follow: true },
+  alternates: { canonical: absoluteUrl('/') },
 }
 
 export const viewport = {
