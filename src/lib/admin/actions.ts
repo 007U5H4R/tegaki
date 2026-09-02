@@ -91,3 +91,37 @@ export async function rejectOrder(orderId: string, reason: string): Promise<Revi
 function readable(code: string | undefined, message: string, fallback: string): string {
   return code === '23514' ? message : fallback
 }
+
+/**
+ * Move an approved order into report production.
+ *
+ * The one edge between approval and delivery, and without it T09's upload
+ * panel is unreachable — an order can be approved and a report can be
+ * attached, but nothing gets from one to the other. T10 replaces this with
+ * controls generated from the transition matrix, at which point this can go;
+ * a single hand-written button is the smaller of the two wrongs meanwhile.
+ */
+export async function startReport(orderId: string): Promise<ReviewState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: 'That area is for the analyst only.' }
+  }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('transition_order', {
+    p_order_id: orderId,
+    p_to: 'report_generating',
+  })
+
+  if (error) {
+    console.error('startReport failed', { orderId, code: error.code, message: error.message })
+    return { error: readable(error.code, error.message, 'We could not start that just then.') }
+  }
+
+  revalidatePath('/admin')
+  revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath('/dashboard')
+  return { ok: true }
+}

@@ -2,6 +2,7 @@ import { Card, MicroLabel } from '@/components/ui/card'
 import { StatusChip } from '@/components/ui/status-chip'
 import { StatusRail } from '@/components/orders/status-rail'
 import { ReuploadPanel } from '@/components/orders/reupload-panel'
+import { DownloadReport } from '@/components/orders/download-report'
 import { CONTACT_EMAIL, PILOT_ORDER_NOTE } from '@/lib/copy'
 import type { Order } from '@/lib/orders/queries'
 import { RAIL_POSITION } from '@/lib/orders/status'
@@ -78,6 +79,8 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
           guardrails={order.guardrails_acked}
         />
       ) : null}
+
+      {order.status === 'completed' ? <DownloadReport orderId={order.id} /> : null}
 
       {order.status === 'parked' ? <ParkedPanel /> : null}
 

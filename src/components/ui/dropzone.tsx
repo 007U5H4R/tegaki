@@ -16,6 +16,8 @@ export function Dropzone({
   disabled = false,
   disabledReason,
   hint = 'JPG, PNG or PDF · up to 20 MB each',
+  accept = 'image/jpeg,image/png,application/pdf',
+  multiple = true,
   onFiles,
   className,
 }: {
@@ -23,6 +25,13 @@ export function Dropzone({
   /** Shown in place of the prompt — say why it is locked, never just grey it out. */
   disabledReason?: string
   hint?: string
+  /**
+   * What the file picker offers. Reports are PDF-only (T09), samples are
+   * photos or a PDF — so the caller says, rather than every caller getting
+   * the sample uploader's answer.
+   */
+  accept?: string
+  multiple?: boolean
   onFiles?: (files: FileList) => void
   className?: string
 }) {
@@ -62,8 +71,8 @@ export function Dropzone({
           <label className="mt-2">
             <input
               type="file"
-              multiple
-              accept="image/jpeg,image/png,application/pdf"
+              multiple={multiple}
+              accept={accept}
               className="sr-only"
               disabled={disabled}
               onChange={(e) => e.target.files && onFiles?.(e.target.files)}
