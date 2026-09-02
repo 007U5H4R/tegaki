@@ -127,7 +127,23 @@
 
 **Two T05 defects fixed:** the tier stage was unreachable (nothing advanced `wizard_stage` past the upload, so `clampSegment` bounced every visitor back), and a draft was unreachable from the dashboard, which made resume real but unusable.
 
-**Next: T07** — the admin queue and sample review. `is_admin()` already exists (T03); T07 adds the policies that use it.
+### T07 · Admin queue + sample review — **done** (`2440cae`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Admin policies | **done** | `20260902120000_admin_policies.sql`. Only `orders` and `profiles` were missing — `is_admin()` (T03), `order_files` (T04) and `payments` (T06) already had theirs. **Read-only: there is no admin INSERT/UPDATE/DELETE policy anywhere**, because nothing about an order is an admin's to rewrite outside `transition_order()` |
+| A2 · Review columns + machine | **done** | `20260902130000_order_review.sql`. `approved_at`, `expected_delivery_date`, `rejected_reason`, `reupload_deadline` — none of them in any grant, so only the definer function writes them. The 2-arg `transition_order` was **dropped** and replaced by a 3-arg version: a defaulted third parameter alongside the old one would make every 2-arg call ambiguous |
+| — · `tier_turnaround_days()` | **done** | Sibling of `tier_price_inr()`. Same drift guard: a test asserts the SQL map and `tiers.ts` agree, so a turnaround edited in one place fails a test rather than promising a wrong date |
+| B1 · `requireAdmin()` | **done** | `src/lib/auth/assert-admin.ts`. Wrapped in React `cache()` — see decisions |
+| B2 · Admin layout | **done** | Non-admins go to their own dashboard, not to a refusal; anonymous to sign-in. No decorative motion (Design.md §3.7) |
+| B3 · Queue | **done** | Dense rows newest-first, filter chips with live counts, all four screen states including `error.tsx`. Drafts never appear — a draft is not an order yet |
+| B4 · Order detail | **done** | Buyer + subject fields, consent timestamp for a third-party subject, guardrail checklist showing what was and was not confirmed |
+| B5 · Sample viewer | **done** | Signed URLs, 10-minute TTL, minted through the **admin's own** client so the storage policy decides. Rendered on the washi surface: judging a photograph of paper against near-black would mislead about its own contrast |
+| B6–B7 · Approve / reject | **done** | Native `<dialog>` — focus trap, Esc and backdrop for free, and §3.7 wants no motion here anyway. Approve states the consequence and the exact date; reject says "the customer sees this text exactly as you write it" *before* you type |
+| C1–C2 · Tests | **done** | 14 SQL/authz tests + 6 e2e (3 × 2 projects). A buyer cannot approve their own order, cannot reject it to reset the clock, and a stranger reaches neither |
+
+**Suites after T07:** typecheck ✓ · lint ✓ · format ✓ · **123 unit** ✓ · **42 e2e against production** ✓ · build ✓
+
+**Next: T08** — the customer's status rail, the re-upload panel and the parked state. `rejected_reason` and `reupload_deadline` are already stored and shown to the analyst; T08 puts them in front of the customer.
 
 ---
 
@@ -192,3 +208,13 @@
 - **`submit_order()` returns rather than redirects, and revalidates nothing.** The stamp is the one celebratory beat in the product and it has to play on the page just confirmed, so the client navigates afterwards. `revalidatePath` in the action re-rendered the route the customer was still standing on — the wizard — whose layout sends a submitted order straight to the dashboard, cutting the stamp short and dropping the confirmation param. Cost 20 minutes to find; the e2e test now asserts the param, so it cannot regress silently.
 - **`payments` CHECK constraints permit only `demo` / `demo_paid`.** The columns are gateway-ready; the constraints are pilot-honest. Permitting states the system cannot produce would make the data harder to trust, and widening two CHECKs is a one-line migration when Cashfree arrives.
 - **A "Continue" button was added to draft order cards** — not in the T06 plan. T05 built wizard resume and justified it at length, but nothing linked to it, so a customer who closed the tab could not get back to their draft. Resume that exists only as a URL is not a feature.
+
+## Decisions taken during T07
+
+- **Admin access goes through RLS policies, never the service key.** The service key is used nowhere in the application — only cron (T15) and test fixtures. A policy keeps the admin's identity in the request and keeps the rule readable and testable; the key answers to nobody. The admin policies are also strictly **read-only**: `transition_order()` is the sole writer, and a broad "admin can update orders" policy would have been wider than any real requirement.
+- **`getAdmin()` is wrapped in React `cache()`, and the pages guard themselves.** A layout and the page inside it render in **parallel**, so the layout's redirect does not stop the page's queries: a stranger's request to `/admin` was running the queue query — and logging `permission denied for table orders` — while the layout was deciding to send them away. Each page now checks too, and the cache means that costs no extra round trip.
+- **A `'use server'` module may only export async functions.** Exporting the two reason-length constants from `src/lib/admin/actions.ts` silently turned the file into a module with **no exports at all**; the build failed at the import, not at the export. They live in `src/lib/admin/constants.ts` now.
+- **Rejection reasons have a 15-character floor.** "Blurry" is a verdict; "the second page is out of focus, please photograph it flat in daylight" is something a customer can act on — and one sentence is all they get. Enforced in the action, and non-emptiness again in the database.
+- **Native `<dialog>` instead of a modal component.** It brings a focus trap, Esc, backdrop and an inert background, and Design.md §3.7 rules out decorative motion on admin surfaces — which is the only thing a hand-rolled modal would have added. The deferred T02 modal primitive stays deferred until a customer-facing screen needs one.
+- **The reject dialog and the page keep separate error slots.** One shared slot rendered the same sentence twice at once — inside the dialog and behind it. Found by an e2e strict-mode violation, which is a good reason to assert on messages rather than on roles.
+- **The dashboard links to the queue for admins.** Not in the plan, but the queue was otherwise reachable only by typing the URL. The guard is what makes it safe; a link is what makes it usable.

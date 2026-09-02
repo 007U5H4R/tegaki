@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-02** (end of T05).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T07).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,15 +18,15 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ (T01, T02) · Phase 2 (T03 ✅ T04 ✅ T05 ✅ T06 ✅ → T07 next)
+   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ (T03–T06) · Phase 3 (T07 ✅ → T08 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **109 unit** ✓ **36 e2e against production** ✓ build ✓.
+**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **123 unit** ✓ **42 e2e against production** ✓ build ✓.
 
-**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 8 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
+**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 10 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
 
 **T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is proven at the database layer by the 8-test isolation suite, and the loop is now proven in a browser too. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
 
@@ -36,9 +36,13 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **The signed-in verification gap is closed.** `e2e/submit-loop.spec.ts` walks the whole loop — arrive, describe, upload two pages, choose a depth, confirm — in a real browser on desktop **and** iPhone 13, **against production**, asserting the database as well as the screen. It signs in by writing the `@supabase/ssr` session cookie directly (`e2e/support/session.ts`); Google's consent screen still cannot be automated, and nothing after it needed to depend on that.
 
-**Next: T07** (`plans/T07-admin-queue-review.md`) — the admin queue and sample review. `is_admin()` already exists from T03; T07 adds the policies that use it. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully) — and give every foreign key an explicit `on delete` rule, which T06 learned the hard way.
+**T07 is done — both halves of the loop now exist.** The analyst has a queue at `/admin`: submitted samples newest-first with filter chips, an order detail with the sample on a washi surface via 10-minute signed URLs, and two decisions. Approving starts the turnaround and **stores** the delivery date (the PRD's clock runs from approval, not checkout, so an unreadable photo costs the customer nothing). Rejecting requires a reason of at least 15 characters, which the customer will read verbatim, and opens a 14-day window. Access is checked three times — route, action, and `transition_order()` in the database — and tests prove a buyer can neither approve their own order nor reject it to reset the clock.
 
-**Before Phase 2 closes, a QA agent should run the phase gate** per `plans/BUILD-ORCHESTRATION.md`: a stranger's account completing sign-in → submitted order on the deployed URL.
+**Next: T08** (`plans/T08-status-rail-reupload-parked.md`) — the customer's side of that review: the status rail, the re-upload panel showing `rejected_reason` verbatim with its deadline, and the parked state. Both fields are already stored and already shown to the analyst.
+
+Project-wide rules, each learned the hard way (full reasoning in `plans/LEDGER.md`): every table migration grants **both** `authenticated` (narrowly) and `service_role` (fully); every foreign key gets an explicit `on delete` rule; a `'use server'` module may export **only** async functions; and a layout's redirect does not stop its page from rendering, so a guarded page guards itself too.
+
+**The Phase 2 gate is met.** `plans/BUILD-ORCHESTRATION.md` asks for a fresh account completing sign-in → submitted order on the deployed URL; `e2e/submit-loop.spec.ts` does exactly that on every run, on two viewports, and checks the database afterwards. The Phase 3 gate wants the same for the analyst's side — `e2e/admin-review.spec.ts` covers approve and reject; report delivery (T09) is still to come.
 
 **Live progress: `plans/LEDGER.md`.**
 
@@ -48,7 +52,7 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **Open for Tushar (neither blocking):** sign in on production to see it himself — now confirmation rather than verification, since the loop is proven end to end; add pilot users as Google *test users* while the OAuth app is in Testing status.
 
-**The Supabase project is clean** as of 2026-09-02: one account (Tushar's admin), zero orders. Test suites create throwaway `@tegaki.test` users and sweep stale ones on every run (`tests/support/fixtures.ts`) — so the admin queue T07 builds will show real orders only.
+**The Supabase project is clean** as of 2026-09-02: one account (Tushar's admin), zero orders. Test suites create throwaway `@tegaki.test` users and sweep stale ones on every run (`tests/support/fixtures.ts`) — so the admin queue shows real orders only.
 
 **Note:** there is no `/to-tickets` skill installed on this machine (checked 2026-09-01). The stage was executed manually per the CLAUDE.md spec. Same is true of `/handoff` — this file is maintained by hand.
 
