@@ -11,38 +11,78 @@ import type { Order } from '@/lib/orders/queries'
 import { ORDER_STATUSES } from '@/lib/orders/status'
 import { Buttons, ErrorSpecimen, Fields, Upload } from './interactive'
 
-/** Fixed dates so the specimens do not churn the visual diff every day. */
+/**
+ * Fixed dates so the specimens do not churn the visual diff every day.
+ *
+ * One card per lifecycle shape (T08): a draft, a live order on the rail, one
+ * parked, and one delivered.
+ *
+ * `needs_reupload` is deliberately absent. Its panel mounts a real uploader,
+ * and an uploader pointed at a fictional order is a control that fails when
+ * anybody uses it — a specimen page should not contain one. That variant is
+ * covered where it can be exercised for real, in e2e/reupload-loop.spec.ts.
+ */
+const specimen = (over: Partial<Order>): Order => ({
+  id: 'a1b2c3d4-0000-4000-8000-000000000000',
+  buyer_id: 'a1b2c3d4-0000-4000-8000-00000000beef',
+  status: 'draft',
+  tier: null,
+  wizard_stage: 1,
+  full_name: 'Asha Menon',
+  subject_is_self: true,
+  subject_name: null,
+  guardrails_acked: { unlined: true, twoPages: true, signatures: true, spontaneous: true },
+  submitted_at: null,
+  expected_delivery_date: null,
+  rejected_reason: null,
+  reupload_deadline: null,
+  created_at: '2026-08-28T09:00:00.000Z',
+  updated_at: '2026-08-28T09:00:00.000Z',
+  ...over,
+})
+
 const SPECIMEN_ORDERS: Order[] = [
-  {
-    id: 'a1b2c3d4-0000-4000-8000-000000000001',
-    buyer_id: 'specimen',
-    status: 'draft',
-    tier: null,
-    wizard_stage: 1,
-    submitted_at: null,
-    created_at: '2026-08-28T09:00:00.000Z',
-    updated_at: '2026-08-28T09:00:00.000Z',
-  },
-  {
+  specimen({ id: 'a1b2c3d4-0000-4000-8000-000000000001', full_name: null }),
+  specimen({
     id: 'a1b2c3d4-0000-4000-8000-000000000002',
-    buyer_id: 'specimen',
+    status: 'sample_under_review',
+    tier: 'express',
+    wizard_stage: 4,
+    submitted_at: '2026-08-27T09:00:00.000Z',
+  }),
+  specimen({
+    id: 'a1b2c3d4-0000-4000-8000-000000000003',
     status: 'analysis_in_progress',
     tier: 'core',
     wizard_stage: 4,
     submitted_at: '2026-08-25T09:00:00.000Z',
-    created_at: '2026-08-24T09:00:00.000Z',
-    updated_at: '2026-08-25T09:00:00.000Z',
-  },
-  {
-    id: 'a1b2c3d4-0000-4000-8000-000000000003',
-    buyer_id: 'specimen',
+    expected_delivery_date: '2026-09-04',
+  }),
+  specimen({
+    id: 'a1b2c3d4-0000-4000-8000-000000000004',
+    status: 'report_generating',
+    tier: 'core',
+    wizard_stage: 4,
+    subject_is_self: false,
+    subject_name: 'Rahul Menon',
+    submitted_at: '2026-08-26T09:00:00.000Z',
+    expected_delivery_date: '2026-09-02',
+  }),
+  specimen({
+    id: 'a1b2c3d4-0000-4000-8000-000000000005',
+    status: 'parked',
+    tier: 'express',
+    wizard_stage: 4,
+    submitted_at: '2026-08-01T09:00:00.000Z',
+  }),
+  specimen({
+    id: 'a1b2c3d4-0000-4000-8000-000000000006',
     status: 'completed',
     tier: 'comprehensive',
     wizard_stage: 4,
     submitted_at: '2026-08-14T09:00:00.000Z',
-    created_at: '2026-08-13T09:00:00.000Z',
-    updated_at: '2026-08-21T09:00:00.000Z',
-  },
+    expected_delivery_date: '2026-08-21',
+  }),
 ]
 
 export const metadata: Metadata = {

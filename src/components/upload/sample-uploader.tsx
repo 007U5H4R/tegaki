@@ -38,11 +38,19 @@ export function SampleUploader({
   buyerId,
   initialGuardrails = {},
   initialFiles = [],
+  onUploaded,
 }: {
   orderId: string
   buyerId: string
   initialGuardrails?: Record<string, boolean>
   initialFiles?: { id: string; file_name: string; size_bytes: number }[]
+  /**
+   * Called once a file has finished and its row exists. The re-upload panel
+   * (T08) uses it to know a replacement is actually there before offering to
+   * send the order back — the database refuses a resubmission without one,
+   * and being told that after the fact would be a poor way to learn it.
+   */
+  onUploaded?: () => void
 }) {
   const [guardrails, setGuardrails] = useState<Record<string, boolean>>(initialGuardrails)
   const [items, setItems] = useState<Item[]>(() =>
@@ -108,6 +116,7 @@ export function SampleUploader({
             i.key === key ? { ...i, fileId: record.id, state: { kind: 'done' } } : i,
           ),
         )
+        onUploaded?.()
       } catch (error) {
         setItems((prev) =>
           prev.map((i) =>
@@ -124,7 +133,7 @@ export function SampleUploader({
         )
       }
     },
-    [buyerId, orderId],
+    [buyerId, orderId, onUploaded],
   )
 
   const addFiles = (files: FileList) => {

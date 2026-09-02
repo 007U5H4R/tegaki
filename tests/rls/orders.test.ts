@@ -258,5 +258,24 @@ async function seedAt(
     .select('id')
     .single()
   if (error) throw error
-  return data!.id as string
+
+  const id = data!.id as string
+
+  // A rejected order needs a replacement page attached before it can go back
+  // for review (T08), so the matrix seeds one — otherwise the fixture would
+  // be testing a state the product cannot reach.
+  if (status === 'needs_reupload') {
+    const { error: fileError } = await admin.from('order_files').insert({
+      order_id: id,
+      uploader_id: buyerId,
+      version: 2,
+      bucket_path: `${buyerId}/${id}/v2/${crypto.randomUUID()}.jpg`,
+      file_name: 'page-1-again.jpg',
+      mime: 'image/jpeg',
+      size_bytes: 190_000,
+    })
+    if (fileError) throw fileError
+  }
+
+  return id
 }

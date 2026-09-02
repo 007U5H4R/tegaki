@@ -45,6 +45,12 @@ export type QueueRow = {
 export async function getQueue(status?: QueueStatus): Promise<QueueRow[]> {
   const supabase = await createClient()
 
+  // Close any re-upload windows that have expired before showing the queue,
+  // so the analyst is never looking at an order the clock has already
+  // decided about. Idempotent, and scoped by the function itself; T15's cron
+  // is the backstop rather than the mechanism.
+  await supabase.rpc('park_overdue_orders')
+
   let query = supabase
     .from('orders')
     .select(

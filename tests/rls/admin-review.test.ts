@@ -174,7 +174,11 @@ describe.skipIf(!configured)('reviewing a sample', () => {
       p_reason: REASON,
     })
 
-    // The buyer sends a replacement, which puts it back in the queue.
+    // The buyer photographs the page again and sends it, which puts the order
+    // back in the queue. Without a replacement the transition is refused —
+    // that rule has its own tests in reupload.test.ts.
+    await addReplacementSample(service, id, buyerUser.id)
+
     const { error: resubmit } = await buyer.rpc('transition_order', {
       p_order_id: id,
       p_to: 'sample_under_review',
@@ -356,4 +360,22 @@ async function submittedOrder(
 async function statusOf(service: SupabaseClient, orderId: string): Promise<string> {
   const { data } = await service.from('orders').select('status').eq('id', orderId).single()
   return data?.status as string
+}
+
+/** A fresh page, uploaded after the rejection — what makes a resubmission real. */
+async function addReplacementSample(
+  service: SupabaseClient,
+  orderId: string,
+  buyerId: string,
+): Promise<void> {
+  const { error } = await service.from('order_files').insert({
+    order_id: orderId,
+    uploader_id: buyerId,
+    version: 2,
+    bucket_path: `${buyerId}/${orderId}/v2/${crypto.randomUUID()}.jpg`,
+    file_name: 'page-1-again.jpg',
+    mime: 'image/jpeg',
+    size_bytes: 195_000,
+  })
+  if (error) throw error
 }

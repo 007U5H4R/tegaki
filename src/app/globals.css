@@ -107,6 +107,26 @@ h3 {
   animation: seal-stamp 350ms var(--ease-out) both;
 }
 
+/* The status rail's active node (Design.md §4.3): a slow opacity pulse that
+   says "this is where your order is" without moving anything. Opacity only,
+   so it costs no layout and no paint.
+
+   Reduced motion collapses it below and the node simply sits at full
+   opacity, which is the state that carries the meaning anyway. */
+@keyframes rail-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.rail-pulse {
+  animation: rail-pulse 2s var(--ease-in-out) infinite;
+}
+
 /* Reduced motion: keep opacity and colour, drop movement (Design.md §4.4). */
 @media (prefers-reduced-motion: reduce) {
   *,

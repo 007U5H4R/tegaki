@@ -22,3 +22,17 @@ export const PILOT_ORDER_NOTE = 'Pilot order — no payment was taken.'
 
 /** Stated at the tiers and again at checkout (Design.md §1). */
 export const RISK_REVERSAL = 'Sample not usable? Full refund.'
+
+/**
+ * Where a customer reaches a human.
+ *
+ * Solution-PRD §6.4 makes this the escape hatch for a parked order — the one
+ * state with no button that moves it forward, so it must not be a dead end.
+ *
+ * This is Tushar's own address, which is what the PRD specifies: the pilot
+ * has no support infrastructure and no custom domain, and pretending
+ * otherwise would be worse than being plain about it. The WhatsApp
+ * deep-link the PRD also mentions is NOT here — it needs a phone number
+ * nobody has given, and a broken link is worse than one honest channel.
+ */
+export const CONTACT_EMAIL = 'snowreaderofficial@gmail.com'
