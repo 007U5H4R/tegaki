@@ -231,6 +231,44 @@
 
 ---
 
+### T14 · Hero scroll-scrub — **done** (`4d769b9`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Frames | **done** | 180 JPEGs at 1280×720 in `public/hero/`, 6.6 MB, committed. The unreferenced `hero-mobile.mp4` was cut before commit — the phone path deliberately uses the static hero, and an unused 240 KB video is dead weight |
+| A2 · Eligibility | **done** | `use-hero-scrub.ts`: wide viewport **and** no reduced-motion preference, decided in an effect so SSR never guesses. Frames are requested only after that answer is known |
+| A3 · Canvas painter | **done** | `hero-scrub.tsx`. `HTMLImageElement`, **not `ImageBitmap`** — 180 decoded bitmaps is ≈660 MB pinned in a JS allocation the collector cannot evict. Concurrency 6, `AbortController`, dPR capped at 2, repaints only when the frame index changes |
+| A4 · Chapters | **done** | Five beats. Copy deliberately shares no sentence with any section further down the page — an earlier pass reused the tagline and the closing CTA line, so the page said both twice |
+| B1 · Mobile/reduced/no-JS gate | **done** | Four Playwright tests count network requests rather than trusting the code. Lighthouse's own network log independently confirms **0 frames** on mobile |
+| B2 · Perf regression | **done** | Production, mobile emulation: **performance 98 · a11y 100 · best practices 100 · SEO 100**. Local desktop 97 |
+| B3 · Memory sweep | **done** | Three full scrubs down and up: heap **+0.1 MB**, node count flat, released on navigation |
+
+**What measurement changed, twice.** The scroll→frame mapping was an ease-in-out that looked reasonable and quietly ate the last two chapters — at 78% of the scroll it was already on frame 162, so the tiers beat got a sliver of travel. Only a screenshot sweep showed it; the code read fine either way. It is linear now.
+
+**A correction recorded against T14.** Its two mobile gate tests scrolled with `page.mouse.wheel`, which mobile WebKit does not support — so the tests written to prove a phone downloads no frames were throwing on the one project they were about. A truncated `tail` of the runner output was read as a pass. Fixed in T15 (`window.scrollTo`); both projects green. The claim itself held — Lighthouse and a separate fallback sweep had each shown zero frames independently — but it was reported as verified on evidence that did not verify it.
+
+---
+
+### T15 · Retention job and delete-my-data — **done** (`67aee50`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Route handler | **done** | `/api/cron/retention`, `CRON_SECRET` bearer compared with `timingSafeEqual`, fails closed when unset. Returns and logs `{examined, objectsDeleted, filesDeleted, ordersPurged, parked, undeliveredBacklog}`; a failure is a **500** so Vercel marks the cron red |
+| A2 · Schedule | **done (one gap)** | `vercel.json` → `0 22 * * *` UTC = 03:30 IST. ⏳ **`CRON_SECRET` must be added in Vercel** or the job 401s nightly — see H4 |
+| A3 · Customer-facing truth | **done** | `samples_purged_at` on `orders`, so "deleted" and "never uploaded" are distinguishable. The completed card shows the date and says the report is unaffected; the admin sample viewer says the same instead of rendering empty |
+| B1 · Delete-my-data | **done** | Two modes on `/admin/orders/[id]` — redact (person goes, anonymous order stays so the books balance) or erase (nothing survives). Typed order-id confirmation. `plans/RUNBOOK-delete-my-data.md` has the wording to quote the customer and the manual step when storage refuses |
+| C1 · Boundary suite | **done** | 13 tests: 89/91 days, the hour either side of the ninetieth, double-run idempotency, undelivered order skipped **and counted**, report survives, buyer refused on all three functions, redact vs erase |
+| C2 · Live verification | **done** | Seeded an order delivered 92 days ago with a real object, ran the endpoint: `examined 1, objectsDeleted 1, filesDeleted 1, ordersPurged 1`. Second run all zeros, no errors. Object confirmed **gone** from the bucket; report row and `completed` status untouched. Probe account removed |
+
+**The design decision worth keeping.** What may be deleted is decided in SQL, not in the route handler. A cron endpoint is a URL — callable twice, callable late, and one day rewritten by somebody who does not know what `delivered_at` means. `purge_expired_samples()` re-derives the deletion set rather than trusting the ids it is handed.
+
+**Objects before rows, deliberately.** Rows-first means a crash between the steps strands bytes in a private bucket that no later run can find, because a run learns what to delete from the rows. Objects-first strands rows whose objects are already gone, and tomorrow's run finishes the job. The interrupted state is the harmless one.
+
+**A test that could not measure what it claimed.** The 90-day boundary cannot be tested in whole days: a fixture dated "exactly 90 days ago" is dated 90 days before the moment it was built, so by assertion time it is 90 days *and change*, and whether it is due depends on how slow the test was. The first version asserted such an order survives and failed for that reason alone. It is pinned at an hour either side now — stricter, and deterministic.
+
+**Suites after T15:** typecheck ✓ · lint ✓ · format ✓ · claims ✓ · **181 unit** ✓ · **106 e2e** ✓ · build ✓ · production Lighthouse mobile **98/100/100/100** ✓
+
+---
+
+
 ---
 
 ---
@@ -252,6 +290,7 @@
 | **H1c** | T01/D4 RLS tests | ⏳ Paste the **secret key** into `SUPABASE_SECRET_KEY` in `.env.local` (dashboard → Settings → API Keys → Secret keys → reveal). It creates the two throwaway users the isolation suite needs |
 | ~~H2~~ | ~~T01/C3~~ | ✅ **Done.** GCP project `tegaki-507313`; consent screen External, app "Tegaki"; client "Tegaki Web"; Tushar pasted the secret into Supabase |
 | ~~H3~~ | ~~T01/E1–E4~~ | ✅ **Done.** Private repo `007U5H4R/tegaki`; Vercel project `tegaki`; production **https://tegaki-one.vercel.app**. Supabase Site URL and redirect list updated; `NEXT_PUBLIC_SITE_URL` set |
+| **H4** | T15 cron | ⏳ **Add `CRON_SECRET` in Vercel** → project `tegaki` → Settings → Environment Variables → Production. Generate with `openssl rand -hex 32`. Vercel Cron sends it as `Authorization: Bearer $CRON_SECRET` automatically once the variable exists. **Until then the nightly retention job returns 401 and never runs** — the endpoint fails closed, which is the safe direction, but the 90-day deletion the privacy policy promises will not happen. Confirm afterwards in Vercel → Logs, filtering `[retention]` |
 
 ## Live infrastructure
 

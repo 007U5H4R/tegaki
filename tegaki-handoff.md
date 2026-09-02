@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-02** (end of T12).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T15 — every code ticket is done; the review gate is next and needs Tushar's go-ahead).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,15 +18,23 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 (T11 ✅ T12 ✅ → T13 next)
-   → /code-review + /security-review + /impeccable → pilot live
+   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅ · Phase 5 ✅  (T01–T15 all done)
+   → ▶ /code-review + /security-review + /impeccable → pilot live
 ```
 
-## ▶ RESUME HERE: **T13 — policies and the ship set**
+## ▶ RESUME HERE: **the review gate**
 
-`plans/T13-policies-linkpreview-shipset.md`. Privacy, Refunds and Terms pages; the OG/Twitter link-preview set with a purpose-built 1200×630 image at an absolute HTTPS URL; favicon; custom 404. The footer already links the three policy routes, so those links are currently dead — T13 is what makes them resolve.
+**Every code ticket T01–T15 is built, verified and deployed.** What remains before the pilot goes live is step 7 of the build workflow — the three-lens review of the whole branch, then triage and fix what it surfaces:
 
-**The landing page is complete** (T11 + T12): hero, how it works, tagline, anatomy, tiers, excerpts, about, FAQ with schema, closing band. **Lighthouse mobile on production: 97 / 100 / 100 / 100**, zero axe failures, CLS 0.
+1. **`/code-review`** — correctness, reuse, simplification, efficiency across the branch.
+2. **`/security-review`** — authz/authn, input validation, injection, secrets, data exposure. The surfaces worth pointing it at first: the `security definer` functions (every one of them decides who may read or destroy customer data), the `CRON_SECRET` bearer check on `/api/cron/retention`, the two places the service key is used, and the storage policies on both private buckets.
+3. **`/impeccable`** — frontend and UX critique against the approved `Design.md`.
+
+**This gate is Tushar's to start.** It was deliberately not run automatically.
+
+**Production, mobile emulation:** performance **98** · accessibility **100** · best practices **100** · SEO **100**. Zero axe failures, CLS 0.
+
+**Before the pilot can honour its own privacy policy: `CRON_SECRET` must be set in Vercel** (H4 in the ledger). Until it is, the nightly retention job returns 401 and never runs — safe, but the 90-day deletion the policy page promises does not happen.
 
 **`scripts/check-claims.mjs` now runs before the test suite** and fails it on copy that over-promises. Read its header before editing marketing copy — the exceptions it allows are enumerated deliberately.
 
