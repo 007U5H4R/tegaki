@@ -22,6 +22,8 @@ playwright-report/
 test-results/
 blob-report/
 .playwright/
+# Browser profiles, kept off the boot disk — see playwright.config.ts
+.playwright-tmp/
 
 # OS / editor
 .DS_Store
