@@ -111,7 +111,7 @@ export function FileRow({
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-washi-50 truncate text-sm">{name}</p>
-          <p className="text-ink-500 font-mono text-xs">{formatBytes(size)}</p>
+          <p className="text-washi-300 font-mono text-xs">{formatBytes(size)}</p>
         </div>
 
         {state.kind === 'error' && onRetry ? (

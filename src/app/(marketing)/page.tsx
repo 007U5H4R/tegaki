@@ -12,7 +12,7 @@ import { TiersSection } from '@/components/marketing/tiers-section'
 import { FAQ } from '@/content/faq'
 
 export const metadata: Metadata = {
-  title: 'Tegaki — your handwriting holds a story',
+  title: { absolute: 'Tegaki — your handwriting holds a story' },
   description:
     'A personal, growth-oriented handwriting assessment, read and written by hand and delivered as a considered report. Pilot programme from ₹999.',
 }

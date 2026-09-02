@@ -89,7 +89,7 @@ const SPECIMEN_ORDERS: Order[] = [
 ]
 
 export const metadata: Metadata = {
-  title: 'Styleguide — Tegaki',
+  title: 'Styleguide',
   robots: { index: false, follow: false },
 }
 

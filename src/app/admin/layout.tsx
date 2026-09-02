@@ -8,7 +8,7 @@ import { signOut } from '@/lib/auth/actions'
 import { getAdmin } from '@/lib/auth/assert-admin'
 
 export const metadata: Metadata = {
-  title: 'Queue — Tegaki',
+  title: 'Queue',
   robots: { index: false, follow: false },
 }
 

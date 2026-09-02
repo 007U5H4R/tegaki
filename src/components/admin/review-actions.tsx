@@ -75,7 +75,8 @@ export function ReviewActions({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-3">
+      {/* Approve leads, reject trails (Design.md §3.8): never adjacent. */}
+      <div className="flex flex-wrap justify-between gap-3">
         <Button type="button" onClick={() => approveDialog.current?.showModal()}>
           Approve this sample
         </Button>

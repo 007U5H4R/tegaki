@@ -125,7 +125,7 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
 
   it('refuses uploads once the order is no longer accepting them', async () => {
     const order = await newDraft(alice, aliceUser.id)
-    await alice.rpc('transition_order', { p_order_id: order, p_to: 'sample_under_review' })
+    await admin.rpc('transition_order', { p_order_id: order, p_to: 'sample_under_review' })
 
     const path = `${aliceUser.id}/${order}/v1/${crypto.randomUUID()}.jpg`
     const { error } = await alice.storage.from(BUCKET).upload(path, SAMPLE_BYTES, {

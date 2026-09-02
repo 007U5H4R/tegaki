@@ -77,11 +77,11 @@ export function TiersSection() {
       </div>
 
       <Reveal delay={150}>
-        <p className="text-washi-300 mt-10 text-sm">
+        <p className="text-washi-300 mt-10 max-w-[62ch] text-sm">
           {RISK_REVERSAL} The turnaround clock starts when your sample is approved, so a photo we
           cannot read costs you nothing.
         </p>
-        <p className="text-ink-500 mt-2 text-sm">{DISCLAIMER}</p>
+        <p className="text-ink-500 mt-2 max-w-[62ch] text-sm">{DISCLAIMER}</p>
       </Reveal>
     </section>
   )

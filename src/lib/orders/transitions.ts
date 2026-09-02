@@ -31,6 +31,9 @@ export type Transition = {
 }
 
 export const TRANSITIONS: readonly Transition[] = [
+  // Walked only inside submit_order(); a direct owner call is refused
+  // (review-gate hardening, 20260902200000). Still the owner's edge in the
+  // sense that the owner is the one who submits.
   { from: 'draft', to: 'sample_under_review', by: 'owner' },
   {
     from: 'sample_under_review',

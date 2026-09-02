@@ -84,6 +84,7 @@ function TierCard({
       className={cn(
         'relative flex cursor-pointer flex-col gap-4 rounded-2xl border p-6',
         'duration-press transition-[border-color,background-color] ease-out',
+        tier.id === 'core' && 'order-first sm:order-none',
         checked ? 'border-shu-500 bg-shu-900/30' : 'border-ink-700 hover:border-ink-500',
         'has-[:focus-visible]:outline-shu-500 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
       )}

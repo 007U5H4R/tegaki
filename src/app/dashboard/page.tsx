@@ -15,7 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 import { isPaused, PAUSED_MESSAGE } from '@/lib/settings'
 
 export const metadata: Metadata = {
-  title: 'Your assessments — Tegaki',
+  title: 'Your assessments',
   robots: { index: false },
 }
 

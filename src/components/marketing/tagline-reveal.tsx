@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 
 /**
  * The tagline moment — Design.md §3.2-3 and §4.2.
@@ -60,14 +60,14 @@ export function TaglineReveal() {
             className="text-washi-50 font-serif text-[clamp(2rem,6vw,3.75rem)] leading-[1.15]"
           >
             {line.map((word, wordIndex) => (
-              <span
-                key={`${lineIndex}-${wordIndex}`}
-                data-word
-                style={{ transitionDelay: `${wordIndex * 60}ms` }}
-              >
-                {word}
+              <Fragment key={`${lineIndex}-${wordIndex}`}>
+                <span data-word style={{ transitionDelay: `${wordIndex * 60}ms` }}>
+                  {word}
+                </span>
+                {/* Outside the span: an inline-block drops its own trailing
+                  space, which rendered "Writtenbyhand." on production. */}
                 {wordIndex < line.length - 1 ? ' ' : null}
-              </span>
+              </Fragment>
             ))}
           </p>
         ))}

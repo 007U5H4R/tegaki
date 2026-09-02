@@ -45,6 +45,21 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
         </p>
       </div>
 
+      {/* Unmissable by design: taking an order without taking money is only
+          honest if nobody can miss being told. Above the button, not below
+          it — on a phone the notice sat under the fold while a red
+          "Confirm my order" sat under "₹1,999". */}
+      <div className="border-warn-500/40 bg-warn-500/10 flex gap-4 rounded-2xl border p-5">
+        <InfoIcon />
+        <p className="text-washi-50 text-sm">
+          <strong className="font-semibold">{PILOT_NOTICE_TITLE}</strong>{' '}
+          <span className="text-washi-300">
+            {PILOT_NOTICE_BODY} Tegaki is running as a pilot, so no card details are asked for and
+            nothing is charged.
+          </span>
+        </p>
+      </div>
+
       <ConfirmOrder orderId={orderId}>
         <Card className="flex flex-col gap-6">
           <div>
@@ -71,19 +86,6 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
           </div>
         </Card>
       </ConfirmOrder>
-
-      {/* Unmissable by design: taking an order without taking money is only
-          honest if nobody can miss being told. */}
-      <div className="border-warn-500/40 bg-warn-500/10 flex gap-4 rounded-2xl border p-5">
-        <InfoIcon />
-        <p className="text-washi-50 text-sm">
-          <strong className="font-semibold">{PILOT_NOTICE_TITLE}</strong>{' '}
-          <span className="text-washi-300">
-            {PILOT_NOTICE_BODY} Tegaki is running as a pilot, so no card details are asked for and
-            nothing is charged.
-          </span>
-        </p>
-      </div>
 
       <div className="text-washi-300 flex flex-col gap-2 text-sm">
         <p>

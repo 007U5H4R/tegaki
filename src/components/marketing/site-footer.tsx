@@ -23,17 +23,29 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <nav aria-label="Footer" className="flex flex-col gap-2">
-          <Link href="/privacy" className="text-washi-300 hover:text-washi-50 text-sm">
+        <nav aria-label="Footer" className="flex flex-col">
+          <Link
+            href="/privacy"
+            className="text-washi-300 hover:text-washi-50 inline-flex min-h-11 items-center text-sm"
+          >
             Privacy
           </Link>
-          <Link href="/refunds" className="text-washi-300 hover:text-washi-50 text-sm">
+          <Link
+            href="/refunds"
+            className="text-washi-300 hover:text-washi-50 inline-flex min-h-11 items-center text-sm"
+          >
             Refunds
           </Link>
-          <Link href="/terms" className="text-washi-300 hover:text-washi-50 text-sm">
+          <Link
+            href="/terms"
+            className="text-washi-300 hover:text-washi-50 inline-flex min-h-11 items-center text-sm"
+          >
             Terms
           </Link>
-          <Link href="/contact" className="text-washi-300 hover:text-washi-50 text-sm">
+          <Link
+            href="/contact"
+            className="text-washi-300 hover:text-washi-50 inline-flex min-h-11 items-center text-sm"
+          >
             Contact
           </Link>
         </nav>

@@ -37,71 +37,82 @@ export function SiteNav({ signedIn }: { signedIn: boolean }) {
     }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
+    // Scroll lock alone is not enough: Tab walked straight past the menu
+    // into the hero behind it. Everything that is not the menu is inert.
+    const behind = ['main', 'footer'].flatMap((tag) => Array.from(document.querySelectorAll(tag)))
+    for (const el of behind) el.setAttribute('inert', '')
 
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
+      for (const el of behind) el.removeAttribute('inert')
     }
   }, [open])
 
   return (
-    <header className="border-ink-700/60 bg-ink-950/85 fixed inset-x-0 top-0 z-40 border-b backdrop-blur-xl">
-      <nav
-        aria-label="Main"
-        className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
-      >
-        <Link href="/" className="shrink-0">
-          <Lockup />
-          <span className="sr-only"> — home</span>
-        </Link>
-
-        <div className="hidden items-center gap-8 md:flex">
-          <ul className="flex items-center gap-6">
-            {SECTIONS.map((section) => (
-              <li key={section.href}>
-                <a
-                  href={section.href}
-                  className="text-washi-300 hover:text-washi-50 duration-press font-mono text-sm tracking-[0.08em] uppercase transition-[color] ease-out"
-                >
-                  {section.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <Button asChild size="sm">
-            <Link href={signedIn ? '/dashboard' : '/sign-in'}>
-              {signedIn ? 'Dashboard' : 'Begin your assessment'}
-            </Link>
-          </Button>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          className="text-washi-50 -mr-2 grid size-11 place-items-center md:hidden"
+    <>
+      <header className="border-ink-700/60 bg-ink-950/85 fixed inset-x-0 top-0 z-40 border-b backdrop-blur-xl">
+        <nav
+          aria-label="Main"
+          className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
         >
-          <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
-          <span aria-hidden className="relative block h-4 w-6">
-            {/* Two bars that rotate into a cross. Neither ever vanishes. */}
-            <span
-              className={cn(
-                'bg-washi-50 duration-modal absolute left-0 block h-px w-6 transition-transform ease-out',
-                open ? 'top-1/2 rotate-45' : 'top-1',
-              )}
-            />
-            <span
-              className={cn(
-                'bg-washi-50 duration-modal absolute left-0 block h-px w-6 transition-transform ease-out',
-                open ? 'top-1/2 -rotate-45' : 'top-[calc(100%-1px)]',
-              )}
-            />
-          </span>
-        </button>
-      </nav>
+          <Link href="/" className="shrink-0">
+            <Lockup />
+            <span className="sr-only"> — home</span>
+          </Link>
 
+          <div className="hidden items-center gap-8 md:flex">
+            <ul className="flex items-center gap-6">
+              {SECTIONS.map((section) => (
+                <li key={section.href}>
+                  <a
+                    href={section.href}
+                    className="text-washi-300 hover:text-washi-50 duration-press font-mono text-sm tracking-[0.08em] uppercase transition-[color] ease-out"
+                  >
+                    {section.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            <Button asChild size="sm">
+              <Link href={signedIn ? '/dashboard' : '/sign-in'}>
+                {signedIn ? 'Dashboard' : 'Begin your assessment'}
+              </Link>
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            className="text-washi-50 -mr-2 grid size-11 place-items-center md:hidden"
+          >
+            <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
+            <span aria-hidden className="relative block h-4 w-6">
+              {/* Two bars that rotate into a cross. Neither ever vanishes. */}
+              <span
+                className={cn(
+                  'bg-washi-50 duration-modal absolute left-0 block h-px w-6 transition-transform ease-out',
+                  open ? 'top-1/2 rotate-45' : 'top-1',
+                )}
+              />
+              <span
+                className={cn(
+                  'bg-washi-50 duration-modal absolute left-0 block h-px w-6 transition-transform ease-out',
+                  open ? 'top-1/2 -rotate-45' : 'top-[calc(100%-1px)]',
+                )}
+              />
+            </span>
+          </button>
+        </nav>
+      </header>
+
+      {/* A sibling of the header, not a child: backdrop-filter makes the
+          header the containing block for fixed descendants, so nested here
+          the overlay was sized to the 64px bar and its ink ground vanished —
+          links drawn straight over the hero photo. */}
       {open ? (
         <div
           id="mobile-nav"
@@ -133,6 +144,6 @@ export function SiteNav({ signedIn }: { signedIn: boolean }) {
           </ul>
         </div>
       ) : null}
-    </header>
+    </>
   )
 }

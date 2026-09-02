@@ -107,7 +107,10 @@ describe.skipIf(!configured)('orders', () => {
 
     it('stops the owner editing an order once it has been submitted', async () => {
       const id = await newDraft(alice, aliceUser.id)
-      await alice.rpc('transition_order', { p_order_id: id, p_to: 'sample_under_review' })
+      // Submitted by the system: the owner can no longer walk this edge by
+      // hand (see submission.test.ts), and this test is about what happens
+      // afterwards.
+      await admin.rpc('transition_order', { p_order_id: id, p_to: 'sample_under_review' })
 
       await alice.from('orders').update({ tier: 'comprehensive' }).eq('id', id)
 
@@ -151,10 +154,19 @@ describe.skipIf(!configured)('orders', () => {
       }
     })
 
-    it('lets the owner submit their own draft, and stamps submitted_at', async () => {
+    it('submits a draft through the system, and stamps submitted_at', async () => {
+      // The owner's edge — but walked only inside submit_order(), which sets
+      // a transaction-local flag transition_order() checks. A bare owner call
+      // is refused (submission.test.ts). Here the system stands in for it.
       const id = await newDraft(alice, aliceUser.id)
 
-      const { error } = await alice.rpc('transition_order', {
+      const { error: direct } = await alice.rpc('transition_order', {
+        p_order_id: id,
+        p_to: 'sample_under_review',
+      })
+      expect(direct, 'the owner walked the edge without submit_order()').not.toBeNull()
+
+      const { error } = await admin.rpc('transition_order', {
         p_order_id: id,
         p_to: 'sample_under_review',
       })

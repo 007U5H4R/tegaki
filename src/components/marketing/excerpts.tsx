@@ -61,7 +61,7 @@ export function Excerpts() {
             tabIndex={active === i ? 0 : -1}
             onClick={() => setActive(i)}
             className={cn(
-              'duration-press rounded-full border px-4 py-2 font-mono text-xs tracking-[0.08em] uppercase transition-[color,background-color,border-color] ease-out',
+              'duration-press min-h-11 rounded-full border px-4 py-2 font-mono text-xs tracking-[0.08em] uppercase transition-[color,background-color,border-color] ease-out',
               active === i
                 ? 'border-shu-500 bg-shu-900/30 text-washi-50'
                 : 'border-ink-700 text-washi-300 hover:border-ink-500',

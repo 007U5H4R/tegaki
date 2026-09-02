@@ -32,7 +32,7 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
           <h3 className="text-washi-50 font-serif text-xl">
             {subject ?? (order.status === 'draft' ? 'New assessment' : 'Your assessment')}
           </h3>
-          <p className="text-ink-500 mt-1 font-mono text-xs">
+          <p className="text-washi-300 mt-1 font-mono text-xs">
             {/* Short id: enough for Tushar and a customer to refer to the same
                 order over WhatsApp, without printing a full UUID at anyone. */}
             {order.id.slice(0, 8).toUpperCase()}

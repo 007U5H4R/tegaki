@@ -74,7 +74,7 @@ export function StatusRail({
 
             <span
               className={cn(
-                'font-mono text-[0.625rem] tracking-[0.08em] uppercase',
+                'font-mono text-[0.6875rem] tracking-[0.08em] uppercase',
                 done && 'text-ok-500',
                 isActive && 'text-shu-500',
                 !done && !isActive && 'text-ink-500',

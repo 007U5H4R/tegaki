@@ -281,6 +281,19 @@
 
 ---
 
+### Review gate — **done** (2026-09-02, Fable 5.1)
+Three lenses over `423a0c1..HEAD`: `/code-review`, `/security-review`, `/impeccable critique` + `audit` (dual isolated assessors). First attempt died on the session usage limit; rerun after reset.
+
+| Lens | Found | Fixed | Parked (reason) |
+|---|---|---|---|
+| Security | **3** — table-wide INSERT grant on `orders` (buyer could insert a non-draft status + stamps); owner could walk `draft → sample_under_review` directly via `transition_order()`, skipping every `submit_order()` assertion; table-wide INSERT on `order_files` let a buyer record a "sample" with no object behind it (defeats the "at least one file" and "replacement after rejection" gates) | All three: `20260902190000`, `20260902200000`, `20260902210000` (+ `orders-insert.test.ts`, `submission.test.ts`). The `transition_order` fix uses a transaction-local flag set only by `submit_order()`; first version let NULL through three-valued logic — the new test caught it on its first run | Below-threshold note: `handle_new_user()` grants admin on any `auth.users` insert matching the allowlist, regardless of email confirmation. **Tushar: confirm email/password sign-up is disabled in the Supabase dashboard** (Google only), else an attacker could pre-register the allowlisted address |
+| Code review | 4 | Cron returned 200 when storage refused every delete (now 500 + test); `requestOrigin()` fell through to `https://null` (now throws) | `uploadReport`/`uploadSample` duplication — a refactor with e2e risk and no user-facing gain; `removeUpload` object-first ordering — deliberately mirrors the retention design (the interrupted state is the harmless one; a second click finishes the job) |
+| Impeccable | landing 24/32, product 33/40, audit 18/20. 2×P0, 2×P1, 8×P2 | Both P0s (tagline "Writtenbyhand." from an inline-block trailing space; mobile nav overlay drawn over the hero because `backdrop-filter` made the header the containing block), both P1s (pilot notice below the Confirm button; focus reaching invisible reveals/scrub chapters), and every mechanical P2 (touch targets, 10px rail labels, `ink-500` on `ink-900` at 4.20:1, doubled title suffix, approve/reject adjacency, core-first tier order on phone, 158ch line length) | Stage-2 ideal/rejected gallery (needs C4 imagery); "See a sample report" with no PDF (needs C1–C3); five design questions for Tushar (see `.impeccable/critique/`) |
+
+**Suites after the gate:** typecheck ✓ · lint ✓ · claims ✓ · **196 unit** ✓ · **106 e2e** ✓
+
+---
+
 ## Open human-in-the-loop items
 
 | # | Needed for | What Tushar must do |
@@ -290,6 +303,7 @@
 | **H1c** | T01/D4 RLS tests | ⏳ Paste the **secret key** into `SUPABASE_SECRET_KEY` in `.env.local` (dashboard → Settings → API Keys → Secret keys → reveal). It creates the two throwaway users the isolation suite needs |
 | ~~H2~~ | ~~T01/C3~~ | ✅ **Done.** GCP project `tegaki-507313`; consent screen External, app "Tegaki"; client "Tegaki Web"; Tushar pasted the secret into Supabase |
 | ~~H3~~ | ~~T01/E1–E4~~ | ✅ **Done.** Private repo `007U5H4R/tegaki`; Vercel project `tegaki`; production **https://tegaki-one.vercel.app**. Supabase Site URL and redirect list updated; `NEXT_PUBLIC_SITE_URL` set |
+| **H5** | security | ⏳ In Supabase → Authentication → Providers, confirm **Email** sign-up is **disabled** (Google only). `handle_new_user()` promotes any new `auth.users` row whose email is on the allowlist, so an open email provider would let a stranger pre-register the admin address |
 | **H4** | T15 cron | ⏳ **Add `CRON_SECRET` in Vercel** → project `tegaki` → Settings → Environment Variables → Production. Generate with `openssl rand -hex 32`. Vercel Cron sends it as `Authorization: Bearer $CRON_SECRET` automatically once the variable exists. **Until then the nightly retention job returns 401 and never runs** — the endpoint fails closed, which is the safe direction, but the 90-day deletion the privacy policy promises will not happen. Confirm afterwards in Vercel → Logs, filtering `[retention]` |
 
 ## Live infrastructure

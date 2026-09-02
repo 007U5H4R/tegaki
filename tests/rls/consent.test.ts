@@ -194,7 +194,7 @@ describe.skipIf(!configured)('consent for a third-party subject', () => {
   it('refuses to edit an order that has already been submitted', async () => {
     const id = await newDraft(buyer, buyerUser.id)
     await buyer.rpc('save_order_profile', { p_order_id: id, ...profileArgs() })
-    await buyer.rpc('transition_order', { p_order_id: id, p_to: 'sample_under_review' })
+    await admin.rpc('transition_order', { p_order_id: id, p_to: 'sample_under_review' })
 
     const { error } = await buyer.rpc('save_order_profile', {
       p_order_id: id,

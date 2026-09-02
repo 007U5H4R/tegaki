@@ -163,6 +163,10 @@ h3 {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
+/* Keyboard focus must never land on something the observer has not shown
+   yet: a <details> scrolled minimally into view sits below the -80px root
+   margin and would stay invisible under a visible focus ring. */
+.reveal:focus-within,
 .reveal[data-shown='true'] {
   opacity: 1;
   transform: none;

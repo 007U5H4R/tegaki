@@ -5,7 +5,7 @@ import { DISCLAIMER } from '@/lib/copy'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Sign in — Tegaki',
+  title: 'Sign in',
   robots: { index: false },
 }
 

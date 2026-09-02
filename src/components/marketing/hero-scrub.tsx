@@ -152,6 +152,7 @@ export function HeroScrub({ fallback }: { fallback: React.ReactNode }) {
                 its primary action, and neither may depend on a scroll
                 position. The later chapters only fade over it. */}
             <div
+              inert={chapter.kind !== 'hero'}
               className={cn(
                 'duration-modal max-w-[680px] transition-opacity ease-out',
                 chapter.kind === 'hero' ? 'opacity-100' : 'pointer-events-none opacity-0',
@@ -200,6 +201,7 @@ export function HeroScrub({ fallback }: { fallback: React.ReactNode }) {
             ))}
 
             <div
+              inert={chapter.kind !== 'final'}
               className={cn(
                 'duration-modal absolute bottom-24 transition-opacity ease-out',
                 chapter.kind === 'final' ? 'opacity-100' : 'pointer-events-none opacity-0',
