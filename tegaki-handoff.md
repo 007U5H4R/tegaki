@@ -22,6 +22,22 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
+## ▶ RESUME HERE: **T09 — report upload and download**
+
+`plans/T09-report-upload-download.md`. The last link in the chain: the analyst attaches the finished PDF, the customer downloads it through a signed URL. Everything it builds on is already in place — the private bucket and signed-URL helper from T04, the status machine's `report_generating → completed` edge from T03, and the admin order page from T07.
+
+**Read `plans/LEDGER.md` alongside this file** — it carries the per-task state and every decision taken mid-build, including the project-wide rules listed further down.
+
+### Machine notes for any session on this Mac (2026-09-02)
+
+- **Everything Claude-related goes on `/Volumes/E Drive`, never the internal disk** — a standing rule now in the global `~/.claude/CLAUDE.md`. The internal volume hit 100% full and made Playwright fail with `ENOSPC` on browser launch, which surfaced as *a different test failing on every run* and looked exactly like a race condition. It is at 20 GB free now. Playwright's temp and browser binaries, the npm cache and the pnpm store all point at the E Drive already; scratch work goes in `/Volumes/E Drive/Dev/.scratch`.
+- **When a failure looks random and moves between runs, check `df` before hypothesising a race.**
+- **Obsidian** was opening an empty vault it created on 2026-09-01; it has been repointed at the real one. If notes ever look missing, check `~/Library/Application Support/obsidian/obsidian.json` before assuming loss.
+- **Orca's project paths** all still pointed at `/Users/tushar/Code/...`, which no longer exists — the cause of `DaemonProtocolError: Working directory does not exist`. A fix runs automatically once Orca quits; the result is in `/Volumes/E Drive/Dev/.scratch/orca-fix.log`. **Check that log at the start of the next session** and confirm terminals open in the right directory.
+- **Compact at 80% context**, at a clean boundary — between tickets or after a commit, never mid-edit.
+
+---
+
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
 **Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **135 unit** ✓ **46 e2e against production** ✓ build ✓.
