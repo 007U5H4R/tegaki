@@ -22,7 +22,12 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
    → ▶ /code-review + /security-review + /impeccable → pilot live
 ```
 
-## ▶ RESUME HERE: **the review gate**
+## ▶ RESUME HERE: **after the review gate**
+
+**The review gate ran on 2026-09-02 and its findings are fixed** (`plans/LEDGER.md` → "Review gate"): three authorization gaps closed in migrations `20260902190000`–`210000`, two code-review defects, both landing-page P0s and P1s. What remains is Tushar's: H4 (`CRON_SECRET` in Vercel), H5 (confirm email sign-up is disabled in Supabase), the five design questions in `.impeccable/critique/`, and the content tickets C1–C4 the two parked design items wait on. Then: pilot live.
+
+<details><summary>What the gate was, for the record</summary>
+
 
 **Every code ticket T01–T15 is built, verified and deployed.** What remains before the pilot goes live is step 7 of the build workflow — the three-lens review of the whole branch, then triage and fix what it surfaces:
 
@@ -31,6 +36,8 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 3. **`/impeccable`** — frontend and UX critique against the approved `Design.md`.
 
 **This gate is Tushar's to start.** It was deliberately not run automatically.
+
+</details>
 
 **Production, mobile emulation:** performance **98** · accessibility **100** · best practices **100** · SEO **100**. Zero axe failures, CLS 0.
 
