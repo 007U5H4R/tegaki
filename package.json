@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --exclude '**/admin-ops.test.ts' && vitest run tests/rls/admin-ops.test.ts",
+    "test:watch": "vitest --exclude '**/admin-ops.test.ts'",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -45,5 +45,5 @@
     "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@11.25.0",
-  "description": "Tegaki (手書き) — pilot handwriting personality assessment platform"
+  "description": "Tegaki (\u624b\u66f8\u304d) \u2014 pilot handwriting personality assessment platform"
 }

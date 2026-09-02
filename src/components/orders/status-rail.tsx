@@ -16,8 +16,22 @@ import { RAIL_POSITION, RAIL_STEPS, type OrderStatus } from '@/lib/orders/status
  * already throttle background animation, but saying so explicitly is what
  * the spec asks for and costs one listener.
  */
-export function StatusRail({ status, className }: { status: OrderStatus; className?: string }) {
-  const active = RAIL_POSITION[status]
+export function StatusRail({
+  status,
+  delivered = false,
+  className,
+}: {
+  status: OrderStatus
+  /**
+   * `completed` means the report exists and is downloadable; the last node
+   * only fills once the analyst confirms they actually sent it. Showing
+   * "Delivered" as done before that would be the software claiming credit for
+   * something that happens in Tushar's inbox.
+   */
+  delivered?: boolean
+  className?: string
+}) {
+  const active = delivered ? RAIL_STEPS.length : RAIL_POSITION[status]
   const [hidden, setHidden] = useState(false)
 
   useEffect(() => {

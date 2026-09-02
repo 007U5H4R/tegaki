@@ -47,7 +47,7 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
         <StatusChip status={order.status} />
       </div>
 
-      {onRail ? <StatusRail status={order.status} /> : null}
+      {onRail ? <StatusRail status={order.status} delivered={Boolean(order.delivered_at)} /> : null}
 
       {order.status === 'draft' ? (
         <p className="text-washi-300 text-sm">
@@ -80,7 +80,16 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
         />
       ) : null}
 
-      {order.status === 'completed' ? <DownloadReport orderId={order.id} /> : null}
+      {order.status === 'completed' ? (
+        <>
+          <DownloadReport orderId={order.id} />
+          {order.delivered_at ? (
+            <p className="text-washi-300 text-sm">
+              Sent to you personally on {formatDay(order.delivered_at)}.
+            </p>
+          ) : null}
+        </>
+      ) : null}
 
       {order.status === 'parked' ? <ParkedPanel /> : null}
 

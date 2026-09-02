@@ -93,15 +93,17 @@ function readable(code: string | undefined, message: string, fallback: string): 
 }
 
 /**
- * Move an approved order into report production.
+ * Walk one edge of the status machine.
  *
- * The one edge between approval and delivery, and without it T09's upload
- * panel is unreachable — an order can be approved and a report can be
- * attached, but nothing gets from one to the other. T10 replaces this with
- * controls generated from the transition matrix, at which point this can go;
- * a single hand-written button is the smaller of the two wrongs meanwhile.
+ * Replaces T09's hand-written `startReport()`. The caller names a
+ * destination, the UI only ever offers destinations from `TRANSITIONS`, and
+ * `transition_order()` checks the edge and the caller regardless — so an
+ * invented destination fails in the database rather than being trusted here.
+ *
+ * Rejection is not routed through this: it carries a reason the customer
+ * reads verbatim, and keeps its own action so the reason cannot be optional.
  */
-export async function startReport(orderId: string): Promise<ReviewState> {
+export async function moveOrder(orderId: string, to: string): Promise<ReviewState> {
   try {
     await requireAdmin()
   } catch {
@@ -110,14 +112,42 @@ export async function startReport(orderId: string): Promise<ReviewState> {
 
   const supabase = await createClient()
 
-  const { error } = await supabase.rpc('transition_order', {
-    p_order_id: orderId,
-    p_to: 'report_generating',
-  })
+  const { error } = await supabase.rpc('transition_order', { p_order_id: orderId, p_to: to })
 
   if (error) {
-    console.error('startReport failed', { orderId, code: error.code, message: error.message })
-    return { error: readable(error.code, error.message, 'We could not start that just then.') }
+    console.error('moveOrder failed', { orderId, to, code: error.code, message: error.message })
+    return { error: readable(error.code, error.message, 'We could not move that just then.') }
+  }
+
+  revalidatePath('/admin')
+  revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath('/dashboard')
+  return { ok: true }
+}
+
+/**
+ * Record that the report was actually sent.
+ *
+ * `completed` means the PDF exists and is downloadable. Delivered means
+ * Tushar sent it from his own Gmail or WhatsApp — a thing that happens
+ * outside this system entirely, which is why it is a stamp rather than a
+ * status. It is also the date T15's retention clock counts from, so the
+ * database refuses to move it once set.
+ */
+export async function markDelivered(orderId: string): Promise<ReviewState> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: 'That area is for the analyst only.' }
+  }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('mark_delivered', { p_order_id: orderId })
+
+  if (error) {
+    console.error('markDelivered failed', { orderId, code: error.code, message: error.message })
+    return { error: readable(error.code, error.message, 'We could not mark that just then.') }
   }
 
   revalidatePath('/admin')

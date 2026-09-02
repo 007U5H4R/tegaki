@@ -78,10 +78,17 @@ test.describe('delivering the report', () => {
     await page.getByRole('button', { name: /approve this sample/i }).click()
     await page.getByRole('button', { name: /approve and start/i }).click()
 
+    // T10 generates this control from the transition matrix and confirms it,
+    // so the click opens a dialog and the dialog's button performs the move.
     await expect(page.getByRole('button', { name: /start the report/i })).toBeVisible({
       timeout: 20_000,
     })
     await page.getByRole('button', { name: /start the report/i }).click()
+    await expect(page.getByText(/moves it into production/i)).toBeVisible()
+    await page
+      .getByRole('button', { name: /start the report/i })
+      .last()
+      .click()
 
     await expect(page.getByText(/deliver the report/i)).toBeVisible({ timeout: 20_000 })
     await expectNoHorizontalOverflow(page, 'admin report upload')

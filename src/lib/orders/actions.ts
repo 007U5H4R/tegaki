@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { PAUSED_MESSAGE } from '@/lib/settings'
 import { wizardPath } from './wizard'
 
 /**
@@ -29,6 +30,11 @@ export async function createDraftOrder() {
     .single()
 
   if (error || !data) {
+    // The pause is enforced by a trigger on the table, not by a check here,
+    // so this is where that refusal is turned back into the designed notice.
+    // 23514 is the check_violation the trigger raises with.
+    if (error?.code === '23514') throw new Error(PAUSED_MESSAGE)
+
     throw new Error(`Could not start a new assessment: ${error?.message ?? 'no order returned'}`)
   }
 

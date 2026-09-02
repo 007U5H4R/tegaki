@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { ORDER_STATUSES, type OrderStatus } from '@/lib/orders/status'
+import { isLegalTransition, TRANSITIONS } from '@/lib/orders/transitions'
 
 /**
  * T03 — orders isolation and the status machine.
@@ -23,18 +24,12 @@ const aliceEmail = `orders-alice-${runId}@tegaki.test`
 const bobEmail = `orders-bob-${runId}@tegaki.test`
 
 /** The legal edges, straight from Solution-PRD §6.6. */
-const LEGAL: ReadonlyArray<[OrderStatus, OrderStatus]> = [
-  ['draft', 'sample_under_review'],
-  ['sample_under_review', 'analysis_in_progress'],
-  ['sample_under_review', 'needs_reupload'],
-  ['needs_reupload', 'sample_under_review'],
-  ['needs_reupload', 'parked'],
-  ['analysis_in_progress', 'report_generating'],
-  ['report_generating', 'completed'],
-]
+// The same list the admin controls are generated from (T10). Walking all 49
+// pairs against the live function is what keeps it honest: if the TypeScript
+// list and the SQL edge list ever disagree, this suite says so.
+const LEGAL: ReadonlyArray<[OrderStatus, OrderStatus]> = TRANSITIONS.map((t) => [t.from, t.to])
 
-const isLegal = (from: OrderStatus, to: OrderStatus) =>
-  LEGAL.some(([f, t]) => f === from && t === to)
+const isLegal = isLegalTransition
 
 describe.skipIf(!configured)('orders', () => {
   let admin: SupabaseClient

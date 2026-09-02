@@ -43,8 +43,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Wraps: this row gained a Settings link in T10 and stopped fitting
+            a 375px screen, which the responsive gate caught. */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <p className="text-washi-300 hidden font-mono text-xs sm:block">{admin.email}</p>
+          <Button asChild variant="quiet" size="sm">
+            <Link href="/admin/settings">Settings</Link>
+          </Button>
           <Button asChild variant="quiet" size="sm">
             <Link href="/dashboard">My assessments</Link>
           </Button>

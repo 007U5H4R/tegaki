@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ReviewActions } from '@/components/admin/review-actions'
 import { ReportUpload } from '@/components/admin/report-upload'
-import { StartReport } from '@/components/admin/start-report'
+import { StatusControls } from '@/components/admin/status-controls'
 import { SampleViewer } from '@/components/admin/sample-viewer'
 import { Button } from '@/components/ui/button'
 import { Card, MicroLabel } from '@/components/ui/card'
@@ -57,15 +57,20 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
           turnaroundDays={tier.turnaroundDays}
           expectedDelivery={formatDay(expectedDeliveryDate(tier.id, new Date()))}
         />
-      ) : order.status === 'analysis_in_progress' ? (
-        <StartReport orderId={order.id} />
       ) : order.status === 'report_generating' ? (
         <ReportUpload
           orderId={order.id}
           subject={order.subject_is_self ? order.full_name : order.subject_name}
         />
       ) : (
-        <ReviewSummary order={order} />
+        <>
+          <ReviewSummary order={order} />
+          <StatusControls
+            orderId={order.id}
+            status={order.status}
+            deliveredAt={order.delivered_at}
+          />
+        </>
       )}
 
       <section className="flex flex-col gap-4">

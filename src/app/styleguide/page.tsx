@@ -36,6 +36,7 @@ const specimen = (over: Partial<Order>): Order => ({
   expected_delivery_date: null,
   rejected_reason: null,
   reupload_deadline: null,
+  delivered_at: null,
   created_at: '2026-08-28T09:00:00.000Z',
   updated_at: '2026-08-28T09:00:00.000Z',
   ...over,
@@ -82,6 +83,7 @@ const SPECIMEN_ORDERS: Order[] = [
     wizard_stage: 4,
     submitted_at: '2026-08-14T09:00:00.000Z',
     expected_delivery_date: '2026-08-21',
+    delivered_at: '2026-08-21T09:00:00.000Z',
   }),
 ]
 

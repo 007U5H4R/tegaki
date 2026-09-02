@@ -12,6 +12,7 @@ import { signOut } from '@/lib/auth/actions'
 import { createDraftOrder } from '@/lib/orders/actions'
 import { getMyOrders } from '@/lib/orders/queries'
 import { createClient } from '@/lib/supabase/server'
+import { isPaused, PAUSED_MESSAGE } from '@/lib/settings'
 
 export const metadata: Metadata = {
   title: 'Your assessments — Tegaki',
@@ -40,6 +41,10 @@ export default async function DashboardPage({
     .eq('id', user.id)
     .single()
 
+  // Asked only once we know who is asking — no work on behalf of a visitor
+  // who is about to be sent to sign in.
+  const paused = await isPaused()
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
       <MicroLabel>Tegaki · 手書き{profile?.role === 'admin' ? ' · admin' : ''}</MicroLabel>
@@ -62,18 +67,32 @@ export default async function DashboardPage({
             </Button>
           ) : null}
 
-          <form action={createDraftOrder}>
-            <Button type="submit">New request</Button>
-          </form>
+          {paused ? null : (
+            <form action={createDraftOrder}>
+              <Button type="submit">New request</Button>
+            </form>
+          )}
         </div>
       </div>
+
+      {/* Hiding the button is not what stops a new order — a trigger on the
+          table is. This is what tells somebody why the button is gone, and
+          answers the question it provokes. */}
+      {paused ? (
+        <div className="border-warn-500/40 bg-warn-500/10 mt-6 rounded-2xl border p-5">
+          <p className="text-washi-50 text-sm">{PAUSED_MESSAGE}</p>
+          <p className="text-washi-300 mt-1 text-sm">
+            Anything already under way below carries on exactly as normal.
+          </p>
+        </div>
+      ) : null}
 
       {/* Streamed, so the page shell and the New request button are usable
           before the list resolves — the skeleton is what people see while it
           does, not a blank screen. */}
       <div className="mt-10">
         <Suspense fallback={<SkeletonList count={2} />}>
-          <OrderList />
+          <OrderList paused={paused} />
         </Suspense>
       </div>
 
@@ -88,7 +107,7 @@ export default async function DashboardPage({
   )
 }
 
-async function OrderList() {
+async function OrderList({ paused }: { paused: boolean }) {
   const orders = await getMyOrders()
 
   if (orders.length === 0) {
@@ -103,9 +122,11 @@ async function OrderList() {
           </>
         }
         action={
-          <form action={createDraftOrder}>
-            <Button type="submit">Begin your assessment</Button>
-          </form>
+          paused ? undefined : (
+            <form action={createDraftOrder}>
+              <Button type="submit">Begin your assessment</Button>
+            </form>
+          )
         }
       />
     )
