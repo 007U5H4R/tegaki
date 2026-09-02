@@ -45,6 +45,10 @@ export async function signOut() {
 async function requestOrigin(): Promise<string> {
   const headerList = await headers()
   const host = headerList.get('x-forwarded-host') ?? headerList.get('host')
+  // No host header means no way to build a redirect Supabase will honour.
+  // Without this the fallthrough was the literal string "https://null", which
+  // fails at Google's end with nothing said here.
+  if (!host) throw new Error('Cannot start sign-in: the request carried no Host header.')
   const protocol =
     headerList.get('x-forwarded-proto') ?? (host?.startsWith('localhost') ? 'http' : 'https')
   return `${protocol}://${host}`

@@ -63,7 +63,11 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json({ ok: true, ...report, ms })
+    // A storage refusal means the rows were left in place for tomorrow, so
+    // this run did not do its job. That has to be a red cron in Vercel's
+    // dashboard, not a green one with a sad field inside it.
+    const ok = report.objectErrors.length === 0
+    return NextResponse.json({ ok, ...report, ms }, { status: ok ? 200 : 500 })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[retention] failed', message)
