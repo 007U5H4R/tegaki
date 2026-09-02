@@ -4,6 +4,7 @@ import { StatusRail } from '@/components/orders/status-rail'
 import { ReuploadPanel } from '@/components/orders/reupload-panel'
 import { DownloadReport } from '@/components/orders/download-report'
 import { CONTACT_EMAIL, PILOT_ORDER_NOTE } from '@/lib/copy'
+import { RETENTION_DAYS } from '@/lib/retention/constants'
 import type { Order } from '@/lib/orders/queries'
 import { RAIL_POSITION } from '@/lib/orders/status'
 import { TIER_DETAILS } from '@/lib/tiers'
@@ -88,6 +89,7 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
               Sent to you personally on {formatDay(order.delivered_at)}.
             </p>
           ) : null}
+          {order.samples_purged_at ? <SamplesPurgedNote at={order.samples_purged_at} /> : null}
         </>
       ) : null}
 
@@ -121,6 +123,28 @@ function ParkedPanel() {
           email us
         </a>{' '}
         and we will reopen it.
+      </p>
+    </div>
+  )
+}
+
+/**
+ * The retention promise, kept and shown.
+ *
+ * A customer whose samples were destroyed should be told by the product, not
+ * discover it from a policy page — and the difference between "deleted" and
+ * "there was never anything here" is one only the timestamp can settle. It
+ * sits beside the download deliberately: the sentence that reassures is the
+ * one that says the report is unaffected.
+ */
+function SamplesPurgedNote({ at }: { at: string }) {
+  return (
+    <div className="border-ink-700 flex flex-col gap-1 rounded-2xl border border-dashed p-4">
+      <MicroLabel tone="muted">Samples deleted</MicroLabel>
+      <p className="text-washi-300 text-sm">
+        Your handwriting was deleted on {formatDay(at)}, {RETENTION_DAYS} days after your report was
+        sent, as our retention policy promises. Your report is unaffected and stays downloadable
+        here.
       </p>
     </div>
   )

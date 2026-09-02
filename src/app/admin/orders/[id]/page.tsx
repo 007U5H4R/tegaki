@@ -4,6 +4,7 @@ import { ReviewActions } from '@/components/admin/review-actions'
 import { ReportUpload } from '@/components/admin/report-upload'
 import { StatusControls } from '@/components/admin/status-controls'
 import { SampleViewer } from '@/components/admin/sample-viewer'
+import { EraseData } from '@/components/admin/erase-data'
 import { Button } from '@/components/ui/button'
 import { Card, MicroLabel } from '@/components/ui/card'
 import { StatusChip } from '@/components/ui/status-chip'
@@ -75,7 +76,17 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
 
       <section className="flex flex-col gap-4">
         <h2 className="text-washi-50 font-serif text-2xl">The sample</h2>
-        <SampleViewer files={files} />
+        {order.samples_purged_at ? (
+          <Card className="flex flex-col gap-2">
+            <MicroLabel tone="muted">Samples deleted</MicroLabel>
+            <p className="text-washi-300 text-sm">
+              Destroyed on {formatDate(order.samples_purged_at)} under the retention policy. The
+              report is unaffected. An empty viewer would read as a bug rather than a promise kept.
+            </p>
+          </Card>
+        ) : (
+          <SampleViewer files={files} />
+        )}
       </section>
 
       <section className="flex flex-col gap-4">
@@ -132,6 +143,11 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
             ))}
           </ul>
         </Card>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-washi-50 font-serif text-2xl">If they ask to be forgotten</h2>
+        <EraseData orderId={order.id} />
       </section>
     </div>
   )

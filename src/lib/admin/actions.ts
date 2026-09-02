@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/assert-admin'
+import { purgeOrderData } from '@/lib/retention/purge'
 import { createClient } from '@/lib/supabase/server'
 import { MAX_REASON_LENGTH, MIN_REASON_LENGTH } from './constants'
 
@@ -154,4 +155,62 @@ export async function markDelivered(orderId: string): Promise<ReviewState> {
   revalidatePath(`/admin/orders/${orderId}`)
   revalidatePath('/dashboard')
   return { ok: true }
+}
+
+/**
+ * Honour a delete-my-data request for one order.
+ *
+ * This is the only destructive action in the product, so it is guarded three
+ * ways: the admin check here, the caller having typed the order's short id
+ * into the dialog, and `purge_order_data()` refusing anyone who is not the
+ * analyst. None of them alone is the reason it is safe.
+ *
+ * `erase` chooses between nulling the personal fields and deleting the order
+ * outright. The person who asked gets to pick — the runbook explains what
+ * each one costs them.
+ */
+export async function eraseOrderData(input: {
+  orderId: string
+  erase: boolean
+  confirmation: string
+}): Promise<ReviewState & { objectsDeleted?: number }> {
+  try {
+    await requireAdmin()
+  } catch {
+    return { error: 'That area is for the analyst only.' }
+  }
+
+  // The same eight characters the dialog shows, so a mistyped or stale tab
+  // cannot destroy the wrong customer's file.
+  const expected = input.orderId.slice(0, 8).toUpperCase()
+  if (input.confirmation.trim().toUpperCase() !== expected) {
+    return { error: `Type ${expected} to confirm. Nothing has been deleted.` }
+  }
+
+  try {
+    const { objectsDeleted, objectErrors } = await purgeOrderData(input.orderId, input.erase)
+
+    console.log(
+      '[erasure]',
+      JSON.stringify({ orderId: input.orderId, erase: input.erase, objectsDeleted, objectErrors }),
+    )
+
+    revalidatePath('/admin')
+    revalidatePath(`/admin/orders/${input.orderId}`)
+    revalidatePath('/dashboard')
+
+    if (objectErrors.length > 0) {
+      // The rows are already gone, so this cannot be retried by re-running.
+      // Say so plainly rather than reporting a clean success.
+      return {
+        error: `The records were deleted, but ${objectErrors.length} file(s) could not be removed from storage: ${objectErrors.join('; ')}. Clear them in the Supabase dashboard — see the delete-my-data runbook.`,
+      }
+    }
+
+    return { ok: true, objectsDeleted }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('eraseOrderData failed', { orderId: input.orderId, message })
+    return { error: 'We could not erase that just then. Nothing has been deleted.' }
+  }
 }

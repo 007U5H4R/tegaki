@@ -111,6 +111,7 @@ export type AdminOrder = {
   rejected_reason: string | null
   reupload_deadline: string | null
   delivered_at: string | null
+  samples_purged_at: string | null
   created_at: string
   buyer: { email: string; full_name: string | null } | null
 }
@@ -131,7 +132,7 @@ export async function getAdminOrder(orderId: string): Promise<AdminOrder | null>
   const { data, error } = await supabase
     .from('orders')
     .select(
-      'id, buyer_id, status, tier, full_name, age, gender, city, country, email, phone, whatsapp_preferred, subject_is_self, subject_name, subject_age, consent_given_at, guardrails_acked, submitted_at, approved_at, expected_delivery_date, rejected_reason, reupload_deadline, delivered_at, created_at, buyer:profiles!orders_buyer_id_fkey(email, full_name)',
+      'id, buyer_id, status, tier, full_name, age, gender, city, country, email, phone, whatsapp_preferred, subject_is_self, subject_name, subject_age, consent_given_at, guardrails_acked, submitted_at, approved_at, expected_delivery_date, rejected_reason, reupload_deadline, delivered_at, samples_purged_at, created_at, buyer:profiles!orders_buyer_id_fkey(email, full_name)',
     )
     .eq('id', orderId)
     .maybeSingle()

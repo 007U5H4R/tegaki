@@ -19,12 +19,13 @@ export type Order = {
   rejected_reason: string | null
   reupload_deadline: string | null
   delivered_at: string | null
+  samples_purged_at: string | null
   created_at: string
   updated_at: string
 }
 
 const ORDER_COLUMNS =
-  'id, buyer_id, status, tier, wizard_stage, full_name, subject_is_self, subject_name, guardrails_acked, submitted_at, expected_delivery_date, rejected_reason, reupload_deadline, delivered_at, created_at, updated_at'
+  'id, buyer_id, status, tier, wizard_stage, full_name, subject_is_self, subject_name, guardrails_acked, submitted_at, expected_delivery_date, rejected_reason, reupload_deadline, delivered_at, samples_purged_at, created_at, updated_at'
 
 /**
  * The signed-in user's orders, newest first.

@@ -9,7 +9,17 @@ import { expect, test } from '@playwright/test'
  * is not that the film plays — it is that a phone, a visitor who asked for
  * reduced motion, and a page without JavaScript **never request a single
  * frame**.
+ *
+ * Scrolling here is done with `window.scrollTo`, not `page.mouse.wheel`:
+ * mobile WebKit has no mouse and throws on wheel, which is how the first
+ * version of these two tests failed — on the one project whose behaviour they
+ * were written to check.
  */
+
+/** Works in every engine, unlike mouse.wheel. */
+async function scrollDown(page: import('@playwright/test').Page, by = 2000) {
+  await page.evaluate((y) => window.scrollTo(0, y), by)
+}
 
 const FRAME = /\/hero\/hero_\d{3}\.jpg/
 
@@ -22,7 +32,7 @@ test.describe('the hero scrub', () => {
 
     await page.setViewportSize({ width: 375, height: 812 })
     await page.goto('/')
-    await page.mouse.wheel(0, 2000)
+    await scrollDown(page)
     await page.waitForTimeout(1500)
 
     expect(requested, `a phone fetched ${requested.length} frames`).toEqual([])
@@ -44,7 +54,7 @@ test.describe('the hero scrub', () => {
       })
 
       await page.goto('/')
-      await page.mouse.wheel(0, 2000)
+      await scrollDown(page)
       await page.waitForTimeout(1500)
 
       expect(requested, `reduced motion fetched ${requested.length} frames`).toEqual([])

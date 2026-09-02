@@ -18,8 +18,16 @@ export default defineConfig({
     },
   },
   resolve: {
-    // fileURLToPath, not URL.pathname: this repo lives under a directory with
-    // a space in its name, which pathname would leave percent-encoded.
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+    alias: {
+      // fileURLToPath, not URL.pathname: this repo lives under a directory
+      // with a space in its name, which pathname would leave percent-encoded.
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // `server-only` is a build-time marker for the Next bundler and throws
+      // on import anywhere else, which would make every server module
+      // untestable. Stubbing it here does not weaken anything: the guard that
+      // actually matters is supabaseSecretKey() refusing to read the key when
+      // `window` exists, and that is asserted in tests/lib/env.test.ts.
+      'server-only': fileURLToPath(new URL('./tests/support/server-only.ts', import.meta.url)),
+    },
   },
 })
