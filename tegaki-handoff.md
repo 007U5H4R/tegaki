@@ -60,7 +60,7 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **T08 is done — the lifecycle is closed at both ends.** A live order shows a four-node rail and, once approved, "Expected by {date}". A rejected one shows the analyst's sentence verbatim, the deadline, and the same uploader from wizard stage 2; sending a replacement puts it back in the queue with the rejected page kept as history. An expired window parks the order on the next page load — no cron needed for a customer to see the truth about their own order — and a parked order offers a mailto rather than a dead end.
 
-**Next: T09** (`plans/T09-report-upload-download.md`) — report upload and download, the last link in the chain: the analyst attaches the finished PDF, the customer downloads it through a signed URL.
+**T09 is done — the chain is complete.** `reports` is a private bucket whose objects are readable only by the order's owner and the analyst, and `attach_report()` writes the row and completes the order in one transaction. The attestation is enforced at the checkbox, at the action, and by `validated_at` being `not null`: an unvalidated report cannot exist in the table. Downloads are 60-second signed URLs with a filename somebody can find again.
 
 Project-wide rules, each learned the hard way (full reasoning in `plans/LEDGER.md`): every table migration grants **both** `authenticated` (narrowly) and `service_role` (fully); every foreign key gets an explicit `on delete` rule; a `'use server'` module may export **only** async functions; and a layout's redirect does not stop its page from rendering, so a guarded page guards itself too.
 
