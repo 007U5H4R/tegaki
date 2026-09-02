@@ -186,7 +186,24 @@
 
 **Suites after T10:** typecheck ✓ · lint ✓ · format ✓ · **168 unit** ✓ · **54 e2e against production** ✓ · build ✓
 
-**Next: T11** — the landing page, part one. Phase 3 is complete: the product works end to end for both the customer and the analyst.
+### T11 · Landing part 1 — **done** (`9f0c5ad`, `4cdbd61`, `bde166c`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Marketing shell | **done** | `(marketing)` route group keeps `/` while giving the public pages a layout the signed-in surfaces do not share. Nav (T02's deferred one, built now against real sections) + footer + skip link |
+| A2 · Hero | **done** | Static poster from C5. **Two layouts — see decisions.** Copy lower-left over a scrim from `sm` up; image above copy on a phone |
+| A3 · Entrance | **done** | Pure CSS keyframes with per-child `--rise`, so it plays without JS and the page is complete if it never runs |
+| B1 · How it works | **done** | Three steps on the dashed rail this product uses for every kind of progress; the turnaround note sits under step three, before anybody pays |
+| B2 · Tagline reveal | **done** | Per-word IntersectionObserver, once, reading order. Muted level raised from Design.md's 30% — see decisions |
+| B3 · Tiers | **done** | Hairline columns on desktop, stacked with Core first on a phone via CSS `order` only, so reading and focus order stay the price ladder. Every number from `tiers.ts`, asserted by e2e |
+| B4 · Scroll reveals | **done** | Hidden state applied by the effect, never rendered — no-JS shows everything |
+| C1 · Performance | **done** | **Lighthouse mobile on production: Performance 97 · Accessibility 100 · Best Practices 100 · SEO 100.** LCP 2.1 s, CLS 0, TBT 120 ms. Gate was ≥85 |
+| C2 · a11y + e2e | **done** | Zero axe failures after fixing two real ones (below). 12 landing tests × 2 viewports, including a no-JS pass and a measured contrast check |
+
+**Suites after T11:** typecheck ✓ · lint ✓ · format ✓ · **168 unit** ✓ · **66 e2e against production** ✓ · build ✓
+
+**Next: T12** — landing part two: sample-report anatomy, report excerpts, about, FAQ and the final CTA band.
+
+---
 
 ---
 
@@ -311,3 +328,13 @@ Things worth knowing:
 - Assertions must stay **scoped to specific ids** rather than counting all of a user's rows: the accounts are shared across suites running in parallel.
 
 **Still outstanding: the e2e side, which is now the larger consumer** — 34 users per full run across both projects, so ~68 auth calls. Sharing buyers there is not safe as written: several specs assert that a stranger's dashboard shows nothing, which a shared account would invalidate. The analyst *could* be shared (every admin assertion is id-scoped). Worth doing if rate limits reappear; not done, because the unit side was the one that actually kept failing and this would trade real isolation for a modest saving.
+
+## Decisions taken during T11
+
+- **The hero contrast is measured, not asserted.** Design.md §5.1 requires hero copy over photography to reach 7:1, which is a claim about rendered pixels rather than about a class name. `e2e/landing.spec.ts` screenshots the region behind the heading with the text hidden, finds the **lightest** pixel in it, and computes the real ratio. The first measurement was **1.9:1** — an illegible hero that looked perfectly fine in review, and would have shipped.
+- **Then the opposite failure.** Tuning the scrim until it passed took the photograph to a black rectangle, and the same design document says the subject stays visible. Recomposing the crop (`object-position`) so the written line sits out of the copy's band fixed desktop: pen, hand and handwriting all legible beside the words, at 7:1.
+- **The phone gets a different layout, and that is a deviation.** A 16:9 photograph cropped to 390×844 is a narrow vertical slice, and a heading this size covers nearly all of it — every scrim strong enough to pass took the image to black. So on a phone the picture sits **above** the copy at full strength, undarkened, with the words on the ink ground beneath. Design.md §6 says "hero copy over darkened lower half of the macro"; this keeps what that rule was protecting, which is that somebody can see the handwriting. **Flagged for Tushar rather than quietly changed.**
+- **The tagline's muted level is 58%, not Design.md's 30%.** Measured, 30% is below the 3:1 floor for large text and axe fails the page on it — and the same document makes the accessibility gate mandatory, so the number gives way to the gate. The before/after contrast is still obvious.
+- **Lockup links are named by their content.** An `aria-label` replaces the accessible name outright, so any spacing difference between the wordmark and 手書き is a WCAG 2.5.3 mismatch — axe kept flagging it through two attempts at wording the label. Letting the content name the link makes them identical by construction; extra context is appended with `sr-only` text rather than substituted for what is on screen. Same fix applied to the wizard and admin lockups, which axe had not reached because they are behind auth.
+- **Reveals hide content only after JavaScript arms them.** The resting state in CSS is the visible one, so a page with no JS, an old browser or a thrown exception simply reads. A reveal that hides content by default is a reveal that can hide it forever — and there is a spec that loads the page with JavaScript disabled to keep that honest.
+- **`#samples` and `#faq` are real sections with honest placeholder copy,** not empty anchors. The nav names them, and a link that scrolls to nothing reads as broken. T12 fills them.

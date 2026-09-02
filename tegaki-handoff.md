@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-02** (end of T10).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T11).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,15 +18,19 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ (T07–T10) → Phase 4 (T11 next)
+   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 (T11 ✅ → T12 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
-## ▶ RESUME HERE: **T11 — the landing page, part one**
+## ▶ RESUME HERE: **T12 — the landing page, part two**
 
-`plans/T11-landing-part1.md`. **Phase 3 is complete — the product works end to end for both sides.** What remains is the shop window: the landing page, the policies and ship set, the hero scroll-scrub, and retention.
+`plans/T12-landing-part2.md`. Sample-report anatomy, report excerpts, the about section and the FAQ. `#samples` and `#faq` already exist on the page with honest placeholder copy — T12 replaces it.
 
-**T10 finished the analyst's controls.** A pause switch enforced by a trigger on `orders` (insert-only, so somebody mid-wizard can still finish), status controls generated from the same transition matrix the 49-pair test walks, and mark-delivered — a stamp rather than a status, because the sending happens in Tushar's Gmail where the software cannot see it. A grep test now fails the suite if any application code writes `orders.status`.
+**T11 shipped the landing page.** Nav, footer, skip link, hero, how-it-works, the tagline reveal and the tiers. **Lighthouse mobile on production: Performance 97, Accessibility 100, Best Practices 100, SEO 100** — CLS 0, LCP 2.1 s.
+
+**One deviation to show Tushar:** on a phone the hero puts the photograph *above* the copy rather than behind it. Every scrim strong enough to reach the required 7:1 over that crop turned the image into a black rectangle. Reasoning and the measurements are in `plans/LEDGER.md`.
+
+**Two assets still outstanding for T12:** a real photograph of Tushar for the about section (never a generated face), and the C4 scan-guide imagery.
 
 **Before running the full suite twice in a row, read the auth rate-limit note in `plans/LEDGER.md`.** A mass `AuthApiError: Request rate limit reached` is a cadence problem, not a regression — and the real fix (sharing fixture users across suites) is written up there.
 
@@ -44,9 +48,9 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **168 unit** ✓ **54 e2e against production** ✓ build ✓.
+**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **168 unit** ✓ **66 e2e against production** ✓ build ✓. **Lighthouse mobile on production: 97 / 100 / 100 / 100.**
 
-**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 14 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
+**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 15 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
 
 **T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is proven at the database layer by the 8-test isolation suite, and the loop is now proven in a browser too. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
 
