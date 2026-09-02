@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-02** (end of T08).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T09).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,13 +18,17 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ (T03–T06) · Phase 3 (T07 ✅ T08 ✅ → T09 next)
+   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ (T03–T06) · Phase 3 (T07 ✅ T08 ✅ T09 ✅ → T10 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
-## ▶ RESUME HERE: **T09 — report upload and download**
+## ▶ RESUME HERE: **T10 — admin operations**
 
-`plans/T09-report-upload-download.md`. The last link in the chain: the analyst attaches the finished PDF, the customer downloads it through a signed URL. Everything it builds on is already in place — the private bucket and signed-URL helper from T04, the status machine's `report_generating → completed` edge from T03, and the admin order page from T07.
+`plans/T10-admin-ops.md`. The pause switch (enforced where orders are created, not where the button lives), status controls generated from the transition matrix, and mark-delivered — the timestamp T15's retention clock counts from.
+
+**One thing to delete when you get there:** `startReport()` in `src/lib/admin/actions.ts` and `src/components/admin/start-report.tsx`. T09 added them because its upload panel was otherwise unreachable — that single hand-written edge is exactly what T10/B5 replaces with matrix-generated controls.
+
+**T09 is done: the whole chain now runs end to end.** A customer orders, the analyst reviews, approves, writes the report and attaches it with a validation attestation, and the customer downloads it — proven byte-identical in a browser on desktop and iPhone against production. `reports.validated_at` is not nullable and only `attach_report()` writes the row, so an unvalidated report cannot exist.
 
 **Read `plans/LEDGER.md` alongside this file** — it carries the per-task state and every decision taken mid-build, including the project-wide rules listed further down.
 
@@ -40,9 +44,9 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **135 unit** ✓ **46 e2e against production** ✓ build ✓.
+**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **150 unit** ✓ **50 e2e against production** ✓ build ✓.
 
-**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 11 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
+**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 13 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
 
 **T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is proven at the database layer by the 8-test isolation suite, and the loop is now proven in a browser too. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
 

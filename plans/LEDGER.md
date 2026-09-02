@@ -157,7 +157,23 @@
 
 **Suites after T08:** typecheck ✓ · lint ✓ · format ✓ · **135 unit** ✓ · **46 e2e against production** ✓ · build ✓
 
-**Next: T09** — report upload and download. The last link in the chain: the analyst attaches the finished PDF, the customer downloads it through a signed URL.
+### T09 · Report upload + download — **done** (`4982899`, `b9383d7`)
+| Task | Status | Note |
+|---|---|---|
+| A1–A3 · Migration | **done** | `20260902150000_reports.sql`. `validated_at` is **not null** — an unvalidated report cannot exist in the table. `order_id` unique, so a second attach is impossible. `attach_report()` refuses outside `report_generating`, refuses non-admins, and inserts + completes in one transaction |
+| — · Buyer storage policy | **done** | `20260902160000_reports_buyer_read.sql` — **corrects a wrong assumption in A2**; see decisions |
+| B1 · Admin upload | **done** | PDF-only dropzone; the attestation gates the button, the action re-checks, the column enforces. Bytes go up first, row second: an orphaned object beats a completed order with nothing to download |
+| — · `startReport()` *(added)* | **done** | The `analysis_in_progress → report_generating` edge. Not in the T09 plan — without it the upload panel is unreachable, and T09's own e2e had to seed the state in SQL. **T10/B5 replaces this with matrix-generated controls; delete it then** |
+| B2 · Customer download | **done** | Minted on click, not rendered into the page — a signed URL in the HTML of every dashboard load is a working link left lying around. 60-second TTL, filename `Tegaki-{subject}-{tier}-{date}.pdf` |
+| B3 · Status copy | **done** | The rail already covers `completed`; the card gains the download and the "also sent to you directly" note |
+| C1 · Security tests | **done** | 15 tests. Attestation refused three ways, wrong-status refused, second attach refused, buyer-as-analyst refused, cross-account row read empty, anonymous empty, forged insert refused, bucket shut to strangers, link works then dies |
+| C2 · E2E round trip | **done** | A real PDF, **byte-compared** after download, on desktop and iPhone, against production. Plus a second spec proving a stranger who knows the order id gets nothing |
+
+**Suites after T09:** typecheck ✓ · lint ✓ · format ✓ · **150 unit** ✓ · **50 e2e against production** ✓ · build ✓
+
+**Next: T10** — admin operations: the pause switch, matrix-generated status controls, and mark-delivered.
+
+---
 
 ---
 
@@ -244,3 +260,12 @@
 - **`needs_reupload` is deliberately absent from `/styleguide`.** Its panel mounts a real uploader, and an uploader pointed at a fictional order is a control that fails when anyone uses it. The T02 dropzone test caught it the moment it was added. That variant is covered where it can be exercised for real, in `e2e/reupload-loop.spec.ts`.
 - **Client components must not format dates.** `ReuploadPanel` formatted the deadline itself, so Node and WebKit each ran their own ICU for `en-IN`, React saw a hydration mismatch and regenerated the tree — which wiped an upload in progress. Only the **mobile** project caught it. Dates are formatted on the server and passed down as strings; a sweep confirmed no other client component formats one.
 - **The machine's disk filled up mid-ticket** (887 MB free of 228 GB on the internal volume) and Playwright began failing with `ENOSPC` on browser profile creation — appearing as different tests failing on each run, which looked exactly like a race condition. Cleared the tooling caches this work created; **the underlying problem is Tushar's, not the project's** (the repo lives on the external drive with 52 GB free) and will keep causing spurious failures until he frees space.
+
+## Decisions taken during T09
+
+- **The attestation is enforced in three places and guaranteed in one.** The checkbox gates the button, `attachReport()` re-checks, and `reports.validated_at` is `not null` with `attach_report()` as the only writer. Solution-PRD §7.4 permits no unvalidated delivery, and fulfilment is manual — that read-through is the only thing between a generated document and somebody's inbox. A rule enforced only in a form lasts until someone changes the form.
+- **A wrong assumption, caught by the browser.** The first migration gave the reports bucket **no buyer storage policy at all**, on the reasoning that customers never touch it directly — they go through a server action. The shape was right, the mechanics were wrong: **signing a URL is itself an authorised read of the object**, so `createSignedUrl` as the buyer failed with "Object not found" and the download button did nothing. The e2e caught it as a download event that never fired; a probe confirmed it before anything was rewritten. The buyer now gets the narrowest read there is — the object's first path segment must name an order they own — which is the `samples` shape, and works for the same reason: the path is the boundary. **The misleading comment in the first migration is corrected by the second rather than edited in place; an applied migration is history.**
+- **Bytes first, row second.** If the upload succeeds and `attach_report()` fails, an object is orphaned in a private bucket. The other order — row first — would show a customer a completed order with nothing to download. Of the two failures the orphan is the one nobody notices at the wrong moment, and the sweep below now catches it.
+- **`startReport()` is a deliberate stopgap.** T10 owns status controls, generated from the transition matrix so the UI can only offer edges the function accepts. But without this one edge, T09's upload panel cannot be reached at all and its own plan had to seed the state in SQL. A feature nothing can reach is not shipped. **Delete it when T10/B5 lands.**
+- **Private buckets now get swept for orphans.** T09's test runs left ten PDFs in `reports` with no owning row — and checking turned up one in `samples` too, already there, unnoticed because nothing had looked. Deleting a user cascades rows but not bytes; storage has no foreign keys. An orphaned personality report in a private bucket is exactly what retention exists to prevent, and test data is a rehearsal for the real thing rather than an exception to it.
+- **A one-second signed URL cannot prove freshness.** The first expiry test signed for one second, fetched, and asserted the fetch worked — a race the network usually wins, because the round trip alone outlived the link. Freshness is now proven at the real 60-second TTL and expiry with its own short one. *A test that fails for a reason unrelated to the thing it names is worse than no test.*
