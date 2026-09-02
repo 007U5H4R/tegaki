@@ -94,6 +94,22 @@
 
 **Suites after T04:** typecheck ✓ · lint ✓ · **67 unit** ✓ · **34 e2e** ✓ · build ✓
 
+### T05 · Wizard shell + stage 1 — **done** (`b374d54`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Stage-1 columns | **done** | Migration `20260901170000_order_profile.sql`. Plus a **CHECK constraint**: an order that has left `draft` must carry consent when the subject is not the buyer |
+| A2 · Zod schema | **done** | One schema for browser and server. Phone accepts every real Indian format (+91, leading 0, spaces, dashes); gender is free text and optional, since it only shapes report pronouns |
+| B1 · Wizard shell + guard | **done** | Layout loads and guards the order once, so no stage repeats the ownership check. Submitted orders redirect to the dashboard |
+| B2 · Resume | **done** | Progress on `wizard_stage`, not in the browser — start on a phone, finish on a laptop. `clampSegment` sends a deep link back to the furthest stage actually reached and degrades safely on a corrupt value |
+| B3 · Stage-1 form | **done** | Self/other as selectable cards; the subject panel expands with name, age and the consent checkbox |
+| B4 · `save_order_profile()` | **done** | Definer function: stamps `consent_given_at` server-side from an explicit tick (never posted as a value), **clears it** if the buyer switches back to themselves, lowercases the email |
+| B5 · Mount stage 2 | **done** | `SampleUploader` now at `/wizard/[orderId]/upload`; the temporary `/upload-demo` route is **deleted**; "New request" opens the wizard |
+| C1–C2 · Tests | **done** | **26 new tests.** Consent proven at three layers, the last with the service role so it is the constraint itself talking, not a policy |
+
+**Suites after T05:** typecheck ✓ · lint ✓ · **93 unit** ✓ · **34 e2e** ✓ · build ✓
+
+**Next: T06** — tier selection and demo checkout, which closes the customer half of the loop. Note `submit_order()` should also assert the consent rule, matching the constraint.
+
 ---
 
 ## Open human-in-the-loop items
