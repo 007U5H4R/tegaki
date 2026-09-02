@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { StatusChip } from '@/components/ui/status-chip'
+import { PILOT_ORDER_NOTE } from '@/lib/copy'
 import type { Order } from '@/lib/orders/queries'
 import { TIER_DETAILS } from '@/lib/tiers'
 
@@ -40,7 +41,14 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
         <p className="text-washi-300 text-sm">
           You have not finished this request yet. Nothing has been submitted.
         </p>
-      ) : null}
+      ) : (
+        <p className="text-washi-300 text-sm">
+          {tier ? `${tier.turnaroundDays} days from sample approval. ` : ''}
+          {/* Repeated here and not only at checkout: weeks later, "did I pay
+              for this?" is exactly the question this card has to answer. */}
+          <span className="text-ink-500">{PILOT_ORDER_NOTE}</span>
+        </p>
+      )}
 
       {action ? <div className="flex flex-wrap gap-3">{action}</div> : null}
     </Card>

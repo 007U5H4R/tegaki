@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { expectNoHorizontalOverflow } from './support/overflow'
 
 /**
  * The mandatory responsive gate from Design.md §5.2, applied to every page as
@@ -19,25 +20,7 @@ test.describe('responsive gate', () => {
     test(`${path} has no horizontal overflow at 375px`, async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 })
       await page.goto(path)
-
-      const { scrollWidth, clientWidth, offender } = await page.evaluate(() => {
-        const doc = document.documentElement
-        // Name the widest offending element so a failure says what to fix.
-        let offender: string | null = null
-        let widest = doc.clientWidth
-        for (const el of Array.from(document.body.querySelectorAll<HTMLElement>('*'))) {
-          const right = el.getBoundingClientRect().right
-          if (right > widest + 1) {
-            widest = right
-            offender = `${el.tagName.toLowerCase()}.${el.className || '(no class)'}`
-          }
-        }
-        return { scrollWidth: doc.scrollWidth, clientWidth: doc.clientWidth, offender }
-      })
-
-      expect(scrollWidth, `widest overflowing element: ${offender ?? 'none'}`).toBeLessThanOrEqual(
-        clientWidth + 1,
-      )
+      await expectNoHorizontalOverflow(page, path)
     })
 
     test(`${path} renders its content at 768px`, async ({ page }) => {

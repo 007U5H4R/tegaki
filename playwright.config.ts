@@ -1,4 +1,10 @@
+import { config as loadEnv } from 'dotenv'
 import { defineConfig, devices } from '@playwright/test'
+
+// The signed-in specs create their own throwaway users, so the test process
+// needs the same Supabase credentials the app runs on.
+loadEnv({ path: '.env.local', quiet: true })
+loadEnv({ path: '.env.test.local', override: true, quiet: true })
 
 const PORT = Number(process.env.E2E_PORT ?? 3100)
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`

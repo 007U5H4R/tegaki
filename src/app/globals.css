@@ -80,6 +80,33 @@ h3 {
   outline-offset: 2px;
 }
 
+/* The one celebratory beat in the whole product (Design.md §4.3): the seal
+   stamps onto the order summary when a customer confirms.
+
+   A keyframe rather than a transition, against the usual rule, because this
+   fires once at the end of a flow and nothing can retrigger it — the page
+   navigates away immediately afterwards. The 0.98 stop is the 2px settle at
+   the size the seal is stamped. Reduced motion collapses it below, and
+   `both` holds the final state, so the seal still appears. */
+@keyframes seal-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.2) rotate(-6deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.98) rotate(-6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
+  }
+}
+
+.seal-stamp {
+  animation: seal-stamp 350ms var(--ease-out) both;
+}
+
 /* Reduced motion: keep opacity and colour, drop movement (Design.md §4.4). */
 @media (prefers-reduced-motion: reduce) {
   *,

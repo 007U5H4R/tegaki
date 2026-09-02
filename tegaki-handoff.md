@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-01** (end of T03).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T05).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,7 +18,7 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ (T01, T02) · Phase 2 in progress (T03 ✅ → T04 next)
+   → BUILD ▶ Phase 1 ✅ (T01, T02) · Phase 2 in progress (T03 ✅ T04 ✅ T05 ✅ → T06 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
@@ -32,7 +32,9 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **Phase 1 is complete.** T02 shipped the design system: every primitive from `Design.md` with `/styleguide` as its regression surface (34 e2e tests). The hanko seal carries a real glyph outline extracted from Noto Serif JP, so the mark never reflows while a font loads. Nav, modal and toast are deliberately deferred to the tickets that first need them.
 
-**T03, T04 and T05 are done.** `orders` carries the status machine in Postgres; handwriting samples live in a private bucket proven by 13 tests; the wizard shell, resume and consent gate are built. **Next: T06** (`plans/T06-tier-checkout-submit.md`) — tier selection and demo checkout, closing the customer half of the loop. It must also delete the temporary `/upload-demo/[orderId]` route and mount SampleUploader at `/wizard/[orderId]/upload`. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully).
+**T03, T04 and T05 are done.** `orders` carries the status machine in Postgres; handwriting samples live in a private bucket proven by 13 tests; the wizard shell, resume and consent gate are built — and the temporary `/upload-demo` route is deleted, with `SampleUploader` now mounted at `/wizard/[orderId]/upload`. **Next: T06** (`plans/T06-tier-checkout-submit.md`) — tier selection and demo checkout, closing the customer half of the loop. `submit_order()` must itself assert the consent rule, so a blocked submission fails with a readable message rather than a raw constraint violation. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully).
+
+**No ticket has had a signed-in browser walkthrough yet.** The Chrome extension cannot complete Google's consent screen, so authenticated routes are proven at the database layer (93 unit tests against the live project) and component-by-component on `/styleguide` — but never as an assembled flow. One sign-in on production by Tushar closes this for T01/E4, T03, T04 and T05 at once.
 
 **Before Phase 2 closes, a QA agent should run the phase gate** per `plans/BUILD-ORCHESTRATION.md`: a stranger's account completing sign-in → submitted order on the deployed URL.
 
@@ -94,8 +96,8 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 ## 5. Open decisions — asset choices (block specific tickets, not the plan)
 
 1. ~~Sign off `Design.md`~~ — **done 2026-09-01.**
-2. **Hanko seal candidate** *(blocks T02)* — `Design.md` §2.4 offers four SVG concepts: **A** square jitsuin (most official) · **B** circle 手 (most minimal) · **C** ink-bleed column (most artisan) · **D** knockout block (best favicon/OG stamp).
-3. **Hero film — master shot, one defect to resolve** *(C5 → T14)*. Start image ✅ (keeper: variant A, job `be01148d-e2fe-4228-be28-a704bfdcfb1f`) · draft ✅ passed · **master ✅ rendered** (`assets/hero/master-720p-30s.mp4`). The ending is superb — sharp floating pen on a warm void, exactly the scroll-guiding object. **But the page gains a spurious word: "create it.create."** — the model wrote extra text because the prompt told the hand to keep writing. On a handwriting-analysis site that is a credibility problem. **Options and the root-cause fix are in `Hero-Video-Prompts.md` §Master v2 Verdict; recommended is a ~98-credit 15s re-shoot.** Balance: **187** of the original 411 — a full 30s re-roll (195) is no longer affordable. Scan-guide tiles (C4) ≈ 15–20 credits, not started.
+2. ~~**Hanko seal candidate**~~ — **done.** Tushar chose **B** (circle, single 手). Shipped in `src/components/brand/seal.tsx` carrying a real glyph outline, so the mark never reflows while a font loads.
+3. ~~**Hero film**~~ — **done.** The 15s v3 re-shoot fixed the spurious-text defect; keeper is `assets/hero/master-v3-15s-KEEPER.mp4` with the 2K upscale and sliced frames in `assets/hero/frames/`. Balance **~89 credits**, reserved for C4 — or Tushar photographs real scan-guide examples for free, which is worth asking before spending them.
 4. **A real photograph of Tushar** for the about section *(blocks T12)* — never a generated face. Ship an honest placeholder frame at pilot if unavailable.
 
 ---
@@ -117,9 +119,11 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 ## 7. Environment gotchas (discovered the hard way — don't re-burn calls)
 
 - **Mobbin share links 403 on server-side fetch.** `WebFetch` cannot read `mobbin.com/sites/...`. The Mobbin MCP search doesn't index those shared site pages either — searching an app name there returns unrelated results. To view a Mobbin reference, use the browser or ask Tushar to describe/screenshot it.
-- **The Claude-in-Chrome extension was not connected** this session (`tabs_context_mcp` → "Browser extension is not connected"). If browser work is needed, Tushar must connect it first.
+- **The Chrome extension is connected, but cannot complete Google sign-in.** It has no permission on `accounts.google.com`, so the consent click can never be automated and every signed-in browser walkthrough dead-ends there. Verify authenticated behaviour at the database layer and on `/styleguide` instead, and ask Tushar for the one-minute manual pass.
 - **Figma MCP works** — `get_screenshot` with fileKey + nodeId returns a short-lived PNG URL; `curl` it to the scratchpad and Read it.
-- **The repo is not under git.** Do `git init` + a first commit before the build stage — the orchestration playbook needs a worktree/branch, and there is currently no undo.
+- **The repo path contains a space.** `new URL(...).pathname` percent-encodes it and silently breaks path resolution — use `fileURLToPath` (this is why `vitest.config.mts` looks the way it does).
+- **`.next/types` goes stale after a route is deleted** and reports phantom type errors. Kill running `next` processes, `rm -rf .next`, rebuild.
+- **Next injects its own `role="alert"` route announcer**, so a bare `getByRole('alert')` matches two elements after a client-side nav. Scope e2e assertions to the message text.
 - Tushar's Seedance 2.5 reference packs live at `~/Downloads/Documents/The-Seedance-2.5-{Website-Pack,Prompt-Pack,Prompt-Pack-2}.pdf`.
 
 ---

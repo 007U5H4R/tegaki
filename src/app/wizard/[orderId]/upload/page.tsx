@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { SampleUploader } from '@/components/upload/sample-uploader'
 import { Button } from '@/components/ui/button'
+import { goToTier } from '@/lib/orders/tier-action'
 import { clampSegment, wizardPath } from '@/lib/orders/wizard'
 import { createClient } from '@/lib/supabase/server'
 
@@ -53,9 +54,11 @@ export default async function UploadStage({ params }: { params: Promise<{ orderI
         </Button>
 
         {hasFiles ? (
-          <Button asChild>
-            <Link href={wizardPath(orderId, 'tier')}>Choose your depth</Link>
-          </Button>
+          // A form rather than a link: continuing has to record that this
+          // stage was finished, or a resumed wizard would send them back here.
+          <form action={goToTier.bind(null, orderId)}>
+            <Button type="submit">Choose your depth</Button>
+          </form>
         ) : (
           <p className="text-washi-300 text-sm">Upload at least one page to continue.</p>
         )}

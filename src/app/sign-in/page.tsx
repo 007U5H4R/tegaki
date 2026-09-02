@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { signInWithGoogle } from '@/lib/auth/actions'
+import { DISCLAIMER } from '@/lib/copy'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
@@ -54,9 +55,7 @@ export default async function SignInPage({
           </button>
         </form>
 
-        <p className="text-ink-500 mt-8 text-xs">
-          Insights are indicative and growth-oriented — never diagnostic.
-        </p>
+        <p className="text-ink-500 mt-8 text-xs">{DISCLAIMER}</p>
       </div>
     </main>
   )

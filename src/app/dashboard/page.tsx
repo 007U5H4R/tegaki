@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Seal } from '@/components/brand/seal'
 import { OrderCard } from '@/components/orders/order-card'
+import { SubmittedToast } from '@/components/orders/submitted-toast'
 import { Button } from '@/components/ui/button'
 import { MicroLabel } from '@/components/ui/card'
 import { EmptyState, SkeletonList } from '@/components/ui/states'
@@ -16,7 +18,12 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitted?: string }>
+}) {
+  const { submitted } = await searchParams
   const supabase = await createClient()
 
   // getUser(), not getSession(): it verifies the token with the auth server
@@ -65,6 +72,8 @@ export default async function DashboardPage() {
           Sign out
         </Button>
       </form>
+
+      {submitted ? <SubmittedToast /> : null}
     </main>
   )
 }
@@ -95,7 +104,19 @@ async function OrderList() {
   return (
     <div className="flex flex-col gap-4">
       {orders.map((order) => (
-        <OrderCard key={order.id} order={order} />
+        <OrderCard
+          key={order.id}
+          order={order}
+          action={
+            // Without this the wizard's resume is real but unreachable:
+            // someone who closes the tab has no way back to their draft.
+            order.status === 'draft' ? (
+              <Button asChild size="sm">
+                <Link href={`/wizard/${order.id}`}>Continue</Link>
+              </Button>
+            ) : null
+          }
+        />
       ))}
     </div>
   )
