@@ -296,8 +296,18 @@
 - **`tests/codebase/status-writes.test.ts` is a grep, and that is fine.** Three things already stop application code writing `orders.status` at runtime — the missing column grant, the absent policy, and `transition_order()`. This adds the check that fails in *review* instead. Proven to bite before being trusted: one offending line fails it by name and file.
 - **`admin-ops.test.ts` runs alone, after everything else** (`package.json`'s `test` script). The pause is a single global row, so a run overlapping a suite that creates orders closes the shop underneath it — that failed one or two unrelated tests on each of three consecutive runs before the split, in a different place each time.
 
-## Known constraint: Supabase auth rate limits
+## Fixture pool — Supabase auth rate limits (fixed on the unit side)
 
-The RLS suites create roughly 20 throwaway users per run, and the e2e specs another ~24, each with a sign-in. Running the full verification more than about twice in an hour hits GoTrue's rate limiter, and **every affected suite then fails at `beforeAll` with `AuthApiError: Request rate limit reached`** — which looks like a catastrophic regression and is not one. It bit three times during T09/T10.
+**The problem.** Each RLS suite created and signed in its own two or three users: ~40 auth calls per `pnpm test`. Running verification twice inside an hour tripped GoTrue's rate limiter, and every affected suite then failed at `beforeAll` with `AuthApiError: Request rate limit reached` — which reads as a catastrophic regression and is not one. It cost real time three times during T09 and T10.
 
-Mitigation for now: space full runs out, and re-run before believing a mass failure. **The real fix is to share a small pool of fixture users across suites instead of each file creating its own** — roughly 40 auth calls per run would become 6. That is a focused refactor of the eight RLS files plus `e2e/support/session.ts`, and it is worth doing before the suite grows further.
+**The fix** (`tests/support/pool.ts` + `tests/global-setup.ts`). Three accounts — an analyst and two buyers — are created and signed in **once per run**, and their access tokens handed to the workers with vitest's `provide`/`inject`, because each test file runs in its own process and module state does not cross that line. A suite builds a client by putting the token in an Authorization header, which is exactly what `signInWithPassword` produces: PostgREST, GoTrue and Storage all read the JWT from that header, so `auth.uid()`, RLS and storage policies behave identically.
+
+**6 auth calls per invocation, down from ~40.** Verified by three consecutive full runs — the case that used to fail — all green, with no accounts left behind.
+
+Things worth knowing:
+- **A pool client has no session object**, so `client.auth.getSession()` returns null. Anything needing the raw JWT takes it from the member's `accessToken`. One storage test did the former and had to change.
+- **Never delete a pool member from a suite.** They belong to the whole run and are torn down in `global-setup`. Suites still clean up their own storage objects and their own global state (`admin-ops` reopens the shop).
+- `account-deletion.test.ts` still creates its own user, because deleting one is the thing it tests.
+- Assertions must stay **scoped to specific ids** rather than counting all of a user's rows: the accounts are shared across suites running in parallel.
+
+**Still outstanding: the e2e side, which is now the larger consumer** — 34 users per full run across both projects, so ~68 auth calls. Sharing buyers there is not safe as written: several specs assert that a stranger's dashboard shows nothing, which a shared account would invalidate. The analyst *could* be shared (every admin assertion is id-scoped). Worth doing if rate limits reappear; not done, because the unit side was the one that actually kept failing and this would trade real isolation for a modest saving.

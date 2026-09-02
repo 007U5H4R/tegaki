@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { asAnonymous, asMember, asService, pool, type PoolMember } from '../support/pool'
 import { ORDER_STATUSES, type OrderStatus } from '@/lib/orders/status'
 import { isLegalTransition, TRANSITIONS } from '@/lib/orders/transitions'
 
@@ -13,15 +14,11 @@ import { isLegalTransition, TRANSITIONS } from '@/lib/orders/transitions'
  * a state machine whose illegal edges nobody has ever tried.
  */
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-const configured = Boolean(url && publishableKey && secretKey)
-
-const password = 'tegaki-orders-fixture-4b1e77'
-const runId = Math.random().toString(36).slice(2, 10)
-const aliceEmail = `orders-alice-${runId}@tegaki.test`
-const bobEmail = `orders-bob-${runId}@tegaki.test`
+const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  process.env.SUPABASE_SECRET_KEY,
+)
 
 /** The legal edges, straight from Solution-PRD §6.6. */
 // The same list the admin controls are generated from (T10). Walking all 49
@@ -35,23 +32,15 @@ describe.skipIf(!configured)('orders', () => {
   let admin: SupabaseClient
   let alice: SupabaseClient
   let bob: SupabaseClient
-  let aliceUser: User
-  let bobUser: User
+  let aliceUser: PoolMember
+  let bobUser: PoolMember
 
   beforeAll(async () => {
-    admin = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-    aliceUser = await makeUser(admin, aliceEmail)
-    bobUser = await makeUser(admin, bobEmail)
-    alice = await signIn(aliceEmail)
-    bob = await signIn(bobEmail)
-  })
-
-  afterAll(async () => {
-    for (const u of [aliceUser, bobUser]) {
-      if (u?.id) await admin.auth.admin.deleteUser(u.id)
-    }
+    admin = asService()
+    aliceUser = pool().buyerA
+    bobUser = pool().buyerB
+    alice = asMember(aliceUser)
+    bob = asMember(bobUser)
   })
 
   describe('isolation', () => {
@@ -87,9 +76,7 @@ describe.skipIf(!configured)('orders', () => {
     })
 
     it('shows an anonymous client nothing at all', async () => {
-      const anon = createClient(url!, publishableKey!, {
-        auth: { autoRefreshToken: false, persistSession: false },
-      })
+      const anon = asAnonymous()
       const { data } = await anon.from('orders').select('id')
       expect(data ?? []).toHaveLength(0)
     })
@@ -207,25 +194,6 @@ describe.skipIf(!configured)('orders', () => {
     })
   })
 })
-
-async function makeUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  return data.user!
-}
-
-async function signIn(email: string): Promise<SupabaseClient> {
-  const client = createClient(url!, publishableKey!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}
 
 async function newDraft(client: SupabaseClient, buyerId: string): Promise<string> {
   const { data, error } = await client

@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { asMember, asService, pool, type PoolMember } from '../support/pool'
 
 /**
  * T05 — consent, guaranteed by the database.
@@ -14,15 +15,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
  * the form.
  */
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-const configured = Boolean(url && publishableKey && secretKey)
-
-const password = 'tegaki-consent-fixture-5ad920'
-const runId = Math.random().toString(36).slice(2, 10)
-const buyerEmail = `consent-buyer-${runId}@tegaki.test`
-const otherEmail = `consent-other-${runId}@tegaki.test`
+const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  process.env.SUPABASE_SECRET_KEY,
+)
 
 const profileArgs = (over: Record<string, unknown> = {}) => ({
   p_full_name: 'Asha Menon',
@@ -44,23 +41,15 @@ describe.skipIf(!configured)('consent for a third-party subject', () => {
   let admin: SupabaseClient
   let buyer: SupabaseClient
   let other: SupabaseClient
-  let buyerUser: User
-  let otherUser: User
+  let buyerUser: PoolMember
+  let otherUser: PoolMember
 
   beforeAll(async () => {
-    admin = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-    buyerUser = await makeUser(admin, buyerEmail)
-    otherUser = await makeUser(admin, otherEmail)
-    buyer = await signIn(buyerEmail)
-    other = await signIn(otherEmail)
-  })
-
-  afterAll(async () => {
-    for (const u of [buyerUser, otherUser]) {
-      if (u?.id) await admin.auth.admin.deleteUser(u.id)
-    }
+    admin = asService()
+    buyerUser = pool().buyerA
+    otherUser = pool().buyerB
+    buyer = asMember(buyerUser)
+    other = asMember(otherUser)
   })
 
   it('saves a self-assessment without asking for consent', async () => {
@@ -226,25 +215,6 @@ describe.skipIf(!configured)('consent for a third-party subject', () => {
     expect(data?.email).toBe('asha@example.com')
   })
 })
-
-async function makeUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  return data.user!
-}
-
-async function signIn(email: string): Promise<SupabaseClient> {
-  const client = createClient(url!, publishableKey!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}
 
 async function newDraft(client: SupabaseClient, buyerId: string): Promise<string> {
   const { data, error } = await client

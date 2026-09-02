@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { asAnonymous, asMember, asService, pool, type PoolMember } from '../support/pool'
 
 /**
  * T04 — the promise this whole product rests on.
@@ -15,15 +16,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
  */
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-const configured = Boolean(url && publishableKey && secretKey)
+const configured = Boolean(
+  url && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && process.env.SUPABASE_SECRET_KEY,
+)
 
 const BUCKET = 'samples'
-const password = 'tegaki-storage-fixture-71cc03'
-const runId = Math.random().toString(36).slice(2, 10)
-const aliceEmail = `store-alice-${runId}@tegaki.test`
-const bobEmail = `store-bob-${runId}@tegaki.test`
 
 const SAMPLE_BYTES = new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xdb, 1, 2, 3, 4])], {
   type: 'image/jpeg',
@@ -33,20 +30,18 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
   let admin: SupabaseClient
   let alice: SupabaseClient
   let bob: SupabaseClient
-  let aliceUser: User
-  let bobUser: User
+  let aliceUser: PoolMember
+  let bobUser: PoolMember
   let aliceOrder: string
   let alicePath: string
 
   beforeAll(async () => {
-    admin = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+    admin = asService()
 
-    aliceUser = await makeUser(admin, aliceEmail)
-    bobUser = await makeUser(admin, bobEmail)
-    alice = await signIn(aliceEmail)
-    bob = await signIn(bobEmail)
+    aliceUser = pool().buyerA
+    bobUser = pool().buyerB
+    alice = asMember(aliceUser)
+    bob = asMember(bobUser)
 
     aliceOrder = await newDraft(alice, aliceUser.id)
     alicePath = `${aliceUser.id}/${aliceOrder}/v1/${crypto.randomUUID()}.jpg`
@@ -57,11 +52,10 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
     if (error) throw new Error(`fixture upload failed: ${error.message}`)
   })
 
+  // The object is this suite's to clean up; the accounts are the run's, and
+  // are torn down in tests/global-setup.ts.
   afterAll(async () => {
     await admin.storage.from(BUCKET).remove([alicePath])
-    for (const u of [aliceUser, bobUser]) {
-      if (u?.id) await admin.auth.admin.deleteUser(u.id)
-    }
   })
 
   it('lets the owner read their own sample', async () => {
@@ -90,9 +84,7 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
   })
 
   it('refuses an anonymous client entirely', async () => {
-    const anon = createClient(url!, publishableKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+    const anon = asAnonymous()
 
     const { error: downloadError } = await anon.storage.from(BUCKET).download(alicePath)
     expect(downloadError).not.toBeNull()
@@ -146,10 +138,10 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
     // uploadSample() builds this URL and these headers by hand, because
     // supabase-js offers no progress callback. A typo there would only ever
     // surface in a browser, so the same shape is exercised here.
-    const {
-      data: { session },
-    } = await alice.auth.getSession()
-    expect(session?.access_token).toBeTruthy()
+    // The token comes from the pool member rather than alice.auth.getSession():
+    // a pool client carries its JWT in an Authorization header and has no
+    // session object, which is the one thing that differs from signing in.
+    expect(aliceUser.accessToken).toBeTruthy()
 
     const order = await newDraft(alice, aliceUser.id)
     const path = `${aliceUser.id}/${order}/v1/${crypto.randomUUID()}.jpg`
@@ -157,7 +149,7 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
     const response = await fetch(`${url}/storage/v1/object/${BUCKET}/${path}`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${session!.access_token}`,
+        Authorization: `Bearer ${aliceUser.accessToken}`,
         'Content-Type': 'image/jpeg',
         'x-upsert': 'false',
       },
@@ -211,25 +203,6 @@ describe.skipIf(!configured)('handwriting samples are private', () => {
     expect(error).not.toBeNull()
   })
 })
-
-async function makeUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  return data.user!
-}
-
-async function signIn(email: string): Promise<SupabaseClient> {
-  const client = createClient(url!, publishableKey!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}
 
 async function newDraft(client: SupabaseClient, buyerId: string): Promise<string> {
   const { data, error } = await client

@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { asMember, asService, pool, type PoolMember } from '../support/pool'
 import { TIER_LIST } from '@/lib/tiers'
 
 /**
@@ -16,16 +17,11 @@ import { TIER_LIST } from '@/lib/tiers'
  * and T04 suites still passing is the other half of that proof.
  */
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-const configured = Boolean(url && publishableKey && secretKey)
-
-const password = 'tegaki-admin-fixture-4d20ea'
-const runId = Math.random().toString(36).slice(2, 10)
-const adminEmail = `rev-admin-${runId}@tegaki.test`
-const buyerEmail = `rev-buyer-${runId}@tegaki.test`
-const otherEmail = `rev-other-${runId}@tegaki.test`
+const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  process.env.SUPABASE_SECRET_KEY,
+)
 
 const REASON = 'The second page is out of focus — please photograph it again in daylight.'
 
@@ -34,33 +30,25 @@ describe.skipIf(!configured)('reviewing a sample', () => {
   let reviewer: SupabaseClient
   let buyer: SupabaseClient
   let other: SupabaseClient
-  let adminUser: User
-  let buyerUser: User
-  let otherUser: User
+  let adminUser: PoolMember
+  let buyerUser: PoolMember
+  let otherUser: PoolMember
 
   beforeAll(async () => {
-    service = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+    service = asService()
 
-    adminUser = await makeUser(service, adminEmail)
-    buyerUser = await makeUser(service, buyerEmail)
-    otherUser = await makeUser(service, otherEmail)
+    adminUser = pool().analyst
+    buyerUser = pool().buyerA
+    otherUser = pool().buyerB
 
     // The allowlist is compiled into handle_new_user(), so a fixture account
     // is promoted directly. This is the one place a role is set by hand, and
     // it is deliberately not something the app can do.
     await service.from('profiles').update({ role: 'admin' }).eq('id', adminUser.id)
 
-    reviewer = await signIn(adminEmail)
-    buyer = await signIn(buyerEmail)
-    other = await signIn(otherEmail)
-  })
-
-  afterAll(async () => {
-    for (const u of [adminUser, buyerUser, otherUser]) {
-      if (u?.id) await service.auth.admin.deleteUser(u.id)
-    }
+    reviewer = asMember(adminUser)
+    buyer = asMember(buyerUser)
+    other = asMember(otherUser)
   })
 
   // ── The turnaround promise ────────────────────────────────────────────────
@@ -257,7 +245,7 @@ describe.skipIf(!configured)('reviewing a sample', () => {
       .select('email')
       .eq('id', buyerUser.id)
       .maybeSingle()
-    expect(profile?.email).toBe(buyerEmail)
+    expect(profile?.email).toBe(buyerUser.email)
   })
 
   it('lets the admin read the samples and the payment', async () => {
@@ -289,25 +277,6 @@ describe.skipIf(!configured)('reviewing a sample', () => {
 })
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
-
-async function makeUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  return data.user!
-}
-
-async function signIn(email: string): Promise<SupabaseClient> {
-  const client = createClient(url!, publishableKey!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}
 
 /** An order sitting in `sample_under_review`, exactly as the queue receives it. */
 async function submittedOrder(

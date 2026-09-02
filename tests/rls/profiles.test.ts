@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { asAnonymous, asMember, asService, pool, type PoolMember } from '../support/pool'
 
 /**
  * T01/D4 — the isolation guarantee.
@@ -9,49 +10,35 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
  * suite is where that claim is actually tested, at the database level rather
  * than through the UI, because the UI is not the security boundary — RLS is.
  *
- * Two real users are created against the live project, each given their own
- * anon-key client carrying their own JWT, and then asked to read the other's
- * row. The service-role client exists only to create and destroy fixtures.
+ * Two real users, each given their own publishable-key client carrying their
+ * own JWT, and then asked to read the other's row. The service-role client
+ * exists only to seed and assert behind RLS.
+ *
+ * The accounts come from the shared pool created once per run — see
+ * `tests/support/pool.ts`. They are still two genuinely separate,
+ * unprivileged users, which is the only property this suite depends on.
  */
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-
-const configured = Boolean(url && publishableKey && secretKey)
-const password = 'tegaki-rls-fixture-9f2c41'
-
-// A unique run id keeps parallel or repeated runs from colliding, and makes
-// orphaned fixtures obvious if teardown ever fails.
-const runId = Math.random().toString(36).slice(2, 10)
-const alice = `rls-alice-${runId}@tegaki.test`
-const bob = `rls-bob-${runId}@tegaki.test`
+const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  process.env.SUPABASE_SECRET_KEY,
+)
 
 describe.skipIf(!configured)('profiles row level security', () => {
   let admin: SupabaseClient
-  let aliceUser: User
-  let bobUser: User
+  let aliceUser: PoolMember
+  let bobUser: PoolMember
   let aliceClient: SupabaseClient
   let bobClient: SupabaseClient
 
-  beforeAll(async () => {
-    admin = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-
-    aliceUser = await createConfirmedUser(admin, alice)
-    bobUser = await createConfirmedUser(admin, bob)
-
-    aliceClient = await signIn(url!, publishableKey!, alice)
-    bobClient = await signIn(url!, publishableKey!, bob)
-  })
-
-  afterAll(async () => {
-    // Always clean up: leaving fixture users behind would inflate the
-    // project's user count and confuse the next run.
-    for (const user of [aliceUser, bobUser]) {
-      if (user?.id) await admin.auth.admin.deleteUser(user.id)
-    }
+  beforeAll(() => {
+    admin = asService()
+    // Created and torn down once for the whole run, in tests/global-setup.ts.
+    aliceUser = pool().buyerA
+    bobUser = pool().buyerB
+    aliceClient = asMember(aliceUser)
+    bobClient = asMember(bobUser)
   })
 
   it('creates exactly one profile per signup, via the trigger', async () => {
@@ -77,7 +64,7 @@ describe.skipIf(!configured)('profiles row level security', () => {
 
     expect(error).toBeNull()
     expect(data).toHaveLength(1)
-    expect(data?.[0]?.email).toBe(alice)
+    expect(data?.[0]?.email).toBe(aliceUser.email)
   })
 
   it("returns nothing when a user asks for someone else's profile", async () => {
@@ -135,31 +122,7 @@ describe.skipIf(!configured)('profiles row level security', () => {
   })
 
   it('shows nothing at all to an anonymous client', async () => {
-    const anon = createClient(url!, publishableKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-
-    const { data } = await anon.from('profiles').select('id')
+    const { data } = await asAnonymous().from('profiles').select('id')
     expect(data ?? []).toHaveLength(0)
   })
 })
-
-async function createConfirmedUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  if (!data.user) throw new Error(`No user returned for ${email}`)
-  return data.user
-}
-
-async function signIn(projectUrl: string, key: string, email: string): Promise<SupabaseClient> {
-  const client = createClient(projectUrl, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}

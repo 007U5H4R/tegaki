@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { asMember, asService, pool, type PoolMember } from '../support/pool'
 
 /**
  * T10 — closing the shop, and recording that a report actually reached
@@ -22,32 +23,26 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
  * the split, each time in a different place.
  */
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-const configured = Boolean(url && publishableKey && secretKey)
-
-const password = 'tegaki-adminops-fixture-6ea20b'
-const runId = Math.random().toString(36).slice(2, 10)
-const analystEmail = `ops-analyst-${runId}@tegaki.test`
-const buyerEmail = `ops-buyer-${runId}@tegaki.test`
+const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  process.env.SUPABASE_SECRET_KEY,
+)
 
 describe.skipIf(!configured)('admin operations', () => {
   let service: SupabaseClient
   let analyst: SupabaseClient
   let buyer: SupabaseClient
-  let analystUser: User
-  let buyerUser: User
+  let analystUser: PoolMember
+  let buyerUser: PoolMember
 
   beforeAll(async () => {
-    service = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-    analystUser = await makeUser(service, analystEmail)
-    buyerUser = await makeUser(service, buyerEmail)
+    service = asService()
+    analystUser = pool().analyst
+    buyerUser = pool().buyerA
     await service.from('profiles').update({ role: 'admin' }).eq('id', analystUser.id)
-    analyst = await signIn(analystEmail)
-    buyer = await signIn(buyerEmail)
+    analyst = asMember(analystUser)
+    buyer = asMember(buyerUser)
   })
 
   // The pause is global. Leaving it on would close the shop for every other
@@ -56,11 +51,11 @@ describe.skipIf(!configured)('admin operations', () => {
     await service.from('settings').update({ value: false }).eq('key', 'pause_new_orders')
   })
 
+  // The pool users belong to the whole run and are torn down in
+  // tests/global-setup.ts; deleting them here would pull the floor out from
+  // under every other suite. Reopening the shop is this file's own mess.
   afterAll(async () => {
     await service.from('settings').update({ value: false }).eq('key', 'pause_new_orders')
-    for (const u of [analystUser, buyerUser]) {
-      if (u?.id) await service.auth.admin.deleteUser(u.id)
-    }
   })
 
   // ── Who can throw the switch ──────────────────────────────────────────────
@@ -201,25 +196,6 @@ describe.skipIf(!configured)('admin operations', () => {
 })
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
-
-async function makeUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  return data.user!
-}
-
-async function signIn(email: string): Promise<SupabaseClient> {
-  const client = createClient(url!, publishableKey!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}
 
 async function setPaused(service: SupabaseClient, value: boolean): Promise<void> {
   const { error } = await service.from('settings').update({ value }).eq('key', 'pause_new_orders')

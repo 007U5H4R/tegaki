@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { asAnonymous, asMember, asService, pool, type PoolMember } from '../support/pool'
 import { reportDownloadName } from '@/lib/reports/constants'
 
 /**
@@ -20,16 +21,11 @@ import { reportDownloadName } from '@/lib/reports/constants'
  * `attach_report()` writes the row, so an unvalidated report cannot exist.
  */
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-const secretKey = process.env.SUPABASE_SECRET_KEY
-const configured = Boolean(url && publishableKey && secretKey)
-
-const password = 'tegaki-reports-fixture-9c14ef'
-const runId = Math.random().toString(36).slice(2, 10)
-const analystEmail = `rep-analyst-${runId}@tegaki.test`
-const buyerEmail = `rep-buyer-${runId}@tegaki.test`
-const otherEmail = `rep-other-${runId}@tegaki.test`
+const configured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  process.env.SUPABASE_SECRET_KEY,
+)
 
 const BUCKET = 'reports'
 const A_PDF = new Blob([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, 0x0a])], {
@@ -42,32 +38,22 @@ describe.skipIf(!configured)('the delivered report', () => {
   let buyer: SupabaseClient
   let other: SupabaseClient
   let anon: SupabaseClient
-  let analystUser: User
-  let buyerUser: User
-  let otherUser: User
+  let analystUser: PoolMember
+  let buyerUser: PoolMember
+  let otherUser: PoolMember
 
   beforeAll(async () => {
-    service = createClient(url!, secretKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+    service = asService()
 
-    analystUser = await makeUser(service, analystEmail)
-    buyerUser = await makeUser(service, buyerEmail)
-    otherUser = await makeUser(service, otherEmail)
+    analystUser = pool().analyst
+    buyerUser = pool().buyerA
+    otherUser = pool().buyerB
     await service.from('profiles').update({ role: 'admin' }).eq('id', analystUser.id)
 
-    analyst = await signIn(analystEmail)
-    buyer = await signIn(buyerEmail)
-    other = await signIn(otherEmail)
-    anon = createClient(url!, publishableKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-  })
-
-  afterAll(async () => {
-    for (const u of [analystUser, buyerUser, otherUser]) {
-      if (u?.id) await service.auth.admin.deleteUser(u.id)
-    }
+    analyst = asMember(analystUser)
+    buyer = asMember(buyerUser)
+    other = asMember(otherUser)
+    anon = asAnonymous()
   })
 
   // ── The validation gate ───────────────────────────────────────────────────
@@ -305,25 +291,6 @@ describe('the download filename', () => {
 })
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
-
-async function makeUser(admin: SupabaseClient, email: string): Promise<User> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  })
-  if (error) throw error
-  return data.user!
-}
-
-async function signIn(email: string): Promise<SupabaseClient> {
-  const client = createClient(url!, publishableKey!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { error } = await client.auth.signInWithPassword({ email, password })
-  if (error) throw error
-  return client
-}
 
 async function submittedOrder(service: SupabaseClient, buyerId: string): Promise<string> {
   const { data, error } = await service
