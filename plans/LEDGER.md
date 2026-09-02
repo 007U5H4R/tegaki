@@ -215,7 +215,21 @@
 
 **Suites after T12:** typecheck ✓ · lint ✓ · format ✓ · claims ✓ · **168 unit** ✓ · **74 e2e against production** ✓ · build ✓
 
-**Next: T13** — policies and the ship set: Privacy, Refunds and Terms pages, the OG/Twitter link-preview set with a purpose-built 1200×630 image, favicon and a custom 404.
+### T13 · Policies, link preview, ship set — **done** (`566b13e`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Policy content | **done** | `src/content/policies/`. Every fact is a position the PRD already settled — 90-day deletion, 14-day window, refund only when no usable sample arrived, consent when subject ≠ buyer, no real payment in the pilot. Written to be read, not to be skipped |
+| A2 · Policy routes | **done** | One longform template at `/[policy]`, `generateStaticParams` over the three slugs. The footer's dead links now resolve |
+| A3 · Contact | **done (one gap)** | Email only. **No WhatsApp link: the number has not been supplied**, and the plan says a placeholder must fail rather than ship |
+| B1 · OG image | **done** | `scripts/generate-og.mjs` renders it in Chromium with the real fonts — 1200×630, 193 KB. Seal outline read from `seal.tsx` so the two cannot drift. Never diffusion-rendered; a wordmark has to be crisp and no image model can be trusted to spell |
+| B2 · Metadata | **done** | Full OG + Twitter set with **absolute** URLs from `src/lib/site.ts`; `metadataBase`, canonical, title template, `en_IN` |
+| B3 · Favicon + 404 | **done** | Seal B as `icon.svg` + `apple-icon.png` (both generated from one source); branded 404 that offers the two places somebody was probably heading |
+| C1 · Live unfurl | **partly — see below** | og-cover.png returns **HTTP 200** on production, bytes identical to the repo, and every tag is absolute HTTPS pointing at the right host. **The LinkedIn Inspector and WhatsApp paste need Tushar** |
+| C2 · Dead-link crawl | **done** | Every internal href on the landing page resolves; zero `href="#"` |
+
+**Suites after T13:** typecheck ✓ · lint ✓ · format ✓ · claims ✓ · **168 unit** ✓ · **90 e2e against production** ✓ · build ✓
+
+---
 
 ---
 
@@ -367,3 +381,21 @@ Things worth knowing:
 ### Still open from C3
 
 The three **sample report PDFs** are not built. They need C1 (the per-tier prompt variants) and C2 (the report template), neither of which has been done — the landing page shows excerpts, which is what it needed, but "see a sample report" has no downloadable artefact behind it yet. Worth doing before the pilot takes real users.
+
+## Decisions taken during T13
+
+- **The OG card is rendered in a browser, not generated.** Chromium is already present for the test suite, so `scripts/generate-og.mjs` renders real HTML with the real fonts and screenshots it at 1200×630. A wordmark has to be crisp at 100%, and no diffusion model can be trusted to spell. The seal outline is read out of `seal.tsx`, so the mark on the card and the mark on the site are one mark.
+- **It is a checked-in PNG rather than generated per request.** A crawler that gets a slow or failed response caches the failure, and a preview broken on first paste is broken for everybody who ever sees that message.
+- **Every OG URL is absolute, and the test knows the difference between environments.** A root-relative image silently fails on LinkedIn and WhatsApp — no image, no error. Locally the tags carry `NEXT_PUBLIC_SITE_URL` (a different port from the test server), so the spec resolves the path against the host under test; deployed, it asserts the exact URL a crawler will fetch, its origin, its status and its content type.
+- **No WhatsApp deep-link on the contact page.** The number has not been supplied and the plan says a placeholder must fail rather than ship. A dead `wa.me` link on the page somebody reaches *because* their order is stuck would be the worst possible place for one.
+- **The policies describe the product that exists.** Including the uncomfortable parts: the pilot takes no money, graphology is not an established science, and reports are not written for hiring decisions. A customer who has just read a page that talks plainly and then meets three screens of borrowed legalese has learned which one was the marketing.
+- **Two more claims-guard exceptions, both denials.** "not a diagnosis" and "availability is not guaranteed". Flipping the second to "is guaranteed" still fails the guard, which is the property that makes an enumerated exception list safe rather than a loophole.
+
+### Open for Tushar on T13
+
+- **The WhatsApp number**, if the deep-link is wanted on the contact page and the parked-order panel.
+- **Two verifications only he can do:** paste `https://tegaki-one.vercel.app` into a WhatsApp chat and check the unfurl, and run it through the LinkedIn Post Inspector. What is proven from here: the image returns 200, its bytes match the repo, and every tag is absolute HTTPS pointing at the right host — which is what makes those two succeed.
+
+### Known load flake
+
+`reupload-loop.spec.ts` failed once in a full 90-test run waiting for the status chip, and passed on both projects in isolation immediately after, and in the next full run. Four Playwright workers share one `next dev` server, and first-hit route compilation under that load can outrun a 30-second wait. Recorded rather than chased: the behaviour it covers is separately proven by `tests/rls/reupload.test.ts`.
