@@ -5,6 +5,7 @@ import { Excerpts } from '@/components/marketing/excerpts'
 import { Faq } from '@/components/marketing/faq'
 import { FinalCta } from '@/components/marketing/final-cta'
 import { Hero } from '@/components/marketing/hero'
+import { HeroScrub } from '@/components/marketing/hero-scrub'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { TaglineReveal } from '@/components/marketing/tagline-reveal'
 import { TiersSection } from '@/components/marketing/tiers-section'
@@ -45,7 +46,10 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <Hero />
+      {/* The scrub upgrades itself on eligible desktops; everybody else —
+          phones, reduced motion, no JavaScript — gets exactly this static
+          hero and never requests a frame. */}
+      <HeroScrub fallback={<Hero />} />
       <HowItWorks />
       <TaglineReveal />
       <Anatomy />
