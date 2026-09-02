@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { wizardPath } from './wizard'
 
 /**
  * Start a new assessment.
@@ -21,16 +22,18 @@ export async function createDraftOrder() {
 
   if (!user) redirect('/sign-in')
 
-  const { error } = await supabase.from('orders').insert({ buyer_id: user.id })
+  const { data, error } = await supabase
+    .from('orders')
+    .insert({ buyer_id: user.id })
+    .select('id')
+    .single()
 
-  if (error) {
-    throw new Error(`Could not start a new assessment: ${error.message}`)
+  if (error || !data) {
+    throw new Error(`Could not start a new assessment: ${error?.message ?? 'no order returned'}`)
   }
 
   revalidatePath('/dashboard')
-  // The wizard arrives in T05; until then the dashboard is where a fresh
-  // draft becomes visible.
-  redirect('/dashboard')
+  redirect(wizardPath(data.id, 'profile'))
 }
 
 /** Abandon a draft started by mistake. Only drafts, and only your own. */
