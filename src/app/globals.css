@@ -177,8 +177,12 @@ h3 {
   transition: color 400ms var(--ease-out);
 }
 
+/* Design.md §3.2-3 says 30%. Measured, that is below the 3:1 floor for
+   large text and axe fails the page on it — and the same document makes the
+   accessibility gate mandatory. 58% keeps the before/after contrast obvious
+   while leaving the unlit words legible to somebody who lands mid-page. */
 [data-tagline][data-armed='true'] [data-word] {
-  color: color-mix(in oklch, var(--color-washi-50) 30%, transparent);
+  color: color-mix(in oklch, var(--color-washi-50) 58%, transparent);
 }
 
 [data-tagline][data-armed='true'] [data-word][data-lit='true'] {

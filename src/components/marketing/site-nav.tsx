@@ -50,7 +50,7 @@ export function SiteNav({ signedIn }: { signedIn: boolean }) {
         aria-label="Main"
         className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6"
       >
-        <Link href="/" aria-label="Tegaki — home" className="shrink-0">
+        <Link href="/" aria-label="Tegaki 手書き — home" className="shrink-0">
           <Lockup />
         </Link>
 

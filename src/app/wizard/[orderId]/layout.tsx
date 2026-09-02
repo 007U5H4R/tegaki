@@ -47,7 +47,7 @@ export default async function WizardLayout({
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <Link href="/dashboard" aria-label="Tegaki — back to your assessments">
+        <Link href="/dashboard" aria-label="Tegaki 手書き — back to your assessments">
           <Lockup />
         </Link>
         {tier ? (
