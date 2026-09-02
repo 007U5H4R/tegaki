@@ -171,7 +171,24 @@
 
 **Suites after T09:** typecheck ✓ · lint ✓ · format ✓ · **150 unit** ✓ · **50 e2e against production** ✓ · build ✓
 
-**Next: T10** — admin operations: the pause switch, matrix-generated status controls, and mark-delivered.
+### T10 · Admin operations — **done** (`b5168c4`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · `settings` | **done** | `20260902170000_settings_and_delivery.sql`. One row per switch; anyone signed in reads, only the analyst writes, and **no one inserts or deletes** — the set of switches comes from migrations |
+| A2 · `delivered_at` + `mark_delivered()` | **done** | Admin only, completed orders only, **once** — the retention clock counts from it, so a second click must not move it |
+| — · Pause **trigger** | **done** | Enforced on `orders` INSERT, not in the action. Deliberately insert-only: a customer mid-wizard can still finish. The analyst is exempt (they may need to reproduce something while shut) |
+| B1 · Settings helpers | **done** | `isPaused()` goes through the `is_paused()` definer function — see decisions. Fails **open**: a settings read that errors must not close a working shop |
+| B2 · Enforcement | **done** | e2e bypasses the UI entirely with a direct API insert and is refused by the trigger. That is the test that matters; the hidden button is only courtesy |
+| B3 · Closed notice | **done** | Warn-tinted, and answers the question a closed sign provokes: existing orders are unaffected. Verified at 375px |
+| B4 · `/admin/settings` | **done** | Pause toggle (warn-tinted when on) + live queue counts |
+| B5 · Status controls | **done** | Generated from `TRANSITIONS`, the same list the 49-pair matrix test walks against the live function. **T09's `startReport()` deleted as planned.** Completing stays out of it: attaching the report is what completes an order |
+| C1 · Tests | **done** | 12 SQL/authz + 4 e2e + **6 static**. The grep test was proven to bite: one offending line fails it by name and file |
+
+**Suites after T10:** typecheck ✓ · lint ✓ · format ✓ · **168 unit** ✓ · **54 e2e against production** ✓ · build ✓
+
+**Next: T11** — the landing page, part one. Phase 3 is complete: the product works end to end for both the customer and the analyst.
+
+---
 
 ---
 
@@ -269,3 +286,18 @@
 - **`startReport()` is a deliberate stopgap.** T10 owns status controls, generated from the transition matrix so the UI can only offer edges the function accepts. But without this one edge, T09's upload panel cannot be reached at all and its own plan had to seed the state in SQL. A feature nothing can reach is not shipped. **Delete it when T10/B5 lands.**
 - **Private buckets now get swept for orphans.** T09's test runs left ten PDFs in `reports` with no owning row — and checking turned up one in `samples` too, already there, unnoticed because nothing had looked. Deleting a user cascades rows but not bytes; storage has no foreign keys. An orphaned personality report in a private bucket is exactly what retention exists to prevent, and test data is a rehearsal for the real thing rather than an exception to it.
 - **A one-second signed URL cannot prove freshness.** The first expiry test signed for one second, fetched, and asserted the fetch worked — a race the network usually wins, because the round trip alone outlived the link. Freshness is now proven at the real 60-second TTL and expiry with its own short one. *A test that fails for a reason unrelated to the thing it names is worse than no test.*
+
+## Decisions taken during T10
+
+- **The pause is a trigger on `orders`, not a check in the server action.** Hiding a button is not enforcement, and neither is application code that a direct PostgREST insert walks straight past — the e2e proves this by bypassing the UI entirely and being refused. **Insert-only, deliberately:** somebody already mid-wizard can still submit. The pause protects the queue from *new* work, and turning a customer away at the last step, after they have photographed two pages, would be the worst possible moment to do it.
+- **Delivered is a stamp, not a status.** `completed` means the report exists and is downloadable; delivered means Tushar actually sent it from his own Gmail — which happens outside this system entirely. Modelling it as a state would put a step the software cannot observe into the machine that governs the ones it can. The customer's rail only closes when it is set, so the product never claims credit for something it did not see.
+- **The admin controls are generated from `TRANSITIONS`,** the same list `tests/rls/orders.test.ts` walks against the live `transition_order()`. The UI can only offer edges the database would accept, and a hand-written button cannot outlive the rule it was written for. Completing is deliberately unlabelled: an order is completed by attaching the report, so a button here would be a way to produce a completed order with nothing to download.
+- **`isPaused()` reads through `is_paused()`, not the table.** Reading `settings` directly worked for a signed-in customer and failed with `permission denied` for an anonymous one — the wrong shape for a question whose answer is a closed sign. It is also asked only *after* the auth check now: no work on behalf of a visitor about to be redirected. (Same class as T07's parallel-render finding.)
+- **`tests/codebase/status-writes.test.ts` is a grep, and that is fine.** Three things already stop application code writing `orders.status` at runtime — the missing column grant, the absent policy, and `transition_order()`. This adds the check that fails in *review* instead. Proven to bite before being trusted: one offending line fails it by name and file.
+- **`admin-ops.test.ts` runs alone, after everything else** (`package.json`'s `test` script). The pause is a single global row, so a run overlapping a suite that creates orders closes the shop underneath it — that failed one or two unrelated tests on each of three consecutive runs before the split, in a different place each time.
+
+## Known constraint: Supabase auth rate limits
+
+The RLS suites create roughly 20 throwaway users per run, and the e2e specs another ~24, each with a sign-in. Running the full verification more than about twice in an hour hits GoTrue's rate limiter, and **every affected suite then fails at `beforeAll` with `AuthApiError: Request rate limit reached`** — which looks like a catastrophic regression and is not one. It bit three times during T09/T10.
+
+Mitigation for now: space full runs out, and re-run before believing a mass failure. **The real fix is to share a small pool of fixture users across suites instead of each file creating its own** — roughly 40 auth calls per run would become 6. That is a focused refactor of the eight RLS files plus `e2e/support/session.ts`, and it is worth doing before the suite grows further.
