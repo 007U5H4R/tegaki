@@ -127,6 +127,78 @@ h3 {
   animation: rail-pulse 2s var(--ease-in-out) infinite;
 }
 
+/* Hero entrance — Design.md §4.2. Pure CSS, so it plays without JavaScript
+   and the page is complete if it never runs at all. Each child sets its own
+   `--rise` delay, which keeps the stagger in the markup next to the thing
+   being staggered rather than in a script that has to agree with it. */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-rise > * {
+  animation: hero-rise 600ms var(--ease-out) both;
+  animation-delay: var(--rise, 0ms);
+}
+
+/* Scroll reveals — Design.md §4.2. The resting state is the VISIBLE one, and
+   `.reveal` only applies the hidden state, so anything that never receives
+   the observer (no JS, no IntersectionObserver, an error) is simply on
+   screen. A reveal that hides content by default is a reveal that can hide
+   it forever. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(6px);
+  transition:
+    opacity var(--duration-reveal) var(--ease-out),
+    transform var(--duration-reveal) var(--ease-out),
+    filter var(--duration-reveal) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal[data-shown='true'] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* The tagline's per-word activation (Design.md §4.2). The resting colour is
+   the full one; muting is applied only once JavaScript has armed the
+   container, so the sentence reads with or without it. */
+[data-tagline] [data-word] {
+  display: inline-block;
+  transition: color 400ms var(--ease-out);
+}
+
+[data-tagline][data-armed='true'] [data-word] {
+  color: color-mix(in oklch, var(--color-washi-50) 30%, transparent);
+}
+
+[data-tagline][data-armed='true'] [data-word][data-lit='true'] {
+  color: var(--color-washi-50);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tagline][data-armed='true'] [data-word] {
+    color: var(--color-washi-50);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 /* Reduced motion: keep opacity and colour, drop movement (Design.md §4.4). */
 @media (prefers-reduced-motion: reduce) {
   *,

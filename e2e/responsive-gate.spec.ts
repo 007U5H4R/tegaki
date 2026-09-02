@@ -33,7 +33,9 @@ test.describe('responsive gate', () => {
 
 test('the brand glyphs render with the subset Japanese face', async ({ page }) => {
   await page.goto('/')
-  const jp = page.getByText('手書き')
+  // The mark now appears in the nav, the hero and the footer, so this asks
+  // the first one rather than all of them.
+  const jp = page.getByText('手書き').first()
   await expect(jp).toBeVisible()
 
   // Guards the 1.3 KB subset wiring (Design.md §2.2). The family name is
