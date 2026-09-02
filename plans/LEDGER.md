@@ -143,7 +143,23 @@
 
 **Suites after T07:** typecheck ✓ · lint ✓ · format ✓ · **123 unit** ✓ · **42 e2e against production** ✓ · build ✓
 
-**Next: T08** — the customer's status rail, the re-upload panel and the parked state. `rejected_reason` and `reupload_deadline` are already stored and shown to the analyst; T08 puts them in front of the customer.
+### T08 · Status rail, re-upload loop, parking — **done** (`15bffec`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · Migration | **done** | `20260902140000_reupload_and_parking.sql`. Adds `rejected_at` + `resubmitted_at`; `transition_order()` gains two preconditions. A resubmission must carry a sample uploaded **after** the rejection, and the window must still be open |
+| — · `park_overdue_orders()` | **done** | Definer, idempotent, scoped to what the caller may touch (own orders; everything for analyst/system). Goes through `transition_order()`, so parking leaves the same trail as any other status change |
+| A2 · Status rail | **done** | `src/components/orders/status-rail.tsx`. Four nodes from PRD §6.6; `needs_reupload` and `parked` replace it with their panels rather than showing progress. Active node pulses on opacity only, and pauses when the tab hides |
+| A3 · Dashboard card | **done** | Subject, tier + short id, the rail, "Expected by {date}" once approved, and the pilot note. `/styleguide` carries a specimen per lifecycle shape |
+| B1 · Re-upload panel | **done** | The analyst's sentence **verbatim**, the deadline, and the same `SampleUploader` from wizard stage 2 — a customer whose sample was rejected meets the interface they already know. Resubmit is disabled until a replacement actually exists |
+| B2 · Parked panel | **done** | The one state with no button forward, so it is not a dead end: a mailto escape hatch. **The WhatsApp deep-link the PRD also mentions is not built — it needs a phone number nobody has given, and a broken link is worse than one honest channel** |
+| B3 · Sweep wiring | **done** | `getMyOrders()` and `getQueue()` both call `park_overdue_orders()` before reading, so no one ever sees an order the clock has already decided about |
+| C1 · Tests | **done** | 12 SQL tests on a controlled clock (deadline ±1 hour) + 4 e2e. Round trip proven end to end: reject → panel shows the reason → upload v2 → resubmit → back in the queue, with v1 still in the table |
+
+**Suites after T08:** typecheck ✓ · lint ✓ · format ✓ · **135 unit** ✓ · **46 e2e against production** ✓ · build ✓
+
+**Next: T09** — report upload and download. The last link in the chain: the analyst attaches the finished PDF, the customer downloads it through a signed URL.
+
+---
 
 ---
 
@@ -218,3 +234,13 @@
 - **Native `<dialog>` instead of a modal component.** It brings a focus trap, Esc, backdrop and an inert background, and Design.md §3.7 rules out decorative motion on admin surfaces — which is the only thing a hand-rolled modal would have added. The deferred T02 modal primitive stays deferred until a customer-facing screen needs one.
 - **The reject dialog and the page keep separate error slots.** One shared slot rendered the same sentence twice at once — inside the dialog and behind it. Found by an e2e strict-mode violation, which is a good reason to assert on messages rather than on roles.
 - **The dashboard links to the queue for admins.** Not in the plan, but the queue was otherwise reachable only by typing the URL. The guard is what makes it safe; a link is what makes it usable.
+
+## Decisions taken during T08
+
+- **Parking an already-overdue order is not a privilege.** The `needs_reupload → parked` edge is allowed to the owner once `now() > reupload_deadline`, because the deadline decided rather than the caller, and the outcome is identical whoever asks. That is what lets the sweep run on an ordinary page load without granting anybody new powers. Parking one **early** stays with the analyst, and a test proves a buyer cannot do it to skip the wait.
+- **A resubmission must carry a sample uploaded after the rejection.** Not "at least one file" — the rejected page is still attached, so that test would pass with nothing new. Without this rule, "resubmit" is a button that returns the order to the queue unchanged to be rejected again, spending the one thing the customer is short of. `rejected_at` exists to make the comparison possible.
+- **The sweep runs on page load, not only on a schedule.** T15's cron becomes the backstop rather than the mechanism, so no customer is ever looking at an order the clock has already decided about. It is idempotent and scoped, so calling it on every dashboard render is cheap and safe.
+- **The contact escape hatch is email only.** The PRD names a mailto *and* a WhatsApp deep-link; the deep-link needs a phone number nobody has supplied, and a broken link on the one screen with no way forward is worse than a single honest channel. `CONTACT_EMAIL` in `src/lib/copy.ts` is Tushar's own address, which is what the PRD specifies for a pilot with no support infrastructure. **Ask him whether he wants a different address, and for a number if he wants the WhatsApp link.**
+- **`needs_reupload` is deliberately absent from `/styleguide`.** Its panel mounts a real uploader, and an uploader pointed at a fictional order is a control that fails when anyone uses it. The T02 dropzone test caught it the moment it was added. That variant is covered where it can be exercised for real, in `e2e/reupload-loop.spec.ts`.
+- **Client components must not format dates.** `ReuploadPanel` formatted the deadline itself, so Node and WebKit each ran their own ICU for `en-IN`, React saw a hydration mismatch and regenerated the tree — which wiped an upload in progress. Only the **mobile** project caught it. Dates are formatted on the server and passed down as strings; a sweep confirmed no other client component formats one.
+- **The machine's disk filled up mid-ticket** (887 MB free of 228 GB on the internal volume) and Playwright began failing with `ENOSPC` on browser profile creation — appearing as different tests failing on each run, which looked exactly like a race condition. Cleared the tooling caches this work created; **the underlying problem is Tushar's, not the project's** (the repo lives on the external drive with 52 GB free) and will keep causing spurious failures until he frees space.

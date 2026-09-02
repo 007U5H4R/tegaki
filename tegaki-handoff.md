@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-02** (end of T07).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T08).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,15 +18,15 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ (T03–T06) · Phase 3 (T07 ✅ → T08 next)
+   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ (T03–T06) · Phase 3 (T07 ✅ T08 ✅ → T09 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **123 unit** ✓ **42 e2e against production** ✓ build ✓.
+**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **135 unit** ✓ **46 e2e against production** ✓ build ✓.
 
-**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 10 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
+**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 11 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
 
 **T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is proven at the database layer by the 8-test isolation suite, and the loop is now proven in a browser too. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
 
@@ -38,7 +38,9 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **T07 is done — both halves of the loop now exist.** The analyst has a queue at `/admin`: submitted samples newest-first with filter chips, an order detail with the sample on a washi surface via 10-minute signed URLs, and two decisions. Approving starts the turnaround and **stores** the delivery date (the PRD's clock runs from approval, not checkout, so an unreadable photo costs the customer nothing). Rejecting requires a reason of at least 15 characters, which the customer will read verbatim, and opens a 14-day window. Access is checked three times — route, action, and `transition_order()` in the database — and tests prove a buyer can neither approve their own order nor reject it to reset the clock.
 
-**Next: T08** (`plans/T08-status-rail-reupload-parked.md`) — the customer's side of that review: the status rail, the re-upload panel showing `rejected_reason` verbatim with its deadline, and the parked state. Both fields are already stored and already shown to the analyst.
+**T08 is done — the lifecycle is closed at both ends.** A live order shows a four-node rail and, once approved, "Expected by {date}". A rejected one shows the analyst's sentence verbatim, the deadline, and the same uploader from wizard stage 2; sending a replacement puts it back in the queue with the rejected page kept as history. An expired window parks the order on the next page load — no cron needed for a customer to see the truth about their own order — and a parked order offers a mailto rather than a dead end.
+
+**Next: T09** (`plans/T09-report-upload-download.md`) — report upload and download, the last link in the chain: the analyst attaches the finished PDF, the customer downloads it through a signed URL.
 
 Project-wide rules, each learned the hard way (full reasoning in `plans/LEDGER.md`): every table migration grants **both** `authenticated` (narrowly) and `service_role` (fully); every foreign key gets an explicit `on delete` rule; a `'use server'` module may export **only** async functions; and a layout's redirect does not stop its page from rendering, so a guarded page guards itself too.
 
