@@ -1,6 +1,6 @@
 # Tegaki — Session Handoff
 
-> **Read this first in any new session.** Last updated: **2026-09-02** (end of T11).
+> **Read this first in any new session.** Last updated: **2026-09-02** (end of T12).
 > Repo: `/Volumes/E Drive/Dev/Code/Claude/Graphology/` — git, remote `007U5H4R/tegaki` (private), `main` is the deploy branch.
 > Obsidian mirror: `~/Documents/Documents - Tushar's Macbook/Obsidian Vault/Tegaki/Tegaki - Project Notes.md` (on conflict, Obsidian wins).
 
@@ -18,19 +18,21 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 (T11 ✅ → T12 next)
+   → BUILD ▶ Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 (T11 ✅ T12 ✅ → T13 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
-## ▶ RESUME HERE: **T12 — the landing page, part two**
+## ▶ RESUME HERE: **T13 — policies and the ship set**
 
-`plans/T12-landing-part2.md`. Sample-report anatomy, report excerpts, the about section and the FAQ. `#samples` and `#faq` already exist on the page with honest placeholder copy — T12 replaces it.
+`plans/T13-policies-linkpreview-shipset.md`. Privacy, Refunds and Terms pages; the OG/Twitter link-preview set with a purpose-built 1200×630 image at an absolute HTTPS URL; favicon; custom 404. The footer already links the three policy routes, so those links are currently dead — T13 is what makes them resolve.
 
-**T11 shipped the landing page.** Nav, footer, skip link, hero, how-it-works, the tagline reveal and the tiers. **Lighthouse mobile on production: Performance 97, Accessibility 100, Best Practices 100, SEO 100** — CLS 0, LCP 2.1 s.
+**The landing page is complete** (T11 + T12): hero, how it works, tagline, anatomy, tiers, excerpts, about, FAQ with schema, closing band. **Lighthouse mobile on production: 97 / 100 / 100 / 100**, zero axe failures, CLS 0.
 
-**One deviation to show Tushar:** on a phone the hero puts the photograph *above* the copy rather than behind it. Every scrim strong enough to reach the required 7:1 over that crop turned the image into a black rectangle. Reasoning and the measurements are in `plans/LEDGER.md`.
+**`scripts/check-claims.mjs` now runs before the test suite** and fails it on copy that over-promises. Read its header before editing marketing copy — the exceptions it allows are enumerated deliberately.
 
-**Two assets still outstanding for T12:** a real photograph of Tushar for the about section (never a generated face), and the C4 scan-guide imagery.
+**Two deviations worth showing Tushar:** on a phone the hero puts the photograph above the copy rather than behind it (every scrim dark enough for legibility turned the image black), and the tagline's muted words sit at 58% rather than Design.md's 30%, which measures below the contrast floor. Both are reasoned in `plans/LEDGER.md`.
+
+**Still open from C3:** the three sample-report PDFs are not built — they need C1 and C2, neither of which exists. The landing page shows excerpts, which is what it needed, but "see a sample report" has no downloadable artefact behind it yet.
 
 **Before running the full suite twice in a row, read the auth rate-limit note in `plans/LEDGER.md`.** A mass `AuthApiError: Request rate limit reached` is a cadence problem, not a regression — and the real fix (sharing fixture users across suites) is written up there.
 
@@ -48,7 +50,7 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **168 unit** ✓ **66 e2e against production** ✓ build ✓. **Lighthouse mobile on production: 97 / 100 / 100 / 100.**
+**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ claims ✓ **168 unit** ✓ **74 e2e against production** ✓ build ✓. **Lighthouse mobile on production: 97 / 100 / 100 / 100.**
 
 **Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 15 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
 

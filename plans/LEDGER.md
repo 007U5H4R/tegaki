@@ -201,7 +201,23 @@
 
 **Suites after T11:** typecheck ✓ · lint ✓ · format ✓ · **168 unit** ✓ · **66 e2e against production** ✓ · build ✓
 
-**Next: T12** — landing part two: sample-report anatomy, report excerpts, about, FAQ and the final CTA band.
+### T12 · Landing part 2 — **done** (`9299a92`, `71efcf4`)
+| Task | Status | Note |
+|---|---|---|
+| — · C3 content | **done (text half)** | Three fictional composite subjects in `src/content/excerpts.ts`. **The sample PDFs C3 also calls for are not built** — they need C1 (prompt variants) and C2 (report template), neither of which exists |
+| A1 · Report anatomy | **done** | Three specimen rows. Crops cut from **Tegaki's own hero photograph** — the C3 plan forbids real client scans here, anonymised or not. Each row states the observation before the reading |
+| A2 · Excerpt tabs | **done** | Washi cards, proper `role="tablist"` with arrow keys and roving tabindex. **"Illustrative sample — fictional subject" sits on the card**, same size as the byline |
+| A3 · About | **done** | Tushar's real photograph from the portfolio repo. **No credential chips** — the plan permits them only for claims confirmed in writing, and none have been |
+| A4 · FAQ | **done** | Ten items via native `<details>`. FAQPage JSON-LD generated from the same array the accordion renders, so the two cannot drift |
+| A5 · Final CTA | **done** | Seal, "Ready when your pen is.", same action as the hero — a second CTA phrased differently reads as a second product |
+| B1 · Claims guard | **done** | `scripts/check-claims.mjs`, wired ahead of `pnpm test`. Proven to bite: a planted sentence trips four separate patterns |
+| B2 · E2E + a11y | **done** | 20 landing tests × 2 viewports. **Lighthouse mobile on production: 97 / 100 / 100 / 100**, zero axe failures, CLS 0 |
+
+**Suites after T12:** typecheck ✓ · lint ✓ · format ✓ · claims ✓ · **168 unit** ✓ · **74 e2e against production** ✓ · build ✓
+
+**Next: T13** — policies and the ship set: Privacy, Refunds and Terms pages, the OG/Twitter link-preview set with a purpose-built 1200×630 image, favicon and a custom 404.
+
+---
 
 ---
 
@@ -338,3 +354,16 @@ Things worth knowing:
 - **Lockup links are named by their content.** An `aria-label` replaces the accessible name outright, so any spacing difference between the wordmark and 手書き is a WCAG 2.5.3 mismatch — axe kept flagging it through two attempts at wording the label. Letting the content name the link makes them identical by construction; extra context is appended with `sr-only` text rather than substituted for what is on screen. Same fix applied to the wizard and admin lockups, which axe had not reached because they are behind auth.
 - **Reveals hide content only after JavaScript arms them.** The resting state in CSS is the visible one, so a page with no JS, an old browser or a thrown exception simply reads. A reveal that hides content by default is a reveal that can hide it forever — and there is a spec that loads the page with JavaScript disabled to keep that honest.
 - **`#samples` and `#faq` are real sections with honest placeholder copy,** not empty anchors. The nav names them, and a link that scrolls to nothing reads as broken. T12 fills them.
+
+## Decisions taken during T12
+
+- **The anatomy crops come from our own hero photograph.** The C3 plan is explicit that a real client scan never appears on the landing page, anonymised or otherwise — a crop small enough to feel anonymous is still somebody's hand. The hero frame is imagery generated for this project and carries all three traits the section names, so it was cut three ways rather than sourcing anything else.
+- **The fictional label sits on the card, not in a footnote.** Solution-PRD §2 rules out testimonials until real ones exist; a "sample report" that let a reader assume it was somebody's real assessment would be the same dishonesty in better clothes. It is rendered in the same size as the byline, above the words that could be mistaken.
+- **The FAQ says outright that this is not a science and not a diagnosis.** Uncomfortable on a sales page, and the reason to believe the rest of it. The schema is generated from the same array the accordion renders — two copies of that text would eventually disagree, and the version search engines quote is the one nobody proofreads.
+- **The claims guard was rewritten before it was trusted.** Version one grepped whole lines and produced **twenty-five false positives** — a component called `Reveal`, import paths, CSS custom properties, and its own explanatory comments. A guard that cries wolf gets switched off. It now strips comments and reads only string literals and JSX text that look like prose (has a space, and a capital or sentence punctuation — which excludes Tailwind class lists and paths). The two places the copy legitimately names "scientific" and "diagnosis" are **listed explicitly**, because it is denying them; an enumerated exception is reviewable in a way a cleverer regex is not. It caught one real claim on the way in: placeholder copy promising what a report "will make".
+- **The portrait is graded in CSS, not in the file.** Its blue backdrop is the only saturated hue on the site that is not vermilion. A warm pass settles it into the page; the original file is untouched, so undoing it is deleting one class. **No credential chips** — the plan allows them only for claims Tushar confirms in writing.
+- **Metadata tokens are calibrated for the dark ground.** `text-ink-500` is the metadata colour on ink-950; on the washi excerpt card it measures **3.61:1**, below the 4.5:1 small text needs, and Lighthouse failed the page on it. Worth holding as a class of bug rather than an instance — the washi card is the only light surface on the site, and a token named for its role on one surface is not automatically right on the other.
+
+### Still open from C3
+
+The three **sample report PDFs** are not built. They need C1 (the per-tier prompt variants) and C2 (the report template), neither of which has been done — the landing page shows excerpts, which is what it needed, but "see a sample report" has no downloadable artefact behind it yet. Worth doing before the pilot takes real users.
