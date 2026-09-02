@@ -60,6 +60,18 @@ export async function createTestUser(
   return { user: data.user!, session: signIn.data.session! }
 }
 
+/**
+ * Promote a fixture account to analyst.
+ *
+ * The real allowlist is compiled into `handle_new_user()`, so a throwaway
+ * account is always a buyer. This is the only place a role is set by hand,
+ * and deliberately not something the application itself can do.
+ */
+export async function promoteToAdmin(admin: SupabaseClient, userId: string): Promise<void> {
+  const { error } = await admin.from('profiles').update({ role: 'admin' }).eq('id', userId)
+  if (error) throw new Error(`could not promote the test admin: ${error.message}`)
+}
+
 export async function applySession(
   context: BrowserContext,
   baseURL: string,

@@ -53,9 +53,19 @@ export default async function DashboardPage({
           </p>
         </div>
 
-        <form action={createDraftOrder}>
-          <Button type="submit">New request</Button>
-        </form>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Without this the queue is reachable only by typing the URL. The
+              guard is what makes it safe; this is what makes it usable. */}
+          {profile?.role === 'admin' ? (
+            <Button asChild variant="ghost">
+              <Link href="/admin">Review queue</Link>
+            </Button>
+          ) : null}
+
+          <form action={createDraftOrder}>
+            <Button type="submit">New request</Button>
+          </form>
+        </div>
       </div>
 
       {/* Streamed, so the page shell and the New request button are usable

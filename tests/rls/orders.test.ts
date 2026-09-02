@@ -155,7 +155,13 @@ describe.skipIf(!configured)('orders', () => {
     it('accepts every legal edge for the trusted server context', async () => {
       for (const [from, to] of LEGAL) {
         const id = await seedAt(admin, aliceUser.id, from)
-        const { error } = await admin.rpc('transition_order', { p_order_id: id, p_to: to })
+        const { error } = await admin.rpc('transition_order', {
+          p_order_id: id,
+          p_to: to,
+          // Rejection is the one edge that may not be taken wordlessly (T07):
+          // the customer is shown this text, so the machine insists on it.
+          p_reason: to === 'needs_reupload' ? 'The second page is out of focus.' : null,
+        })
         expect(error, `${from} → ${to} should have been allowed`).toBeNull()
 
         const { data } = await admin.from('orders').select('status').eq('id', id).single()
