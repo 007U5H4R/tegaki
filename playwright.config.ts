@@ -24,6 +24,12 @@ const browserTmp = resolve(__dirname, '.playwright-tmp')
 mkdirSync(browserTmp, { recursive: true })
 process.env.TMPDIR = browserTmp
 
+// The browser binaries themselves (~850 MB) default to ~/Library/Caches on
+// the boot disk. Same reasoning: this machine's internal volume is the scarce
+// one, so they live beside the other build caches on the external drive.
+// Overridable, so CI — which has its own clean filesystem — is unaffected.
+process.env.PLAYWRIGHT_BROWSERS_PATH ??= '/Volumes/E Drive/Dev/.caches/ms-playwright'
+
 const PORT = Number(process.env.E2E_PORT ?? 3100)
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`
 
