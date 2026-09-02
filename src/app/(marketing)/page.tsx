@@ -1,48 +1,59 @@
 import type { Metadata } from 'next'
+import { About } from '@/components/marketing/about'
+import { Anatomy } from '@/components/marketing/anatomy'
+import { Excerpts } from '@/components/marketing/excerpts'
+import { Faq } from '@/components/marketing/faq'
+import { FinalCta } from '@/components/marketing/final-cta'
 import { Hero } from '@/components/marketing/hero'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { TaglineReveal } from '@/components/marketing/tagline-reveal'
 import { TiersSection } from '@/components/marketing/tiers-section'
+import { FAQ } from '@/content/faq'
 
 export const metadata: Metadata = {
   title: 'Tegaki — your handwriting holds a story',
   description:
-    'A personal, growth-oriented handwriting assessment, analyzed by hand and delivered as a considered report. Pilot programme from ₹999.',
+    'A personal, growth-oriented handwriting assessment, read and written by hand and delivered as a considered report. Pilot programme from ₹999.',
 }
 
 /**
- * The landing page — Design.md §3.2, sections 1, 2, 3 and 5.
+ * The landing page — Design.md §3.2, in order.
  *
- * T12 adds the sample-report anatomy, excerpts, about and FAQ; T13 the ship
- * set; T14 swaps the hero poster for the scroll-scrub. The anchors those
- * sections will fill are already in the nav, so `#samples` and `#faq` resolve
- * to something rather than nowhere — see the placeholders at the bottom.
+ * T14 swaps the hero poster for the scroll-scrub; everything here is final.
+ *
+ * The FAQ schema is generated from the same `FAQ` array the accordion
+ * renders, so the answers Google is shown and the answers a person is shown
+ * cannot drift apart. Two copies of that text would eventually disagree, and
+ * the version search engines quote would be the one nobody proofreads.
  */
 export default function LandingPage() {
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // Content is ours and static; no user input reaches this.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       <Hero />
       <HowItWorks />
       <TaglineReveal />
+      <Anatomy />
       <TiersSection />
-
-      {/* Anchors the nav already points at. Empty landmarks would be worse
-          than honest ones: a link that scrolls to nothing reads as broken. */}
-      <section id="samples" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6">
-        <h2 className="text-washi-50 font-serif text-4xl">What a report looks like</h2>
-        <p className="text-washi-300 mt-3 max-w-[52ch]">
-          Specimen rows and full report excerpts arrive with the next release. Until then, every
-          claim on this page is the same one your report will make: indicative, never diagnostic.
-        </p>
-      </section>
-
-      <section id="faq" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6">
-        <h2 className="text-washi-50 font-serif text-4xl">Questions</h2>
-        <p className="text-washi-300 mt-3 max-w-[52ch]">
-          The full set — what to write, how your sample is stored, when it is deleted, and what
-          happens if we cannot read it — arrives with the next release.
-        </p>
-      </section>
+      <Excerpts />
+      <About />
+      <Faq />
+      <FinalCta />
     </>
   )
 }

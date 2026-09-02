@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { expectNoHorizontalOverflow } from './support/overflow'
 import { TIER_LIST, formatPrice } from '../src/lib/tiers'
+import { FAQ } from '../src/content/faq'
+import { EXCERPTS, FICTIONAL_LABEL } from '../src/content/excerpts'
+import { SPECIMENS } from '../src/content/anatomy'
 
 /**
  * T11 — the landing page.
@@ -152,6 +155,84 @@ test.describe('the landing page', () => {
     ] as const) {
       await expect(page.locator(`#${id}`), `${label} has nowhere to go`).toHaveCount(1)
     }
+  })
+
+  test('shows the whole argument, not only the offer', async ({ page }) => {
+    await page.goto('/')
+
+    // Anatomy: observation and reading, kept apart.
+    for (const specimen of SPECIMENS) {
+      await expect(page.getByText(specimen.observation)).toBeVisible()
+      await expect(page.getByRole('img', { name: specimen.alt })).toBeVisible()
+    }
+
+    await expect(page.getByRole('heading', { name: 'Tushar Pathak' })).toBeVisible()
+    await expect(page.getByRole('img', { name: 'Tushar Pathak' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /ready when your pen is/i })).toBeVisible()
+
+    await expectNoHorizontalOverflow(page, 'full landing')
+  })
+
+  test('labels the sample excerpts as fictional, on the card', async ({ page }) => {
+    await page.goto('/')
+
+    // Not in a footnote: visible on the panel itself, before the words that
+    // could be mistaken for somebody's real assessment.
+    await expect(page.getByText(FICTIONAL_LABEL)).toBeVisible()
+    await expect(page.getByText(EXCERPTS[0]!.heading)).toBeVisible()
+
+    // Tabs are operable from the keyboard, not just clickable.
+    const tabs = page.getByRole('tab')
+    await expect(tabs).toHaveCount(EXCERPTS.length)
+    await tabs.first().focus()
+    await page.keyboard.press('ArrowRight')
+
+    await expect(page.getByText(EXCERPTS[1]!.heading)).toBeVisible()
+    await expect(page.getByText(FICTIONAL_LABEL)).toBeVisible()
+  })
+
+  test('answers the awkward questions, and says so to search engines too', async ({ page }) => {
+    await page.goto('/')
+
+    // The one that matters: the page says outright that this is not a
+    // science, rather than leaving a visitor to assume otherwise.
+    const honest = FAQ.find((f) => f.q === 'Is this scientific?')!
+    await expect(page.getByText(honest.q)).toBeVisible()
+
+    await page.getByText(honest.q).click()
+    await expect(page.getByText(honest.a)).toBeVisible()
+
+    // The schema and the accordion come from one array, so they cannot drift.
+    const schema = await page.locator('script[type="application/ld+json"]').textContent()
+    const parsed = JSON.parse(schema ?? '{}')
+    expect(parsed['@type']).toBe('FAQPage')
+    expect(parsed.mainEntity).toHaveLength(FAQ.length)
+    expect(parsed.mainEntity[0].name).toBe(FAQ[0]!.q)
+    expect(parsed.mainEntity[0].acceptedAnswer.text).toBe(FAQ[0]!.a)
+  })
+
+  test('makes no claim the product cannot stand behind', async ({ page }) => {
+    await page.goto('/')
+    const text = (await page.locator('body').innerText()).toLowerCase()
+
+    // The rendered page, not the source — the claims guard reads the files,
+    // this reads what a visitor actually sees.
+    for (const banned of ['proven', 'destiny', 'guarantee', 'reveals', 'accurate']) {
+      expect(text, `the page says "${banned}"`).not.toContain(banned)
+    }
+
+    // And zero testimonials until real ones exist (Solution-PRD §2).
+    expect(text).not.toContain('testimonial')
+
+    // Design.md §3.2 puts the disclaimer under the tier cards AND in the
+    // footer — a visitor who scrolls straight to pricing should not have to
+    // reach the bottom of the page to meet it.
+    await expect(
+      page.locator('#pricing').getByText(/indicative and growth-oriented/i),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('contentinfo').getByText(/indicative and growth-oriented/i),
+    ).toBeVisible()
   })
 
   test('offers a skip link before anything else', async ({ page }) => {
