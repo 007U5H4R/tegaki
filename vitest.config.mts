@@ -9,6 +9,9 @@ export default defineConfig({
     // RLS tests talk to a real local Supabase, so they need room to breathe.
     testTimeout: 20_000,
     setupFiles: ['tests/setup.ts'],
+    // Once per run: clears fixture accounts left behind by a run that was
+    // interrupted before its afterAll could delete them.
+    globalSetup: ['tests/global-setup.ts'],
     coverage: {
       provider: 'v8',
       include: ['src/lib/**'],

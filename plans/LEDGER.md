@@ -108,7 +108,26 @@
 
 **Suites after T05:** typecheck ✓ · lint ✓ · **93 unit** ✓ · **34 e2e** ✓ · build ✓
 
-**Next: T06** — tier selection and demo checkout, which closes the customer half of the loop. Note `submit_order()` should also assert the consent rule, matching the constraint.
+### T06 · Tier + demo checkout + submit — **done** (`5a97ff6`)
+| Task | Status | Note |
+|---|---|---|
+| A1 · `payments` | **done** | Migration `20260902100000_payments.sql`. `order_id` **unique** — a second payment for an order cannot exist. No insert policy *and* no insert grant for `authenticated`: rows come only from `submit_order()` |
+| A2 · `submit_order()` | **done** | Definer, one transaction: asserts owner, draft, tier, ≥1 sample and **consent**, inserts the payment, calls `transition_order()`. No window where an order is paid but still a draft |
+| — · `tier_price_inr()` *(added)* | **done** | Prices come from SQL, never from the form. A test asserts the SQL map and `tiers.ts` agree — the one duplicated fact in the system, now guarded mechanically |
+| B1 · Stage 3 tier | **done** | Native radios in labels (arrow keys, `aria-checked` free from the browser). "Compare what's inside" is a disclosure, not a sheet — see decisions |
+| B2 · Stage 4 checkout | **done** | Summary + serif price + warn-tinted pilot notice + risk reversal + disclaimer. Copy for all four lives in `src/lib/copy.ts` |
+| B3 · Confirm | **done** | Seal stamps onto the summary (350ms, 2px settle) then navigates. The action deliberately **does not** redirect or revalidate — see decisions |
+| B4 · Dashboard | **done** | Submitted orders show the chip, turnaround and "Pilot order — no payment was taken". Drafts gained a **Continue** button (see decisions) |
+| C1 · Full-loop E2E | **done** | `e2e/submit-loop.spec.ts` — the phase-2 centrepiece. Passes on desktop **and** iPhone 13, **against production**, asserting the database as well as the screen |
+| C2 · Payments RLS | **done** | 15 tests: cross-buyer read, anonymous, direct insert, amount rewrite, double-submit sequential **and** concurrent, and a service-role insert that the unique index refuses |
+
+**Suites after T06:** typecheck ✓ · lint ✓ · format ✓ · **109 unit** ✓ · **36 e2e against production** ✓ · build ✓
+
+**The signed-in verification gap is closed.** `e2e/support/session.ts` signs a browser in by writing the `@supabase/ssr` session cookie directly (`base64-` + base64url JSON, chunked at 3180). Google's consent screen still cannot be automated and never will be here — but nothing after it needed to depend on that. T01/E4, T03, T04/D2 and T05 are now exercised as an assembled flow rather than layer by layer.
+
+**Two T05 defects fixed:** the tier stage was unreachable (nothing advanced `wizard_stage` past the upload, so `clampSegment` bounced every visitor back), and a draft was unreachable from the dashboard, which made resume real but unusable.
+
+**Next: T07** — the admin queue and sample review. `is_admin()` already exists (T03); T07 adds the policies that use it.
 
 ---
 
@@ -161,3 +180,15 @@
 4. **`service_role` had no grants at all.** Disabling "automatically expose new tables" switches off default privileges for **every** role, not just client-facing ones, so privileged queries failed with `42501`. The isolation tests all passed; only the admin fixtures broke — which is a good failure mode, but it would have resurfaced much later as a mysteriously broken retention cron. Granting `service_role` full access costs nothing, since the key already bypasses RLS by design. **Every table migration must now grant both roles.**
 5. **Env guard hardened after a production 500.** The first deploy returned 500 on every route because `NEXT_PUBLIC_SUPABASE_URL` never made it into Vercel — the bulk paste silently dropped the first line. The guard named the exact variable, which is why this took a minute to diagnose rather than an hour. It now also rejects placeholders, malformed URLs, plain http for remote hosts, and the two key mix-ups (a secret key where a browser would read it; the publishable key in the privileged slot).
 6. **`Design.md` hex fallbacks corrected.** They were eyeballed approximations that disagreed with their own authoritative OKLCH values — `--ink-950` was written `#131209` but resolves to `#0d0b06`. Replaced with true computed conversions; `theme-color` now tracks the real value. Contrast is unaffected in the safe direction (the ground got darker, so ratios rose).
+7. **`order_files.uploader_id` had no ON DELETE rule.** It defaulted to NO ACTION, so once somebody uploaded a single sample their account became **undeletable** — the API answered "Database error deleting user" and named nothing. Their orders would have cascaded from `buyer_id` and the file rows from `order_id`; this one column refused, for no benefit. Fixed to `on delete cascade` in `20260902110000_order_files_uploader_cascade.sql`, with `tests/rls/account-deletion.test.ts` as the scar. Found while clearing test accounts, which is the cheap place to find it — the expensive places were **T15**, where deleting data on request is the whole ticket, and the first real customer asking to be forgotten.
+8. **Test fixtures were accumulating in the live project.** 21 leftover `@tegaki.test` accounts, 71 orders, 33 payments and 64 file rows, from runs that were interrupted before their `afterAll`. Not merely untidy: they are live accounts whose passwords sit in source control, and by T07 they would have filled the admin queue with orders nobody placed. All removed (one real account, Tushar's, untouched and never had any orders). The recurrence guard is `tests/support/fixtures.ts`, swept once per vitest run via `globalSetup` and again in the Playwright spec's `beforeAll`; it only touches the reserved `@tegaki.test` domain and only accounts older than an hour, so a concurrent run cannot delete another's fixtures.
+
+---
+
+## Decisions taken during T06
+
+- **Tier cards are one stacked column at every width**, not `Design.md` §3.3's three desktop columns. That layout is specified for the landing page; the wizard is a 640px reading column where three columns would only cramp. It also keeps visual order, DOM order and focus order identical — a CSS-reordered "Core first on mobile" would put the focus order at odds with what is on screen. Core is anchored by its chip and wash, which §6 names as the section's visual anchor anyway.
+- **"Compare what's inside" is a disclosure, not a sheet.** The plan called for an excerpt sheet with placeholder content until C3. Building a modal primitive to hold placeholder text is speculative; the honest comparison — what each depth includes — is data we already have, so it ships as a real comparison now and C3 can add excerpts where they belong.
+- **`submit_order()` returns rather than redirects, and revalidates nothing.** The stamp is the one celebratory beat in the product and it has to play on the page just confirmed, so the client navigates afterwards. `revalidatePath` in the action re-rendered the route the customer was still standing on — the wizard — whose layout sends a submitted order straight to the dashboard, cutting the stamp short and dropping the confirmation param. Cost 20 minutes to find; the e2e test now asserts the param, so it cannot regress silently.
+- **`payments` CHECK constraints permit only `demo` / `demo_paid`.** The columns are gateway-ready; the constraints are pilot-honest. Permitting states the system cannot produce would make the data harder to trust, and widening two CHECKs is a one-line migration when Cashfree arrives.
+- **A "Continue" button was added to draft order cards** — not in the T06 plan. T05 built wizard resume and justified it at length, but nothing linked to it, so a customer who closed the tab could not get back to their draft. Resume that exists only as a URL is not a feature.

@@ -8,6 +8,7 @@ import {
   supabaseConfigured,
 } from './support/session'
 import { expectNoHorizontalOverflow } from './support/overflow'
+import { cleanStaleFixtures } from '../tests/support/fixtures'
 
 /**
  * T06/C1 — the whole customer loop, in a real browser.
@@ -33,8 +34,11 @@ test.describe('the customer loop', () => {
   let admin: SupabaseClient
   let user: User | null = null
 
-  test.beforeAll(() => {
+  test.beforeAll(async () => {
     admin = adminClient()
+    // Same sweep vitest runs: a spec that fails mid-flight never reaches its
+    // afterAll, and those accounts are real rows in a real project.
+    await cleanStaleFixtures(admin)
   })
 
   test.afterAll(async () => {

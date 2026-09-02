@@ -18,23 +18,25 @@ It is a **proof-of-concept pet project**: no deadline, no expected audience (10 
 
 ```
 grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans ✅
-   → BUILD ▶ Phase 1 ✅ (T01, T02) · Phase 2 in progress (T03 ✅ T04 ✅ T05 ✅ → T06 next)
+   → BUILD ▶ Phase 1 ✅ (T01, T02) · Phase 2 (T03 ✅ T04 ✅ T05 ✅ T06 ✅ → T07 next)
    → /code-review + /security-review + /impeccable → pilot live
 ```
 
 ## ▶ THE PILOT IS DEPLOYED: **https://tegaki-one.vercel.app**
 
-**Build state (2026-09-01):** `main` is the deploy branch (10 commits). Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). **Authentication works end to end** — verified in a browser against the live Supabase project. Suites: typecheck ✓ lint ✓ **26 unit** ✓ **14 e2e against production** ✓ build ✓.
+**Build state (2026-09-02):** `main` is the deploy branch. Next.js 16.3.3 + React 19.2.8 + Tailwind 4.3.3; full `Design.md` token system; Vitest + Playwright (desktop **and** mobile). Suites: typecheck ✓ lint ✓ format ✓ **109 unit** ✓ **36 e2e against production** ✓ build ✓.
 
-**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 3 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
+**Infrastructure live:** Supabase `tegaki-pilot` (`rgawqxdfvgbocgatjrlg`, Mumbai), 8 migrations applied · Google Cloud `tegaki-507313`, OAuth configured, app in **Testing** status · GitHub `007U5H4R/tegaki` (private) · Vercel `tegaki` on the free Hobby plan, ₹0/month as the PRD requires.
 
-**T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is already proven at the database layer by the 8-test isolation suite, which is stronger evidence than a UI walkthrough. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
+**T01 is complete but for one confirmation:** signing in on production with **two different Google accounts** to see the isolation with your own eyes. It is confirmation rather than discovery — the guarantee is proven at the database layer by the 8-test isolation suite, and the loop is now proven in a browser too. Note the Google app is in **Testing**, so any second account must first be added under *Audience → Test users*.
 
 **Phase 1 is complete.** T02 shipped the design system: every primitive from `Design.md` with `/styleguide` as its regression surface (34 e2e tests). The hanko seal carries a real glyph outline extracted from Noto Serif JP, so the mark never reflows while a font loads. Nav, modal and toast are deliberately deferred to the tickets that first need them.
 
-**T03, T04 and T05 are done.** `orders` carries the status machine in Postgres; handwriting samples live in a private bucket proven by 13 tests; the wizard shell, resume and consent gate are built — and the temporary `/upload-demo` route is deleted, with `SampleUploader` now mounted at `/wizard/[orderId]/upload`. **Next: T06** (`plans/T06-tier-checkout-submit.md`) — tier selection and demo checkout, closing the customer half of the loop. `submit_order()` must itself assert the consent rule, so a blocked submission fails with a readable message rather than a raw constraint violation. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully).
+**T03 through T06 are done — the customer half of the loop is closed.** `orders` carries the status machine in Postgres; handwriting samples live in a private bucket proven by 13 tests; the wizard shell, resume and consent gate are built; and a customer can now choose a tier, pass the demo checkout, and land a real order an analyst can pick up. `payments.order_id` is unique and `submit_order()` is one transaction, so double payment and paid-but-still-draft are both impossible rather than merely unlikely.
 
-**No ticket has had a signed-in browser walkthrough yet.** The Chrome extension cannot complete Google's consent screen, so authenticated routes are proven at the database layer (93 unit tests against the live project) and component-by-component on `/styleguide` — but never as an assembled flow. One sign-in on production by Tushar closes this for T01/E4, T03, T04 and T05 at once.
+**The signed-in verification gap is closed.** `e2e/submit-loop.spec.ts` walks the whole loop — arrive, describe, upload two pages, choose a depth, confirm — in a real browser on desktop **and** iPhone 13, **against production**, asserting the database as well as the screen. It signs in by writing the `@supabase/ssr` session cookie directly (`e2e/support/session.ts`); Google's consent screen still cannot be automated, and nothing after it needed to depend on that.
+
+**Next: T07** (`plans/T07-admin-queue-review.md`) — the admin queue and sample review. `is_admin()` already exists from T03; T07 adds the policies that use it. Remember the project-wide rule: every table migration must grant **both** `authenticated` (narrowly) and `service_role` (fully) — and give every foreign key an explicit `on delete` rule, which T06 learned the hard way.
 
 **Before Phase 2 closes, a QA agent should run the phase gate** per `plans/BUILD-ORCHESTRATION.md`: a stranger's account completing sign-in → submitted order on the deployed URL.
 
@@ -44,7 +46,9 @@ grilling ✅ → PRD ✅ → t-design ✅ → to-tickets ✅ → writing-plans �
 
 **Hero film (C5): ✅ COMPLETE.** The 15s v3 re-shoot fixed the text defect (page reads exactly the intended sentence; verified frame-by-frame) and the pen stays sharp through the rise. Keeper: `assets/hero/master-v3-15s-KEEPER.mp4` + 2K upscale + sliced frames in `assets/hero/frames/`. Credits: ~89 remaining, reserved for C4 (or Tushar photographs real scan-guide examples for free — ask him).
 
-**Open for Tushar (neither blocking):** sign in on production to see it himself; add pilot users as Google *test users* while the OAuth app is in Testing status.
+**Open for Tushar (neither blocking):** sign in on production to see it himself — now confirmation rather than verification, since the loop is proven end to end; add pilot users as Google *test users* while the OAuth app is in Testing status.
+
+**The Supabase project is clean** as of 2026-09-02: one account (Tushar's admin), zero orders. Test suites create throwaway `@tegaki.test` users and sweep stale ones on every run (`tests/support/fixtures.ts`) — so the admin queue T07 builds will show real orders only.
 
 **Note:** there is no `/to-tickets` skill installed on this machine (checked 2026-09-01). The stage was executed manually per the CLAUDE.md spec. Same is true of `/handoff` — this file is maintained by hand.
 
