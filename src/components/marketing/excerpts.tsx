@@ -84,7 +84,10 @@ export function Excerpts() {
           {FICTIONAL_LABEL}
         </p>
 
-        <p className="text-ink-500 mt-4 font-mono text-xs">
+        {/* ink-700, not ink-500: the metadata tokens are calibrated against
+            the dark ground, and on this washi card ink-500 measures 3.6:1 —
+            below the 4.5:1 small text needs. Lighthouse caught it. */}
+        <p className="text-ink-700 mt-4 font-mono text-xs">
           {excerpt.subject} · {excerpt.context} · {tier.name}
         </p>
 
