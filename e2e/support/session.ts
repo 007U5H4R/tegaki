@@ -115,5 +115,16 @@ export async function destroyTestUser(admin: SupabaseClient, user: User | null):
   const paths = (files ?? []).map((f) => f.bucket_path as string)
   if (paths.length) await admin.storage.from('samples').remove(paths)
 
+  // Reports live under `reports/{order_id}/`, and the order rows are about to
+  // cascade away with the user — so the objects have to go first or nothing
+  // will know they were ever connected to anybody.
+  const { data: reports } = await admin
+    .from('reports')
+    .select('bucket_path, orders!inner(buyer_id)')
+    .eq('orders.buyer_id', user.id)
+
+  const reportPaths = (reports ?? []).map((r) => r.bucket_path as string)
+  if (reportPaths.length) await admin.storage.from('reports').remove(reportPaths)
+
   await admin.auth.admin.deleteUser(user.id)
 }
