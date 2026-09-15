@@ -26,12 +26,15 @@ export function Reveal({
   delay = 0,
   className,
   as: Tag = 'div',
+  soft = false,
 }: {
   children: React.ReactNode
   /** Milliseconds, for staggering siblings. */
   delay?: number
   className?: string
   as?: 'div' | 'section' | 'li'
+  /** Opacity + 10px only, no blur — for the paper sections. */
+  soft?: boolean
 }) {
   const ref = useRef<HTMLElement>(null)
 
@@ -47,7 +50,10 @@ export function Reveal({
         el.dataset.shown = 'true'
         observer.disconnect()
       },
-      { rootMargin: '-80px' },
+      // Fire once the element's top clears the bottom of the viewport by a
+      // little, rather than 80px in on every side: a heading near the top
+      // of a section was still invisible with its section half on screen.
+      { rootMargin: '0px 0px -40px 0px' },
     )
 
     observer.observe(el)
@@ -62,6 +68,7 @@ export function Reveal({
     <Tag
       ref={ref as React.Ref<never>}
       className={cn(className)}
+      data-soft={soft ? 'true' : undefined}
       style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}
     >
       {children}

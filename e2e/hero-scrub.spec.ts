@@ -23,7 +23,11 @@ async function scrollDown(page: import('@playwright/test').Page, by = 2000) {
 
 const FRAME = /\/hero\/hero_\d{3}\.jpg/
 
-test.describe('the hero scrub', () => {
+// The scroll-scrub film hero is no longer rendered: the 2026-09 illustrated
+// hero replaced it (see src/components/marketing/hero.tsx). hero-scrub.tsx
+// stays on disk untouched, so these tests are skipped rather than deleted;
+// un-skip them if the film ever comes back.
+test.describe.skip('the hero scrub', () => {
   test('a phone never downloads a frame', async ({ page }) => {
     const requested: string[] = []
     page.on('request', (r) => {

@@ -5,7 +5,6 @@ import { Excerpts } from '@/components/marketing/excerpts'
 import { Faq } from '@/components/marketing/faq'
 import { FinalCta } from '@/components/marketing/final-cta'
 import { Hero } from '@/components/marketing/hero'
-import { HeroScrub } from '@/components/marketing/hero-scrub'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { TaglineReveal } from '@/components/marketing/tagline-reveal'
 import { TiersSection } from '@/components/marketing/tiers-section'
@@ -18,14 +17,20 @@ export const metadata: Metadata = {
 }
 
 /**
- * The landing page — Design.md §3.2, in order.
+ * The landing page, as three materials.
  *
- * T14 swaps the hero poster for the scroll-scrub; everything here is final.
+ * The terracotta wall (hero), then one long sheet of cream paper pulled out
+ * from under it (how it works through the FAQ), then the wall again for the
+ * closing band and the footer. The paper is a single surface on purpose:
+ * section breaks are hairlines and spacing, not new backgrounds.
+ *
+ * As the hero leaves it slides 40px under the paper (`--hero-exit`, written
+ * by HeroMotion, applied in hero.tsx), so the sheet reads as pulled up over
+ * the wall rather than merely scrolled to.
  *
  * The FAQ schema is generated from the same `FAQ` array the accordion
  * renders, so the answers Google is shown and the answers a person is shown
- * cannot drift apart. Two copies of that text would eventually disagree, and
- * the version search engines quote would be the one nobody proofreads.
+ * cannot drift apart.
  */
 export default function LandingPage() {
   const faqSchema = {
@@ -46,17 +51,24 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      {/* The scrub upgrades itself on eligible desktops; everybody else —
-          phones, reduced motion, no JavaScript — gets exactly this static
-          hero and never requests a frame. */}
-      <HeroScrub fallback={<Hero />} />
+      {/* Illustrated hero (2026-09 redesign). The scroll-scrub film in
+          hero-scrub.tsx is no longer rendered; it stays on disk untouched. */}
+      <Hero />
       <HowItWorks />
-      <TaglineReveal />
-      <Anatomy />
-      <TiersSection />
-      <Excerpts />
-      <About />
-      <Faq />
+
+      <div className="paper-world bg-paper-50 text-inkl-900 grain relative" data-nav-surface="paper">
+        <div className="relative z-[1]">
+          <TaglineReveal />
+          <Anatomy />
+          {/* The one human the proposition rests on is introduced before the
+              price is asked, not after. */}
+          <About />
+          <TiersSection />
+          <Excerpts />
+          <Faq />
+        </div>
+      </div>
+
       <FinalCta />
     </>
   )
