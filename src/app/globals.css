@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './landing.css';
 
 /* ==========================================================================
    Tegaki design tokens — implements Design.md §2 verbatim.
@@ -35,6 +36,31 @@
   --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', monospace;
   --font-jp: var(--font-noto-serif-jp), var(--font-serif);
 
+  /* Landing-page world (hero + how it works): an illustrated editorial on
+     a terracotta wall. Sampled from the approved hero; used by role, never
+     as a gradient. */
+  --color-terra-500: #af4d2a; /* the wall */
+  --color-terra-600: #913d25; /* wall in shadow, pigment variation */
+  --color-terra-700: #6f2c19; /* deepest terracotta */
+  --color-rust-500: #823d30; /* upholstery */
+  --color-teal-900: #123f43; /* deep teal: "talking", primary CTA */
+  --color-teal-800: #1b4f54; /* teal lifted one step: CTA hover */
+  --color-inkl-900: #173b43; /* dark ink on paper: section heading, notes */
+  --color-paper-50: #f4ebd6; /* warm ivory: headline, the sheet, section two */
+  --color-paper-100: #e9dcc2; /* paper in shadow, folded corner, note borders */
+  --color-ochre-500: #c99a4e; /* muted ochre: underline, CTA accent strokes */
+  --color-pencil-500: #c75b53; /* annotation red: the analyst's strokes */
+  --color-pencil-600: #a8433a; /* the same pencil, pressed harder: red TEXT on cream (4.8:1) */
+  --color-hand-500: #4a5f7a; /* blue-grey ink of the handwriting sample */
+
+  /* Landing-only faces. --font-display is the face the approved hero renders
+     in — Instrument Serif, the site's own serif — so every display moment on
+     the landing page (hero, section headings, tagline, prices, FAQ
+     questions) shares one voice. --font-hand for handwriting, notes and the
+     handwritten CTA labels. */
+  --font-display: var(--font-instrument-serif), Georgia, 'Times New Roman', serif;
+  --font-hand: var(--font-caveat), 'Segoe Print', 'Bradley Hand', cursive;
+
   /* Radius vocabulary (Design.md §2.3) — inputs 8, cards 16, buttons/chips pill */
   --radius-lg: 8px;
   --radius-2xl: 16px;
@@ -67,11 +93,16 @@ body {
   text-wrap: pretty;
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-serif);
-  text-wrap: balance;
+/* In @layer base so a `font-*` utility on a heading can override it. As an
+   unlayered rule it silently beat every `font-display` utility on the page
+   and nobody could tell from the markup. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    text-wrap: balance;
+  }
 }
 
 /* Focus ring — 2px shu, 2px offset. Never removed (Design.md §5.2). */
@@ -218,3 +249,4 @@ h3 {
     scroll-behavior: auto !important;
   }
 }
+

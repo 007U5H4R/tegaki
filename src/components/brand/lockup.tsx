@@ -12,20 +12,41 @@ export function Lockup({
   size = 24,
   showSubtitle = true,
   className,
+  tone = 'washi',
+  large = false,
 }: {
   size?: number
   showSubtitle?: boolean
   className?: string
+  /**
+   * `washi`: vermilion seal, cream wordmark on the ink ground.
+   * `paper`: all warm ivory — the landing hero's terracotta wall.
+   * `ink`:   all deep ink — the landing page's cream sections.
+   */
+  tone?: 'washi' | 'paper' | 'ink'
+  /** The landing page's nav: wordmark and subtitle scale gently with the viewport. */
+  large?: boolean
 }) {
+  const seal = { washi: 'text-shu-500', paper: 'text-paper-50', ink: 'text-inkl-900' }[tone]
+  const word = { washi: 'text-washi-50', paper: 'text-paper-50', ink: 'text-inkl-900' }[tone]
+  const sub = { washi: 'text-washi-300', paper: 'text-paper-50/75', ink: 'text-inkl-900/70' }[tone]
   return (
-    <span className={cn('inline-flex items-center gap-2.5', className)}>
+    <span className={cn('inline-flex items-center', large ? 'gap-3' : 'gap-2.5', className)}>
       {/* Decorative: the wordmark beside it already names the brand, so
           announcing "Tegaki" twice would be noise for a screen reader. */}
-      <Seal size={size} title={null} className="text-shu-500" />
+      <Seal size={size} title={null} className={cn(seal, large && 'size-[clamp(1.6rem,1.9vw,2.3rem)]')} />
       <span className="flex items-baseline gap-2">
-        <span className="text-washi-50 font-serif text-xl leading-none">Tegaki</span>
+        <span
+          className={cn(
+            'font-serif leading-none',
+            large ? 'text-[clamp(1.35rem,1.65vw,2rem)]' : 'text-xl',
+            word,
+          )}
+        >
+          Tegaki
+        </span>
         {showSubtitle ? (
-          <span className="font-jp text-washi-300 text-xs" lang="ja">
+          <span className={cn('font-jp', large ? 'text-[clamp(0.8rem,0.95vw,1.15rem)]' : 'text-xs', sub)} lang="ja">
             手書き
           </span>
         ) : null}

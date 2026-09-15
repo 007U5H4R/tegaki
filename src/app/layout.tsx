@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { absoluteUrl, SITE_URL } from '@/lib/site'
-import { Geist_Mono, Instrument_Serif, Manrope } from 'next/font/google'
+import { Caveat, Geist_Mono, Instrument_Serif, Manrope } from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
 
@@ -15,6 +15,16 @@ const manrope = Manrope({
   variable: '--font-manrope',
   subsets: ['latin'],
   weight: ['400', '500', '600'],
+  display: 'swap',
+})
+
+// The analyst's pen. Used ONLY for the handwriting sample, his red-pencil
+// notes, the handful of handwritten asides and the two handwritten CTA
+// labels on the landing page — never for headings, nav or body copy.
+const caveat = Caveat({
+  variable: '--font-caveat',
+  subsets: ['latin'],
+  weight: 'variable',
   display: 'swap',
 })
 
@@ -100,7 +110,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${manrope.variable} ${geistMono.variable} ${notoSerifJp.variable} h-full`}
+      className={`${instrumentSerif.variable} ${manrope.variable} ${geistMono.variable} ${caveat.variable} ${notoSerifJp.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

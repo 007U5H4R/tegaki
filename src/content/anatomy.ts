@@ -1,22 +1,24 @@
 /**
- * The three specimen rows — Design.md §3.2-4.
+ * The three specimens — what a reading actually looks at.
  *
- * The crops are cut from Tegaki's own hero photograph, which is generated
- * imagery of handwriting made for this project. **No real client scan
+ * The specimens are drawn, not photographed: a line of handwriting set in
+ * the site's own hand face with the trait exaggerated in CSS (slant as a
+ * skew, spacing as word-spacing, pressure as weight). **No real client scan
  * appears on this page, anonymised or otherwise** — the C3 plan is explicit
  * about that, and a crop small enough to feel anonymous is still somebody's
  * hand.
  *
- * Each sentence names what is visible and then what it *suggests*. That
- * order matters: the observation is the evidence, the reading is an
+ * Each pair names what is visible and then what it *suggests*. That order
+ * matters: the observation is the evidence, the reading is an
  * interpretation, and the copy should not let them blur.
  */
 
 export type Specimen = {
-  id: string
-  src: string
-  alt: string
+  id: 'slant' | 'spacing' | 'pressure'
+  /** The analyst's one-word note, in red pencil. */
   trait: string
+  /** The two lines written on the scrap. */
+  lines: readonly [string, string]
   observation: string
   reading: string
 }
@@ -24,29 +26,26 @@ export type Specimen = {
 export const SPECIMENS: readonly Specimen[] = [
   {
     id: 'slant',
-    src: '/specimens/slant.jpg',
-    alt: 'A line of cursive handwriting leaning consistently to the right on cream paper',
-    trait: 'Slant',
-    observation: 'Letters lean right, consistently, across the whole line.',
+    trait: 'slant',
+    lines: ['I said yes before', 'I had finished thinking.'],
+    observation: 'The letters lean right, consistently, across the whole line.',
     reading:
-      'A pronounced rightward slant suggests expressive engagement with other people — a tendency to move toward, rather than hold back from.',
+      'A steady rightward slant is often associated with moving toward people and situations rather than holding back from them.',
   },
   {
-    id: 'tbar',
-    src: '/specimens/tbar.jpg',
-    alt: 'Close view of crossed t letters in cursive, the crossbars sitting high on the stems',
-    trait: 'The t-bar',
-    observation: 'The crossbars sit high on the stem and travel well past it.',
+    id: 'spacing',
+    trait: 'spacing',
+    lines: ['Give me a minute', 'and I will have an answer.'],
+    observation: 'The gaps between words stay wide and even, line after line.',
     reading:
-      'High, long t-bars often indicate goals set above present reach, and enough drive to keep reaching for them.',
+      'Generous, regular spacing can be associated with a considered rhythm — room left between one thought and the next.',
   },
   {
-    id: 'loops',
-    src: '/specimens/loops.jpg',
-    alt: 'Close view of descending loops in cursive handwriting, full and returning to the baseline',
-    trait: 'Lower loops',
-    observation: 'Descenders are full and return cleanly to the baseline.',
+    id: 'pressure',
+    trait: 'pressure',
+    lines: ['Some days I write', 'harder than others.'],
+    observation: 'The strokes are dark and firm; the pen pressed rather than skated.',
     reading:
-      'Generous, closed lower loops suggest emotional energy that is available to be spent rather than held in reserve.',
+      'Heavier pressure may suggest intensity and staying power — feelings that register deeply and are slow to fade.',
   },
 ] as const

@@ -79,11 +79,11 @@ test.describe('the landing page', () => {
     await page.goto('/')
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Your handwriting')
-    await expect(page.getByText(/handwriting analysis/i).first()).toBeVisible()
-    await expect(page.getByText(/hand-validated by Tushar Pathak/i)).toBeVisible()
+    await expect(page.getByText(/Two pages\. One human reader\./i).first()).toBeVisible()
+    await expect(page.getByText(/we just know/i).first()).toBeVisible()
 
     // The argument, in order.
-    await expect(page.getByRole('heading', { name: /three steps/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /from handwriting/i })).toBeVisible()
     await expect(page.getByText('Written by hand.')).toBeVisible()
     await expect(page.getByRole('heading', { name: /how deep should we go/i })).toBeVisible()
 
@@ -97,14 +97,15 @@ test.describe('the landing page', () => {
     const lightest = await lightestPixelBehind(page, 'h1')
     const ratio = contrastRatio(lightest, WASHI_50)
 
-    // Design.md §5.1: hero copy over photography requires a scrim to ≥7:1.
-    // Measured against the LIGHTEST pixel in the region, so this is the worst
-    // case a reader meets rather than the average.
+    // The hero is ivory display type on a flat terracotta wall (no photograph,
+    // no scrim), so the bar is WCAG AA for text: 4.5:1. Measured against the
+    // LIGHTEST pixel in the region, so this is the worst case a reader meets
+    // rather than the average; the pigment texture only ever darkens the wall.
     expect(
       ratio,
       `worst-case contrast behind the h1 at ${info.project.name} was ${ratio.toFixed(2)}:1 ` +
         `(lightest background pixel rgb(${lightest.r}, ${lightest.g}, ${lightest.b}))`,
-    ).toBeGreaterThanOrEqual(7)
+    ).toBeGreaterThanOrEqual(4.5)
   })
 
   test('every price comes from the tier table', async ({ page }) => {
@@ -114,12 +115,12 @@ test.describe('the landing page', () => {
       await expect(page.getByRole('heading', { name: tier.name })).toBeVisible()
       await expect(page.getByText(formatPrice(tier.priceInr), { exact: true })).toBeVisible()
       await expect(
-        page.getByText(new RegExp(`${tier.turnaroundDays}-day turnaround`, 'i')).first(),
+        page.getByText(new RegExp(`${tier.turnaroundDays} days`, 'i')).first(),
       ).toBeVisible()
     }
 
     // Exactly one tier may be anchored, or the anchor stops meaning anything.
-    await expect(page.getByText('Most popular')).toHaveCount(1)
+    await expect(page.getByText('most people start here')).toHaveCount(1)
   })
 
   test('is complete with JavaScript switched off', async ({ browser }) => {
@@ -163,10 +164,10 @@ test.describe('the landing page', () => {
     // Anatomy: observation and reading, kept apart.
     for (const specimen of SPECIMENS) {
       await expect(page.getByText(specimen.observation)).toBeVisible()
-      await expect(page.getByRole('img', { name: specimen.alt })).toBeVisible()
+      await expect(page.getByText(specimen.reading)).toBeVisible()
     }
 
-    await expect(page.getByRole('heading', { name: 'Tushar Pathak' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /read by one person/i })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Tushar Pathak' })).toBeVisible()
     await expect(page.getByRole('heading', { name: /ready when your pen is/i })).toBeVisible()
 
@@ -178,16 +179,17 @@ test.describe('the landing page', () => {
 
     // Not in a footnote: visible on the panel itself, before the words that
     // could be mistaken for somebody's real assessment.
+    // The middle depth opens first — it is the one most people choose.
     await expect(page.getByText(FICTIONAL_LABEL)).toBeVisible()
-    await expect(page.getByText(EXCERPTS[0]!.heading)).toBeVisible()
+    await expect(page.getByText(EXCERPTS[1]!.heading)).toBeVisible()
 
     // Tabs are operable from the keyboard, not just clickable.
     const tabs = page.getByRole('tab')
     await expect(tabs).toHaveCount(EXCERPTS.length)
-    await tabs.first().focus()
+    await tabs.nth(1).focus()
     await page.keyboard.press('ArrowRight')
 
-    await expect(page.getByText(EXCERPTS[1]!.heading)).toBeVisible()
+    await expect(page.getByText(EXCERPTS[2]!.heading)).toBeVisible()
     await expect(page.getByText(FICTIONAL_LABEL)).toBeVisible()
   })
 

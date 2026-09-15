@@ -1,0 +1,483 @@
+/* ==========================================================================
+   Landing world — hero + how it works (2026-09 illustrated redesign).
+   An illustrated editorial on a terracotta wall. Everything here is
+   transforms, opacity and SVG stroke; nothing lays out.
+   ========================================================================== */
+
+/* The wall. Two textures, both almost invisible at reading distance:
+   irregular pigment variation (a low-frequency turbulence, multiplied) and a
+   fine paper grain. Both sit behind the content, so type and controls stay
+   crisp. */
+.wall {
+  position: relative;
+  background-color: var(--color-terra-500);
+  isolation: isolate;
+}
+.wall::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.26;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.62 0 0 0 0 0.36 0 0 0 0 0.24 0 0 0 0.75 0'/%3E%3C/filter%3E%3Crect width='900' height='900' filter='url(%23p)'/%3E%3C/svg%3E");
+  background-size: 900px 900px;
+}
+.wall::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* Paper grain for the cream section and the standalone sheet: finer, fainter. */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* --- Load choreography. Each element names its own beat in `--at`, in ms
+   after the terracotta is on screen. `both` so the pre-animation state is
+   the hidden one and the resting state is fully visible; the wall itself
+   never animates. --- */
+@keyframes land-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise-y, 12px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.land-rise {
+  animation: land-rise 720ms var(--ease-out) both;
+  animation-delay: var(--at, 0ms);
+}
+/* The illustration is faintly present from the first frame, then settles
+   upward into place as one group. */
+@keyframes illo-settle {
+  from {
+    opacity: 0.08;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.illo-settle {
+  animation: illo-settle 820ms var(--ease-out) both;
+  animation-delay: var(--at, 500ms);
+}
+
+/* --- Red-pencil marks draw themselves. `--len` is measured per path; the
+   draw is a dashoffset transition so load, hover and reduced motion share
+   one mechanism. --- */
+.mark {
+  stroke-dasharray: var(--len, 3000) var(--len, 3000);
+  stroke-dashoffset: var(--len, 3000);
+  /* Hidden until it starts drawing: a zero-length dash with round caps
+     still paints a dot. */
+  opacity: 0;
+  transition:
+    stroke-dashoffset var(--draw, 650ms) var(--ease-out),
+    opacity 1ms linear;
+  transition-delay: var(--at, 0ms);
+}
+.mark[data-drawn='true'] {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+/* The red handwritten notes fade in as their stroke finishes. */
+.mark-note {
+  opacity: 0;
+  transition: opacity 380ms var(--ease-out);
+  transition-delay: var(--at, 0ms);
+}
+.mark-note[data-drawn='true'] {
+  opacity: 1;
+}
+
+/* A hotspot is real text on the page; nothing about it looks like a control
+   until it is hovered or focused, when the ink deepens a shade. */
+.hot {
+  all: unset;
+  position: relative;
+  display: inline-block;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color 200ms var(--ease-out);
+}
+.hot:hover,
+.hot:focus-visible,
+.hot[aria-expanded='true'] {
+  color: var(--color-inkl-900);
+}
+.hot:focus-visible {
+  outline: 2px solid var(--color-pencil-500);
+  outline-offset: 3px;
+}
+
+/* The analyst's explanation: a scrap of cream paper placed on the scene.
+   Fine border, a hair of shadow, a small pointer. Fades and settles by 6px;
+   leaving is quicker than arriving. */
+.paper-note {
+  position: absolute;
+  z-index: 30;
+  width: 15.5rem;
+  padding: 0.75rem 0.95rem 0.85rem;
+  background: var(--color-paper-50);
+  color: var(--color-inkl-900);
+  border: 1px solid color-mix(in oklch, var(--color-inkl-900) 30%, var(--color-paper-100));
+  box-shadow: 0 1px 0 color-mix(in oklch, var(--color-terra-700) 35%, transparent);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+  pointer-events: none;
+}
+.paper-note[data-open='true'] {
+  opacity: 1;
+  transform: none;
+  transition-duration: 300ms;
+  pointer-events: auto;
+}
+.paper-note::before {
+  content: '';
+  position: absolute;
+  top: 1.1rem;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border-left: inherit;
+  border-bottom: inherit;
+  transform: rotate(45deg);
+}
+.paper-note:not([data-side])::before {
+  display: none;
+}
+.paper-note[data-side='right']::before {
+  left: auto;
+  right: -6px;
+  border-left: 0;
+  border-bottom: 0;
+  border-right: inherit;
+  border-top: inherit;
+}
+
+/* --- The analyst is alive but almost still. Eyelids: two skin-coloured
+   shapes over the eyes, closed for two frames every few seconds. The two
+   cycles differ by a fraction so the blinks never fall on a grid. --- */
+@keyframes blink {
+  0%,
+  96%,
+  100% {
+    transform: scaleY(0);
+  }
+  97.2%,
+  98.4% {
+    transform: scaleY(1);
+  }
+}
+.eyelid {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+  animation: blink 6.9s linear infinite;
+  animation-delay: 2.6s;
+}
+.eyelid[data-eye='b'] {
+  animation-delay: 2.62s;
+}
+
+/* The cat breathes: 1.4%, from the ground up, slowly. */
+@keyframes cat-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.014);
+  }
+}
+.cat-breathe {
+  transform-origin: 50% 100%;
+  animation: cat-breathe 6.4s ease-in-out infinite;
+}
+/* Near the cursor, one eye opens; a tiny handwritten "still here." fades in
+   and back out. A hidden detail, never announced. */
+.cat-eye,
+.cat-note {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+.cat-note {
+  transform: translateY(3px);
+  transition:
+    opacity 260ms var(--ease-out),
+    transform 260ms var(--ease-out);
+}
+[data-cat-awake='true'] .cat-eye {
+  opacity: 1;
+  transition-delay: 140ms;
+}
+[data-cat-awake='true'] .cat-note {
+  opacity: 1;
+  transform: none;
+  transition-delay: 360ms;
+}
+
+/* --- Cursor parallax (fine pointers only; ±2px on the scene, ∓1px on the
+   wall props) and the scroll exit: the scene lifts a little faster than the
+   copy while the cream paper below rises over the terracotta. HeroMotion
+   writes --px / --py on the hero and --hero-exit on <html>. --- */
+.scene-move {
+  transform: translate(
+    calc(var(--px, 0) * 2px),
+    calc(var(--py, 0) * 2px - var(--hero-exit, 0) * 28px)
+  );
+  will-change: transform;
+}
+.props-move {
+  transform: translate(
+    calc(var(--px, 0) * -1px),
+    calc(var(--py, 0) * -1px - var(--hero-exit, 0) * 10px)
+  );
+}
+.thread-draw {
+  stroke-dasharray: var(--len, 3000) var(--len, 3000);
+  stroke-dashoffset: calc(var(--len, 3000) * (1 - var(--hero-exit, 0)));
+}
+
+/* --- Primary CTA: deep teal pill, handwritten ivory label. Hover: arrow
+   slides 4px, the ground steps one shade, two tiny ochre strokes appear
+   beside it. Press: a 1px depression. No scale, no glow. --- */
+.cta-ink {
+  position: relative;
+  background: var(--color-teal-900);
+  color: var(--color-paper-50);
+  box-shadow:
+    inset 0 -1px 0 color-mix(in oklch, black 26%, transparent),
+    0 1px 0 color-mix(in oklch, var(--color-terra-700) 55%, transparent);
+  transition:
+    background-color 200ms var(--ease-out),
+    transform 120ms var(--ease-out),
+    box-shadow 120ms var(--ease-out);
+}
+.cta-ink .cta-arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out);
+}
+.cta-ink .cta-accent {
+  position: absolute;
+  right: -1.15rem;
+  top: -0.6rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  opacity: 0;
+  transform: translate(-3px, 3px);
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+  pointer-events: none;
+}
+.cta-ink:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 -1px 0 color-mix(in oklch, black 26%, transparent);
+}
+@media (hover: hover) {
+  .cta-ink:hover {
+    background: var(--color-teal-800);
+  }
+  .cta-ink:hover .cta-arrow {
+    transform: translateX(4px);
+  }
+  .cta-ink:hover .cta-accent {
+    opacity: 1;
+    transform: none;
+  }
+}
+.cta-ink:focus-visible {
+  background: var(--color-teal-800);
+}
+.cta-ink:focus-visible .cta-arrow {
+  transform: translateX(4px);
+}
+.cta-ink:focus-visible .cta-accent {
+  opacity: 1;
+  transform: none;
+}
+
+/* The nav's ivory pill, teal handwriting. */
+.cta-paper {
+  background: var(--color-paper-50);
+  color: var(--color-teal-900);
+  box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-terra-700) 28%, transparent);
+  transition:
+    background-color 200ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+.cta-paper .cta-arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out);
+}
+.cta-paper:active {
+  transform: translateY(1px);
+}
+@media (hover: hover) {
+  .cta-paper:hover {
+    background: #fbf5e8;
+  }
+  .cta-paper:hover .cta-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Fine ivory underline on the secondary link; full strength on hover. */
+.link-fine {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in oklch, currentColor 55%, transparent);
+  transition: text-decoration-color 180ms var(--ease-out);
+}
+.link-fine:hover {
+  text-decoration-color: currentColor;
+}
+
+/* --- The paper world: everything between the hero and the closing band.
+   The tagline's words come up from a faint ink to full ink (the shared
+   rules in globals.css are written for the dark ground). --- */
+.paper-world [data-tagline][data-armed='true'] p [data-word] {
+  /* 55%, not lower: the unlit words are still read by somebody who lands
+     mid-page, and they measure below 4.5:1 on cream any fainter. */
+  color: color-mix(in oklch, var(--color-inkl-900) 55%, transparent);
+}
+.paper-world [data-tagline][data-armed='true'] p [data-word][data-lit='true'] {
+  color: var(--color-inkl-900);
+}
+@media (prefers-reduced-motion: reduce) {
+  .paper-world [data-tagline][data-armed='true'] p [data-word] {
+    color: var(--color-inkl-900);
+  }
+}
+
+/* Outlined pill for the two quieter depths: ink line, ink handwriting. */
+.cta-line {
+  border: 1px solid color-mix(in oklch, var(--color-inkl-900) 45%, transparent);
+  color: var(--color-inkl-900);
+  background: transparent;
+  transition:
+    border-color 200ms var(--ease-out),
+    background-color 200ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+.cta-line .cta-arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out);
+}
+.cta-line:active {
+  transform: translateY(1px);
+}
+@media (hover: hover) {
+  .cta-line:hover {
+    border-color: var(--color-inkl-900);
+    background: color-mix(in oklch, var(--color-inkl-900) 6%, transparent);
+  }
+  .cta-line:hover .cta-arrow {
+    transform: translateX(4px);
+  }
+}
+.cta-line:focus-visible .cta-arrow {
+  transform: translateX(4px);
+}
+
+/* Soft reveal: opacity + 10px, no blur (the paper section). */
+.reveal[data-soft='true'] {
+  transform: translateY(10px);
+  filter: none;
+}
+.reveal[data-soft='true'][data-shown='true'] {
+  transform: none;
+}
+
+/* A stroke that draws once on load (pathLength="100" on the path). */
+@keyframes draw-once {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.draw-once {
+  stroke-dasharray: 100 100;
+  stroke-dashoffset: 100;
+  animation: draw-once var(--draw, 600ms) var(--ease-out) both;
+  animation-delay: var(--at, 0ms);
+}
+/* Same, but armed by a section's reveal rather than by page load. */
+.reveal .draw-on-reveal {
+  stroke-dasharray: 100 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset var(--draw, 700ms) var(--ease-out);
+  transition-delay: var(--at, 0ms);
+}
+.reveal[data-shown='true'] .draw-on-reveal {
+  stroke-dashoffset: 0;
+}
+
+/* Reduced motion: the finished hero, immediately. No parallax, no idle
+   life; marks and threads are simply there; every interaction remains. */
+@media (prefers-reduced-motion: reduce) {
+  .land-rise,
+  .illo-settle,
+  .eyelid,
+  .cat-breathe {
+    animation: none;
+  }
+  .scene-move,
+  .props-move {
+    transform: none;
+  }
+  .mark {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    opacity: 0;
+    transition: opacity 200ms linear;
+  }
+  .mark[data-drawn='true'] {
+    opacity: 1;
+  }
+  .thread-draw {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+  .draw-once,
+  .reveal .draw-on-reveal {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}
