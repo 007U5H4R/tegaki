@@ -24,7 +24,7 @@ export function TiersSection() {
           How deep should we go?
         </h2>
         <p className="mt-5 max-w-[54ch] text-[1.05rem] leading-relaxed opacity-85">
-          Every depth is read by the same person — Tushar — from the same two pages. What changes
+          Every depth is read by the same person — Tushar Pathak — from the same two pages. What changes
           is how much of what he sees gets written up, and how long that takes.
         </p>
       </Reveal>

@@ -59,7 +59,7 @@ export function About() {
             and why nothing reaches you until it has been read through in full.
           </p>
           <p className="font-hand text-pencil-600 mt-8 -rotate-2 text-[1.6rem] leading-none font-medium" aria-hidden>
-            — Tushar
+            — Tushar Pathak
           </p>
         </div>
       </Reveal>

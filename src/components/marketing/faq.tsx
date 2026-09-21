@@ -30,7 +30,7 @@ export function Faq() {
             are answered first.
           </p>
           <p className="mt-10 max-w-[30ch] text-[0.98rem] leading-relaxed opacity-85">
-            Something not covered? Write to Tushar directly at{' '}
+            Something not covered? Write to Tushar Pathak directly at{' '}
             <a href={`mailto:${CONTACT_EMAIL}`} className="link-fine break-all font-medium opacity-100">
               {CONTACT_EMAIL}
             </a>
