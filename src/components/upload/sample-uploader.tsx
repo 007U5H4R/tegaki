@@ -179,7 +179,7 @@ export function SampleUploader({
       <fieldset className="flex flex-col gap-1">
         <legend className="sr-only">Sample guidelines</legend>
         <MicroLabel tone="muted">Before you upload</MicroLabel>
-        <p className="text-washi-300 mb-2 text-sm">
+        <p className="text-inkl-900/70 mb-2 text-sm">
           A sample that misses any of these has to be redone, which costs you days. Please confirm
           each one.
         </p>

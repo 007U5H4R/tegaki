@@ -34,8 +34,8 @@ export default async function UploadStage({ params }: { params: Promise<{ orderI
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="text-washi-50 font-serif text-3xl">Your handwriting sample</h1>
-        <p className="text-washi-300 mt-3">
+        <h1 className="text-inkl-900 font-serif text-3xl">Your handwriting sample</h1>
+        <p className="text-inkl-900/70 mt-3">
           Photograph each page flat and in good light. Only you and your analyst will ever see
           these, and they are deleted 90 days after your report is delivered.
         </p>
@@ -60,7 +60,7 @@ export default async function UploadStage({ params }: { params: Promise<{ orderI
             <Button type="submit">Choose your depth</Button>
           </form>
         ) : (
-          <p className="text-washi-300 text-sm">Upload at least one page to continue.</p>
+          <p className="text-inkl-900/70 text-sm">Upload at least one page to continue.</p>
         )}
       </div>
     </div>

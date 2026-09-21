@@ -39,8 +39,8 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="text-washi-50 font-serif text-3xl">Confirm your order</h1>
-        <p className="text-washi-300 mt-3">
+        <h1 className="text-inkl-900 font-serif text-3xl">Confirm your order</h1>
+        <p className="text-inkl-900/70 mt-3">
           One last look before it reaches your analyst. You can still go back and change anything.
         </p>
       </div>
@@ -51,9 +51,9 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
           "Confirm my order" sat under "₹1,999". */}
       <div className="border-warn-500/40 bg-warn-500/10 flex gap-4 rounded-2xl border p-5">
         <InfoIcon />
-        <p className="text-washi-50 text-sm">
+        <p className="text-inkl-900 text-sm">
           <strong className="font-semibold">{PILOT_NOTICE_TITLE}</strong>{' '}
-          <span className="text-washi-300">
+          <span className="text-inkl-900/70">
             {PILOT_NOTICE_BODY} Tegaki is running as a pilot, so no card details are asked for and
             nothing is charged.
           </span>
@@ -64,7 +64,7 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
         <Card className="flex flex-col gap-6">
           <div>
             <MicroLabel tone="muted">Assessment for</MicroLabel>
-            <p className="text-washi-50 mt-1 font-serif text-xl">{subject}</p>
+            <p className="text-inkl-900 mt-1 font-serif text-xl">{subject}</p>
           </div>
 
           <dl className="flex flex-col gap-3 text-sm">
@@ -78,16 +78,16 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
             <Row label="Pages received" value={`${pages} ${pages === 1 ? 'file' : 'files'}`} />
           </dl>
 
-          <div className="border-ink-700 flex items-end justify-between border-t pt-6">
+          <div className="border-inkl-900/15 flex items-end justify-between border-t pt-6">
             <MicroLabel tone="muted">Total</MicroLabel>
-            <p className="text-washi-50 font-serif text-4xl sm:text-5xl">
+            <p className="text-inkl-900 font-serif text-4xl sm:text-5xl">
               {formatPrice(tier.priceInr)}
             </p>
           </div>
         </Card>
       </ConfirmOrder>
 
-      <div className="text-washi-300 flex flex-col gap-2 text-sm">
+      <div className="text-inkl-900/70 flex flex-col gap-2 text-sm">
         <p>
           {RISK_REVERSAL} If we cannot read your sample we will ask for a replacement, and you have
           14 days to send one.
@@ -107,10 +107,10 @@ export default async function CheckoutStage({ params }: { params: Promise<{ orde
 function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="flex flex-wrap justify-between gap-x-6 gap-y-1">
-      <dt className="text-washi-300">{label}</dt>
-      <dd className="text-washi-50 text-right">
+      <dt className="text-inkl-900/70">{label}</dt>
+      <dd className="text-inkl-900 text-right">
         {value}
-        {hint ? <span className="text-washi-300 mt-1 block text-xs">{hint}</span> : null}
+        {hint ? <span className="text-inkl-900/60 mt-1 block text-xs">{hint}</span> : null}
       </dd>
     </div>
   )
@@ -121,7 +121,7 @@ function InfoIcon() {
     <svg
       viewBox="0 0 20 20"
       fill="none"
-      className="text-warn-500 size-5 shrink-0"
+      className="text-warn-700 size-5 shrink-0"
       aria-hidden
       focusable="false"
     >

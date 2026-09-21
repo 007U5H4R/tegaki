@@ -30,6 +30,13 @@
   --color-warn-500: oklch(0.75 0.12 80); /* under review / in progress */
   --color-err-500: oklch(0.68 0.17 30); /* needs re-upload / errors */
 
+  /* State, darkened for TEXT on cream paper (auth surfaces). The -500 hues
+     are tuned for legibility on the dark ink ground; on paper-50 they drop
+     below 4.5:1, so paper surfaces use these for state text and thin marks. */
+  --color-ok-700: oklch(0.48 0.1 150); /* completed text on cream */
+  --color-warn-700: oklch(0.5 0.1 72); /* in-progress text on cream */
+  --color-err-700: oklch(0.5 0.16 30); /* error text on cream */
+
   /* Typography — families are wired to next/font in layout.tsx */
   --font-serif: var(--font-instrument-serif), Georgia, 'Times New Roman', serif;
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
@@ -109,6 +116,13 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-shu-500);
   outline-offset: 2px;
+}
+
+/* On the cream auth surfaces (data-theme="paper"), shu-500 sits ~2.5:1 on
+   paper-50 and misses the 3:1 non-text floor, so the ring darkens to shu-700.
+   Scoped to the paper wrapper, so the dark surfaces keep the shu-500 ring. */
+[data-theme='paper'] :focus-visible {
+  outline-color: var(--color-shu-700);
 }
 
 /* The one celebratory beat in the whole product (Design.md §4.3): the seal
@@ -249,4 +263,3 @@ body {
     scroll-behavior: auto !important;
   }
 }
-

@@ -29,10 +29,10 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
     <Card className="flex flex-col gap-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-washi-50 font-serif text-xl">
+          <h3 className="text-inkl-900 font-serif text-xl">
             {subject ?? (order.status === 'draft' ? 'New assessment' : 'Your assessment')}
           </h3>
-          <p className="text-washi-300 mt-1 font-mono text-xs">
+          <p className="text-inkl-900/70 mt-1 font-mono text-xs">
             {/* Short id: enough for Tushar and a customer to refer to the same
                 order over WhatsApp, without printing a full UUID at anyone. */}
             {order.id.slice(0, 8).toUpperCase()}
@@ -51,21 +51,21 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
       {onRail ? <StatusRail status={order.status} delivered={Boolean(order.delivered_at)} /> : null}
 
       {order.status === 'draft' ? (
-        <p className="text-washi-300 text-sm">
+        <p className="text-inkl-900/70 text-sm">
           You have not finished this request yet. Nothing has been submitted.
         </p>
       ) : null}
 
       {order.expected_delivery_date ? (
-        <p className="text-washi-300 text-sm">
+        <p className="text-inkl-900/70 text-sm">
           Expected by{' '}
-          <strong className="text-washi-50">{formatDay(order.expected_delivery_date)}</strong>
+          <strong className="text-inkl-900">{formatDay(order.expected_delivery_date)}</strong>
           {tier ? ` · ${tier.turnaroundDays} days from when your sample was accepted` : ''}
         </p>
       ) : null}
 
       {order.status === 'sample_under_review' ? (
-        <p className="text-washi-300 text-sm">
+        <p className="text-inkl-900/70 text-sm">
           Your analyst is checking the sample is readable. The turnaround starts once it is
           accepted, so a photo we cannot use costs you nothing.
         </p>
@@ -85,7 +85,7 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
         <>
           <DownloadReport orderId={order.id} />
           {order.delivered_at ? (
-            <p className="text-washi-300 text-sm">
+            <p className="text-inkl-900/70 text-sm">
               Sent to you personally on {formatDay(order.delivered_at)}.
             </p>
           ) : null}
@@ -95,7 +95,9 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
 
       {order.status === 'parked' ? <ParkedPanel /> : null}
 
-      {order.status !== 'draft' ? <p className="text-ink-500 text-sm">{PILOT_ORDER_NOTE}</p> : null}
+      {order.status !== 'draft' ? (
+        <p className="text-inkl-900/50 text-sm">{PILOT_ORDER_NOTE}</p>
+      ) : null}
 
       {action ? <div className="flex flex-wrap gap-3">{action}</div> : null}
     </Card>
@@ -108,17 +110,17 @@ export function OrderCard({ order, action }: { order: Order; action?: React.Reac
  */
 function ParkedPanel() {
   return (
-    <div className="border-ink-700 bg-ink-800 flex flex-col gap-2 rounded-2xl border p-5">
+    <div className="border-inkl-900/12 bg-inkl-900/5 flex flex-col gap-2 rounded-2xl border p-5">
       <MicroLabel tone="muted">Re-upload window closed</MicroLabel>
-      <p className="text-washi-50 text-sm">
+      <p className="text-inkl-900 text-sm">
         The two-week window for sending a replacement sample has closed, so this order is on hold.
         Nothing has been lost and your sample is still here.
       </p>
-      <p className="text-washi-300 text-sm">
+      <p className="text-inkl-900/70 text-sm">
         If you would still like it assessed,{' '}
         <a
           href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Parked Tegaki order')}`}
-          className="text-washi-50 underline underline-offset-2"
+          className="text-inkl-900 underline underline-offset-2"
         >
           email us
         </a>{' '}
@@ -139,9 +141,9 @@ function ParkedPanel() {
  */
 function SamplesPurgedNote({ at }: { at: string }) {
   return (
-    <div className="border-ink-700 flex flex-col gap-1 rounded-2xl border border-dashed p-4">
+    <div className="border-inkl-900/15 flex flex-col gap-1 rounded-2xl border border-dashed p-4">
       <MicroLabel tone="muted">Samples deleted</MicroLabel>
-      <p className="text-washi-300 text-sm">
+      <p className="text-inkl-900/70 text-sm">
         Your handwriting was deleted on {formatDay(at)}, {RETENTION_DAYS} days after your report was
         sent, as our retention policy promises. Your report is unaffected and stays downloadable
         here.

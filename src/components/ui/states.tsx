@@ -18,10 +18,10 @@ import { Card } from './card'
 export function SkeletonCard({ className }: { className?: string }) {
   return (
     <Card className={cn('animate-pulse motion-reduce:animate-none', className)} aria-hidden>
-      <div className="bg-ink-800 h-5 w-1/3 rounded" />
-      <div className="bg-ink-800 mt-3 h-3 w-1/4 rounded" />
-      <div className="bg-ink-800 mt-6 h-2 w-full rounded" />
-      <div className="bg-ink-800 mt-4 h-3 w-2/5 rounded" />
+      <div className="bg-ink-800 in-[[data-theme=paper]]:bg-inkl-900/10 h-5 w-1/3 rounded" />
+      <div className="bg-ink-800 in-[[data-theme=paper]]:bg-inkl-900/10 mt-3 h-3 w-1/4 rounded" />
+      <div className="bg-ink-800 in-[[data-theme=paper]]:bg-inkl-900/10 mt-6 h-2 w-full rounded" />
+      <div className="bg-ink-800 in-[[data-theme=paper]]:bg-inkl-900/10 mt-4 h-3 w-2/5 rounded" />
     </Card>
   )
 }
@@ -55,9 +55,15 @@ export function EmptyState({
 }) {
   return (
     <div className={cn('flex flex-col items-center px-6 py-16 text-center', className)}>
-      {icon ? <div className="text-shu-500 mb-6">{icon}</div> : null}
-      <h2 className="text-washi-50 max-w-[420px] text-2xl">{title}</h2>
-      <div className="text-washi-300 mt-3 max-w-[420px]">{body}</div>
+      {icon ? (
+        <div className="text-shu-500 in-[[data-theme=paper]]:text-shu-700 mb-6">{icon}</div>
+      ) : null}
+      <h2 className="text-washi-50 in-[[data-theme=paper]]:text-inkl-900 max-w-[420px] text-2xl">
+        {title}
+      </h2>
+      <div className="text-washi-300 in-[[data-theme=paper]]:text-inkl-900/70 mt-3 max-w-[420px]">
+        {body}
+      </div>
       {action ? <div className="mt-8">{action}</div> : null}
     </div>
   )
@@ -80,9 +86,14 @@ export function ErrorState({
   className?: string
 }) {
   return (
-    <Card className={cn('border-err-500/40 bg-err-500/5', className)}>
+    <Card
+      className={cn(
+        'border-err-500/40 bg-err-500/5 in-[[data-theme=paper]]:border-err-700/40 in-[[data-theme=paper]]:bg-err-700/5',
+        className,
+      )}
+    >
       <div role="alert" className="flex flex-col gap-4">
-        <p className="text-washi-50">{message}</p>
+        <p className="text-washi-50 in-[[data-theme=paper]]:text-inkl-900">{message}</p>
         <div>
           <Button variant="ghost" size="sm" onClick={onRetry}>
             Try again

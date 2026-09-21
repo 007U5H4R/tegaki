@@ -39,11 +39,11 @@ export function DownloadReport({ orderId }: { orderId: string }) {
         <Button type="button" onClick={download} loading={working}>
           Download report (PDF)
         </Button>
-        <p className="text-washi-300 text-sm">Also sent to you directly by Tushar.</p>
+        <p className="text-inkl-900/70 text-sm">Also sent to you directly by Tushar.</p>
       </div>
 
       {error ? (
-        <p role="alert" className="text-err-500 text-sm">
+        <p role="alert" className="text-err-700 text-sm">
           {error}
         </p>
       ) : null}

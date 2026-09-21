@@ -24,8 +24,8 @@ export default async function TierStage({ params }: { params: Promise<{ orderId:
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="text-washi-50 font-serif text-3xl">How deep should we go?</h1>
-        <p className="text-washi-300 mt-3">
+        <h1 className="text-inkl-900 font-serif text-3xl">How deep should we go?</h1>
+        <p className="text-inkl-900/70 mt-3">
           Every depth reads the same sample. What changes is how much of it we write up, and how
           long that takes.
         </p>

@@ -32,9 +32,13 @@ export function Stepper({
                   className={cn(
                     'flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
                     'duration-pop transition-[background-color,border-color,color] ease-out',
-                    done && 'border-shu-500 bg-shu-500 text-washi-50',
-                    active && 'border-shu-500 text-shu-500',
-                    !done && !active && 'border-ink-700 text-ink-500',
+                    done &&
+                      'border-shu-500 bg-shu-500 text-washi-50 in-[[data-theme=paper]]:border-shu-600 in-[[data-theme=paper]]:bg-shu-600 in-[[data-theme=paper]]:text-paper-50',
+                    active &&
+                      'border-shu-500 text-shu-500 in-[[data-theme=paper]]:border-shu-600 in-[[data-theme=paper]]:text-shu-700',
+                    !done &&
+                      !active &&
+                      'border-ink-700 text-ink-500 in-[[data-theme=paper]]:border-inkl-900/25 in-[[data-theme=paper]]:text-inkl-900/45',
                   )}
                 >
                   {done ? (
@@ -57,7 +61,9 @@ export function Stepper({
                     aria-hidden
                     className={cn(
                       'h-px flex-1 border-t border-dashed',
-                      done ? 'border-shu-500' : 'border-ink-700',
+                      done
+                        ? 'border-shu-500 in-[[data-theme=paper]]:border-shu-600'
+                        : 'border-ink-700 in-[[data-theme=paper]]:border-inkl-900/25',
                     )}
                   />
                 ) : null}
@@ -67,7 +73,11 @@ export function Stepper({
                 aria-current={active ? 'step' : undefined}
                 className={cn(
                   'font-mono text-[0.6875rem] tracking-[0.08em] uppercase',
-                  active ? 'text-washi-50' : done ? 'text-washi-300' : 'text-ink-500',
+                  active
+                    ? 'text-washi-50 in-[[data-theme=paper]]:text-inkl-900'
+                    : done
+                      ? 'text-washi-300 in-[[data-theme=paper]]:text-inkl-900/70'
+                      : 'text-ink-500 in-[[data-theme=paper]]:text-inkl-900/45',
                 )}
               >
                 {step}

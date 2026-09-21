@@ -47,7 +47,7 @@ export function TierForm({ orderId, defaultTier }: { orderId: string; defaultTie
 
       <Compare />
 
-      <p className="text-washi-300 text-sm">
+      <p className="text-inkl-900/70 text-sm">
         Sample not usable? Full refund. You also have 14 days to send a replacement page if we ask
         for one.
       </p>
@@ -55,7 +55,7 @@ export function TierForm({ orderId, defaultTier }: { orderId: string; defaultTie
       {state.error ? (
         <p
           role="alert"
-          className="border-err-500/40 bg-err-500/10 text-washi-50 rounded-lg border px-4 py-3 text-sm"
+          className="border-err-700/40 bg-err-700/10 text-inkl-900 rounded-lg border px-4 py-3 text-sm"
         >
           {state.error}
         </p>
@@ -85,8 +85,8 @@ function TierCard({
         'relative flex cursor-pointer flex-col gap-4 rounded-2xl border p-6',
         'duration-press transition-[border-color,background-color] ease-out',
         tier.id === 'core' && 'order-first sm:order-none',
-        checked ? 'border-shu-500 bg-shu-900/30' : 'border-ink-700 hover:border-ink-500',
-        'has-[:focus-visible]:outline-shu-500 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
+        checked ? 'border-shu-600 bg-shu-600/10' : 'border-inkl-900/15 hover:border-inkl-900/30',
+        'has-[:focus-visible]:outline-shu-700 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
       )}
     >
       <input
@@ -101,26 +101,26 @@ function TierCard({
       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div>
           {tier.popular ? (
-            <span className="border-shu-500 text-shu-500 mb-2 inline-block rounded-full border px-3 py-1 font-mono text-xs tracking-[0.08em] uppercase">
+            <span className="border-shu-600 text-shu-700 mb-2 inline-block rounded-full border px-3 py-1 font-mono text-xs tracking-[0.08em] uppercase">
               Most popular
             </span>
           ) : null}
 
-          <h2 className="text-washi-50 font-serif text-2xl">{tier.name}</h2>
+          <h2 className="text-inkl-900 font-serif text-2xl">{tier.name}</h2>
 
-          <p className="text-washi-300 mt-1 font-mono text-xs tracking-[0.08em] uppercase">
+          <p className="text-inkl-900/70 mt-1 font-mono text-xs tracking-[0.08em] uppercase">
             {tier.turnaroundDays}-day turnaround · {tier.pages}
           </p>
         </div>
 
-        <p className="text-washi-50 font-serif text-4xl sm:text-5xl">
+        <p className="text-inkl-900 font-serif text-4xl sm:text-5xl">
           {formatPrice(tier.priceInr)}
         </p>
       </div>
 
       <ul className="flex flex-col gap-2">
         {tier.contents.map((item) => (
-          <li key={item} className="text-washi-300 flex gap-3 text-sm">
+          <li key={item} className="text-inkl-900/70 flex gap-3 text-sm">
             <Tick />
             <span>{item}</span>
           </li>
@@ -139,26 +139,26 @@ function TierCard({
  */
 function Compare() {
   return (
-    <details className="border-ink-700 group rounded-2xl border">
+    <details className="border-inkl-900/15 group rounded-2xl border">
       <summary
         className={cn(
-          'text-washi-50 flex cursor-pointer list-none items-center justify-between gap-3 p-4',
-          'focus-visible:outline-shu-500 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+          'text-inkl-900 flex cursor-pointer list-none items-center justify-between gap-3 p-4',
+          'focus-visible:outline-shu-700 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
         )}
       >
         <span className="text-sm font-medium">Compare what&rsquo;s inside</span>
         <Chevron />
       </summary>
 
-      <div className="border-ink-700 flex flex-col gap-6 border-t p-4">
+      <div className="border-inkl-900/15 flex flex-col gap-6 border-t p-4">
         {TIER_LIST.map((tier) => (
           <div key={tier.id}>
-            <p className="text-shu-500 font-mono text-xs tracking-[0.08em] uppercase">
+            <p className="text-shu-700 font-mono text-xs tracking-[0.08em] uppercase">
               {tier.name} · {formatPrice(tier.priceInr)}
             </p>
             <ul className="mt-2 flex flex-col gap-1">
               {tier.contents.map((item) => (
-                <li key={item} className="text-washi-300 text-sm">
+                <li key={item} className="text-inkl-900/70 text-sm">
                   {item}
                 </li>
               ))}
@@ -175,7 +175,7 @@ function Tick() {
     <svg
       viewBox="0 0 16 16"
       fill="none"
-      className="text-shu-500 mt-0.5 size-4 shrink-0"
+      className="text-shu-700 mt-0.5 size-4 shrink-0"
       aria-hidden
       focusable="false"
     >
@@ -195,7 +195,7 @@ function Chevron() {
     <svg
       viewBox="0 0 16 16"
       fill="none"
-      className="text-washi-300 duration-press size-4 shrink-0 transition-transform ease-out group-open:rotate-180"
+      className="text-inkl-900/60 duration-press size-4 shrink-0 transition-transform ease-out group-open:rotate-180"
       aria-hidden
       focusable="false"
     >

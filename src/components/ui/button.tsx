@@ -24,9 +24,13 @@ const button = cva(
   {
     variants: {
       variant: {
+        // The vermilion pill reads on both the dark ground and cream paper,
+        // so primary needs no paper override — only a light label on the red.
         primary: 'bg-shu-600 text-washi-50 hover:bg-shu-700',
-        ghost: 'border border-washi-300/40 text-washi-50 hover:border-washi-50',
-        quiet: 'text-washi-300 hover:text-washi-50',
+        ghost:
+          'border border-washi-300/40 text-washi-50 hover:border-washi-50 in-[[data-theme=paper]]:border-inkl-900/30 in-[[data-theme=paper]]:text-inkl-900 in-[[data-theme=paper]]:hover:border-inkl-900',
+        quiet:
+          'text-washi-300 hover:text-washi-50 in-[[data-theme=paper]]:text-inkl-900/70 in-[[data-theme=paper]]:hover:text-inkl-900',
       },
       size: {
         md: 'px-6 py-3 text-base',

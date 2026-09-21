@@ -11,7 +11,16 @@ import { cn } from '@/lib/cn'
  */
 export function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div className={cn('border-ink-700 bg-ink-900 rounded-2xl border p-6', className)} {...props} />
+    <div
+      className={cn(
+        'border-ink-700 bg-ink-900 rounded-2xl border p-6',
+        // On cream, elevation cannot come from luminance, so the paper card
+        // earns its lift from a hairline border plus a soft ink shadow.
+        'in-[[data-theme=paper]]:border-inkl-900/12 in-[[data-theme=paper]]:bg-paper-100 in-[[data-theme=paper]]:shadow-[0_1px_2px_rgba(23,59,67,0.06),0_8px_20px_-12px_rgba(23,59,67,0.18)]',
+        className,
+      )}
+      {...props}
+    />
   )
 }
 
@@ -21,7 +30,15 @@ export function Card({ className, ...props }: React.ComponentProps<'div'>) {
  * assistive technology.
  */
 export function DashedRule({ className }: { className?: string }) {
-  return <hr aria-hidden className={cn('border-ink-700 border-t border-dashed', className)} />
+  return (
+    <hr
+      aria-hidden
+      className={cn(
+        'border-ink-700 in-[[data-theme=paper]]:border-inkl-900/20 border-t border-dashed',
+        className,
+      )}
+    />
+  )
 }
 
 /**
@@ -37,7 +54,9 @@ export function MicroLabel({
     <p
       className={cn(
         'font-mono text-xs tracking-[0.08em] uppercase',
-        tone === 'accent' ? 'text-shu-500' : 'text-washi-300',
+        tone === 'accent'
+          ? 'text-shu-500 in-[[data-theme=paper]]:text-shu-700'
+          : 'text-washi-300 in-[[data-theme=paper]]:text-inkl-900/60',
         className,
       )}
       {...props}

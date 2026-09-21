@@ -11,14 +11,22 @@ import { ORDER_STATUS_LABELS } from '@/lib/orders/status'
  * is exactly the distinction they could not afford to miss.
  */
 
+// The warn/err/ok tints stay (low-saturation washes read on cream too); only
+// the TEXT darkens on paper, since the -500 hues miss 4.5:1 on paper-50.
 const TONE: Record<OrderStatus, string> = {
-  draft: 'border-ink-500/40 bg-ink-800 text-washi-300',
-  sample_under_review: 'border-warn-500/40 bg-warn-500/10 text-warn-500',
-  needs_reupload: 'border-err-500/40 bg-err-500/10 text-err-500',
-  analysis_in_progress: 'border-warn-500/40 bg-warn-500/10 text-warn-500',
-  report_generating: 'border-warn-500/40 bg-warn-500/10 text-warn-500',
-  completed: 'border-ok-500/40 bg-ok-500/10 text-ok-500',
-  parked: 'border-ink-500/40 bg-ink-800 text-washi-300',
+  draft:
+    'border-ink-500/40 bg-ink-800 text-washi-300 in-[[data-theme=paper]]:border-inkl-900/20 in-[[data-theme=paper]]:bg-inkl-900/8 in-[[data-theme=paper]]:text-inkl-900/70',
+  sample_under_review:
+    'border-warn-500/40 bg-warn-500/10 text-warn-500 in-[[data-theme=paper]]:text-warn-700',
+  needs_reupload:
+    'border-err-500/40 bg-err-500/10 text-err-500 in-[[data-theme=paper]]:text-err-700',
+  analysis_in_progress:
+    'border-warn-500/40 bg-warn-500/10 text-warn-500 in-[[data-theme=paper]]:text-warn-700',
+  report_generating:
+    'border-warn-500/40 bg-warn-500/10 text-warn-500 in-[[data-theme=paper]]:text-warn-700',
+  completed: 'border-ok-500/40 bg-ok-500/10 text-ok-500 in-[[data-theme=paper]]:text-ok-700',
+  parked:
+    'border-ink-500/40 bg-ink-800 text-washi-300 in-[[data-theme=paper]]:border-inkl-900/20 in-[[data-theme=paper]]:bg-inkl-900/8 in-[[data-theme=paper]]:text-inkl-900/70',
 }
 
 const ICON: Record<OrderStatus, React.ReactNode> = {

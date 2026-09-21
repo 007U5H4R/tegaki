@@ -27,7 +27,7 @@ export function Checkbox({ label, error, className, id: providedId, ...props }: 
       <label
         htmlFor={id}
         className={cn(
-          'group text-washi-50 flex cursor-pointer items-start gap-3 py-2 text-base',
+          'group text-washi-50 in-[[data-theme=paper]]:text-inkl-900 flex cursor-pointer items-start gap-3 py-2 text-base',
           className,
         )}
       >
@@ -45,15 +45,17 @@ export function Checkbox({ label, error, className, id: providedId, ...props }: 
             className={cn(
               'flex size-5 items-center justify-center rounded border',
               'duration-press transition-[background-color,border-color] ease-out',
-              error ? 'border-err-500' : 'border-ink-500',
-              'peer-checked:border-shu-500 peer-checked:bg-shu-500',
+              error
+                ? 'border-err-500 in-[[data-theme=paper]]:border-err-700'
+                : 'border-ink-500 in-[[data-theme=paper]]:border-inkl-900/30',
+              'peer-checked:border-shu-500 peer-checked:bg-shu-500 in-[[data-theme=paper]]:peer-checked:border-shu-600 in-[[data-theme=paper]]:peer-checked:bg-shu-600',
               'peer-focus-visible:outline-shu-500 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
             )}
           >
             <svg
               viewBox="0 0 16 16"
               fill="none"
-              className="text-washi-50 duration-press size-3 scale-90 opacity-0 transition-[opacity,transform] ease-out peer-checked:scale-100 peer-checked:opacity-100"
+              className="text-washi-50 in-[[data-theme=paper]]:text-paper-50 duration-press size-3 scale-90 opacity-0 transition-[opacity,transform] ease-out peer-checked:scale-100 peer-checked:opacity-100"
             >
               <path
                 d="M3 8.5 6.5 12 13 4.5"
@@ -69,7 +71,7 @@ export function Checkbox({ label, error, className, id: providedId, ...props }: 
       </label>
 
       {error ? (
-        <p id={errorId} className="text-err-500 text-sm">
+        <p id={errorId} className="text-err-500 in-[[data-theme=paper]]:text-err-700 text-sm">
           {error}
         </p>
       ) : null}
@@ -87,7 +89,7 @@ export function Toggle({ label, className, id: providedId, ...props }: TogglePro
     <label
       htmlFor={id}
       className={cn(
-        'text-washi-50 flex cursor-pointer items-center gap-3 py-2 text-base',
+        'text-washi-50 in-[[data-theme=paper]]:text-inkl-900 flex cursor-pointer items-center gap-3 py-2 text-base',
         className,
       )}
     >
@@ -102,7 +104,7 @@ export function Toggle({ label, className, id: providedId, ...props }: TogglePro
         <span
           aria-hidden
           className={cn(
-            'bg-ink-700 h-6 w-11 rounded-full',
+            'bg-ink-700 in-[[data-theme=paper]]:bg-inkl-900/20 h-6 w-11 rounded-full',
             'duration-press transition-[background-color] ease-out',
             'peer-checked:bg-shu-600',
             'peer-focus-visible:outline-shu-500 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
@@ -110,7 +112,7 @@ export function Toggle({ label, className, id: providedId, ...props }: TogglePro
         />
         <span
           aria-hidden
-          className="bg-washi-50 duration-press pointer-events-none absolute left-0.5 size-5 rounded-full transition-transform ease-out peer-checked:translate-x-5"
+          className="bg-washi-50 duration-press pointer-events-none absolute left-0.5 size-5 rounded-full transition-transform ease-out peer-checked:translate-x-5 in-[[data-theme=paper]]:bg-white"
         />
       </span>
       <span>{label}</span>

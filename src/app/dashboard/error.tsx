@@ -28,14 +28,16 @@ export default function DashboardError({
   }, [error])
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-      <h1 className="text-washi-50 font-serif text-4xl">Your assessments</h1>
-      <div className="mt-8">
-        <ErrorState
-          message="We could not load your assessments just now. Nothing has been lost — please try again."
-          onRetry={reset}
-        />
-      </div>
-    </main>
+    <div data-theme="paper" className="bg-paper-50 text-inkl-900 grain min-h-dvh">
+      <main className="relative z-[1] mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
+        <h1 className="text-inkl-900 font-serif text-4xl">Your assessments</h1>
+        <div className="mt-8">
+          <ErrorState
+            message="We could not load your assessments just now. Nothing has been lost — please try again."
+            onRetry={reset}
+          />
+        </div>
+      </main>
+    </div>
   )
 }

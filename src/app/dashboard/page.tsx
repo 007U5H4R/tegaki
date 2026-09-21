@@ -46,64 +46,66 @@ export default async function DashboardPage({
   const paused = await isPaused()
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-      <MicroLabel>Tegaki · 手書き{profile?.role === 'admin' ? ' · admin' : ''}</MicroLabel>
+    <div data-theme="paper" className="bg-paper-50 text-inkl-900 grain min-h-dvh">
+      <main className="relative z-[1] mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
+        <MicroLabel>Tegaki · 手書き{profile?.role === 'admin' ? ' · admin' : ''}</MicroLabel>
 
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-washi-50 font-serif text-4xl">Your assessments</h1>
-          <p className="text-washi-300 mt-2">
-            Signed in as {profile?.full_name ? `${profile.full_name} · ` : ''}
-            {profile?.email ?? user.email}
-          </p>
-        </div>
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-inkl-900 font-serif text-4xl">Your assessments</h1>
+            <p className="text-inkl-900/70 mt-2">
+              Signed in as {profile?.full_name ? `${profile.full_name} · ` : ''}
+              {profile?.email ?? user.email}
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Without this the queue is reachable only by typing the URL. The
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Without this the queue is reachable only by typing the URL. The
               guard is what makes it safe; this is what makes it usable. */}
-          {profile?.role === 'admin' ? (
-            <Button asChild variant="ghost">
-              <Link href="/admin">Review queue</Link>
-            </Button>
-          ) : null}
+            {profile?.role === 'admin' ? (
+              <Button asChild variant="ghost">
+                <Link href="/admin">Review queue</Link>
+              </Button>
+            ) : null}
 
-          {paused ? null : (
-            <form action={createDraftOrder}>
-              <Button type="submit">New request</Button>
-            </form>
-          )}
+            {paused ? null : (
+              <form action={createDraftOrder}>
+                <Button type="submit">New request</Button>
+              </form>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Hiding the button is not what stops a new order — a trigger on the
+        {/* Hiding the button is not what stops a new order — a trigger on the
           table is. This is what tells somebody why the button is gone, and
           answers the question it provokes. */}
-      {paused ? (
-        <div className="border-warn-500/40 bg-warn-500/10 mt-6 rounded-2xl border p-5">
-          <p className="text-washi-50 text-sm">{PAUSED_MESSAGE}</p>
-          <p className="text-washi-300 mt-1 text-sm">
-            Anything already under way below carries on exactly as normal.
-          </p>
-        </div>
-      ) : null}
+        {paused ? (
+          <div className="border-warn-500/40 bg-warn-500/10 mt-6 rounded-2xl border p-5">
+            <p className="text-inkl-900 text-sm">{PAUSED_MESSAGE}</p>
+            <p className="text-inkl-900/70 mt-1 text-sm">
+              Anything already under way below carries on exactly as normal.
+            </p>
+          </div>
+        ) : null}
 
-      {/* Streamed, so the page shell and the New request button are usable
+        {/* Streamed, so the page shell and the New request button are usable
           before the list resolves — the skeleton is what people see while it
           does, not a blank screen. */}
-      <div className="mt-10">
-        <Suspense fallback={<SkeletonList count={2} />}>
-          <OrderList paused={paused} />
-        </Suspense>
-      </div>
+        <div className="mt-10">
+          <Suspense fallback={<SkeletonList count={2} />}>
+            <OrderList paused={paused} />
+          </Suspense>
+        </div>
 
-      <form action={signOut} className="mt-12">
-        <Button variant="ghost" size="sm" type="submit">
-          Sign out
-        </Button>
-      </form>
+        <form action={signOut} className="mt-12">
+          <Button variant="ghost" size="sm" type="submit">
+            Sign out
+          </Button>
+        </form>
 
-      {submitted ? <SubmittedToast /> : null}
-    </main>
+        {submitted ? <SubmittedToast /> : null}
+      </main>
+    </div>
   )
 }
 

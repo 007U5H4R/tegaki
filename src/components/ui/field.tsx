@@ -36,19 +36,24 @@ export function Field({ label, hint, error, required, className, children }: Fie
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <label htmlFor={id} className="text-washi-50 text-sm font-medium">
+      <label
+        htmlFor={id}
+        className="text-washi-50 in-[[data-theme=paper]]:text-inkl-900 text-sm font-medium"
+      >
         {label}
         {required ? (
-          <span className="text-shu-500 ml-1" aria-hidden>
+          <span className="text-shu-500 in-[[data-theme=paper]]:text-shu-700 ml-1" aria-hidden>
             *
           </span>
         ) : (
-          <span className="text-ink-500 ml-2 text-xs font-normal">optional</span>
+          <span className="text-ink-500 in-[[data-theme=paper]]:text-inkl-900/55 ml-2 text-xs font-normal">
+            optional
+          </span>
         )}
       </label>
 
       {hint ? (
-        <p id={hintId} className="text-washi-300 text-xs">
+        <p id={hintId} className="text-washi-300 in-[[data-theme=paper]]:text-inkl-900/65 text-xs">
           {hint}
         </p>
       ) : null}
@@ -56,7 +61,7 @@ export function Field({ label, hint, error, required, className, children }: Fie
       {children({ id, describedBy: describedBy || undefined, invalid: Boolean(error) })}
 
       {error ? (
-        <p id={errorId} className="text-err-500 text-sm">
+        <p id={errorId} className="text-err-500 in-[[data-theme=paper]]:text-err-700 text-sm">
           {error}
         </p>
       ) : null}
@@ -67,12 +72,15 @@ export function Field({ label, hint, error, required, className, children }: Fie
 const control = [
   'w-full rounded-lg border bg-ink-900 px-4 py-3 text-base text-washi-50',
   'placeholder:text-ink-500',
+  'in-[[data-theme=paper]]:bg-paper-100 in-[[data-theme=paper]]:text-inkl-900 in-[[data-theme=paper]]:placeholder:text-inkl-900/45',
   'transition-[border-color] duration-press ease-out',
   'disabled:cursor-not-allowed disabled:opacity-50',
 ].join(' ')
 
 const controlBorder = (invalid: boolean) =>
-  invalid ? 'border-err-500' : 'border-ink-700 hover:border-ink-500'
+  invalid
+    ? 'border-err-500 in-[[data-theme=paper]]:border-err-700'
+    : 'border-ink-700 hover:border-ink-500 in-[[data-theme=paper]]:border-inkl-900/15 in-[[data-theme=paper]]:hover:border-inkl-900/30'
 
 export function Input({
   invalid,

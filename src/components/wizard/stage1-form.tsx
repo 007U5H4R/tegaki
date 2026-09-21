@@ -35,7 +35,7 @@ export function Stage1Form({ orderId, defaults }: { orderId: string; defaults: S
   return (
     <form action={formAction} className="flex flex-col gap-10">
       <section className="flex flex-col gap-6">
-        <h1 className="text-washi-50 font-serif text-3xl">About you</h1>
+        <h1 className="text-inkl-900 font-serif text-3xl">About you</h1>
 
         <Field label="Full name" required error={errors.fullName}>
           {({ id, describedBy, invalid }) => (
@@ -112,7 +112,7 @@ export function Stage1Form({ orderId, defaults }: { orderId: string; defaults: S
       </section>
 
       <section className="flex flex-col gap-6">
-        <h2 className="text-washi-50 font-serif text-2xl">How we reach you</h2>
+        <h2 className="text-inkl-900 font-serif text-2xl">How we reach you</h2>
 
         <Field label="Email" required hint="Where your report link is sent." error={errors.email}>
           {({ id, describedBy, invalid }) => (
@@ -151,7 +151,7 @@ export function Stage1Form({ orderId, defaults }: { orderId: string; defaults: S
       </section>
 
       <section className="flex flex-col gap-6">
-        <h2 className="text-washi-50 font-serif text-2xl">Whose handwriting is this?</h2>
+        <h2 className="text-inkl-900 font-serif text-2xl">Whose handwriting is this?</h2>
 
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Who this is for">
           <SubjectChoice
@@ -173,7 +173,7 @@ export function Stage1Form({ orderId, defaults }: { orderId: string; defaults: S
         </div>
 
         {!isSelf ? (
-          <Card className="border-shu-900 bg-shu-900/20 flex flex-col gap-6">
+          <Card className="border-shu-600/30 bg-shu-600/8 flex flex-col gap-6">
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Their name" required error={errors.subjectName}>
                 {({ id, describedBy, invalid }) => (
@@ -209,7 +209,7 @@ export function Stage1Form({ orderId, defaults }: { orderId: string; defaults: S
               label={
                 <>
                   I have this person&rsquo;s permission to have their handwriting analysed.
-                  <span className="text-washi-300 mt-1 block text-sm">
+                  <span className="text-inkl-900/70 mt-1 block text-sm">
                     They have not agreed to anything by being written about, so we ask you to
                     confirm on their behalf.
                   </span>
@@ -223,7 +223,7 @@ export function Stage1Form({ orderId, defaults }: { orderId: string; defaults: S
       {state.formError ? (
         <p
           role="alert"
-          className="border-err-500/40 bg-err-500/10 text-washi-50 rounded-lg border px-4 py-3 text-sm"
+          className="border-err-700/40 bg-err-700/10 text-inkl-900 rounded-lg border px-4 py-3 text-sm"
         >
           {state.formError}
         </p>
@@ -258,8 +258,8 @@ function SubjectChoice({
       className={cn(
         'flex cursor-pointer flex-col gap-1 rounded-2xl border p-4',
         'duration-press transition-[border-color,background-color] ease-out',
-        checked ? 'border-shu-500 bg-shu-900/30' : 'border-ink-700 hover:border-ink-500',
-        'has-[:focus-visible]:outline-shu-500 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
+        checked ? 'border-shu-600 bg-shu-600/10' : 'border-inkl-900/15 hover:border-inkl-900/30',
+        'has-[:focus-visible]:outline-shu-700 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
       )}
     >
       <input
@@ -270,8 +270,8 @@ function SubjectChoice({
         onChange={onSelect}
         className="sr-only"
       />
-      <span className="text-washi-50 font-medium">{title}</span>
-      <span className="text-washi-300 text-sm">{body}</span>
+      <span className="text-inkl-900 font-medium">{title}</span>
+      <span className="text-inkl-900/70 text-sm">{body}</span>
     </label>
   )
 }

@@ -56,9 +56,9 @@ export function StatusRail({
                 aria-hidden
                 className={cn(
                   'grid size-2 shrink-0 place-items-center rounded-full',
-                  done && 'bg-ok-500',
-                  isActive && 'bg-shu-500',
-                  !done && !isActive && 'bg-ink-700',
+                  done && 'bg-ok-700',
+                  isActive && 'bg-shu-600',
+                  !done && !isActive && 'bg-inkl-900/20',
                   isActive && !hidden && 'rail-pulse',
                 )}
               />
@@ -67,7 +67,7 @@ export function StatusRail({
               {i < RAIL_STEPS.length - 1 ? (
                 <span
                   aria-hidden
-                  className={cn('h-px min-w-4 flex-1', done ? 'bg-ok-500/50' : 'bg-ink-700')}
+                  className={cn('h-px min-w-4 flex-1', done ? 'bg-ok-700/40' : 'bg-inkl-900/20')}
                 />
               ) : null}
             </div>
@@ -75,9 +75,9 @@ export function StatusRail({
             <span
               className={cn(
                 'font-mono text-[0.6875rem] tracking-[0.08em] uppercase',
-                done && 'text-ok-500',
-                isActive && 'text-shu-500',
-                !done && !isActive && 'text-ink-500',
+                done && 'text-ok-700',
+                isActive && 'text-shu-700',
+                !done && !isActive && 'text-inkl-900/45',
               )}
             >
               {/* Only the current step is announced as current; the rest are

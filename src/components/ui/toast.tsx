@@ -49,7 +49,7 @@ export function Toast({
         role="status"
         aria-live="polite"
         className={cn(
-          'border-ink-700 bg-ink-900 text-washi-50 pointer-events-auto',
+          'border-ink-700 bg-ink-900 text-washi-50 in-[[data-theme=paper]]:border-inkl-900/15 in-[[data-theme=paper]]:bg-paper-100 in-[[data-theme=paper]]:text-inkl-900 pointer-events-auto',
           'flex w-full max-w-md items-center gap-4 rounded-2xl border px-5 py-4 shadow-lg',
           'transition-[transform,opacity] duration-[400ms] ease-out',
           // @starting-style, so the entrance needs no mount flag and no
@@ -62,7 +62,7 @@ export function Toast({
         <button
           type="button"
           onClick={() => setLeaving(true)}
-          className="text-washi-300 hover:text-washi-50 -m-2 shrink-0 p-2"
+          className="text-washi-300 hover:text-washi-50 in-[[data-theme=paper]]:text-inkl-900/60 in-[[data-theme=paper]]:hover:text-inkl-900 -m-2 shrink-0 p-2"
         >
           <span className="sr-only">Dismiss</span>
           <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden focusable="false">

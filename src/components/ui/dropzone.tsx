@@ -55,19 +55,23 @@ export function Dropzone({
         'flex flex-col items-center gap-3 rounded-2xl border border-dashed px-6 py-10 text-center',
         'duration-pop transition-[border-color,transform] ease-out',
         disabled
-          ? 'border-ink-700 opacity-60'
+          ? 'border-ink-700 in-[[data-theme=paper]]:border-inkl-900/20 opacity-60'
           : dragging
-            ? 'border-shu-500 scale-[1.01]'
-            : 'border-ink-700',
+            ? 'border-shu-500 in-[[data-theme=paper]]:border-shu-600 scale-[1.01]'
+            : 'border-ink-700 in-[[data-theme=paper]]:border-inkl-900/25',
         className,
       )}
     >
       {disabled && disabledReason ? (
-        <p className="text-washi-300 text-sm">{disabledReason}</p>
+        <p className="text-washi-300 in-[[data-theme=paper]]:text-inkl-900/70 text-sm">
+          {disabledReason}
+        </p>
       ) : (
         <>
-          <p className="text-washi-50">Drag your photos here</p>
-          <p className="text-washi-300 text-xs">{hint}</p>
+          <p className="text-washi-50 in-[[data-theme=paper]]:text-inkl-900">
+            Drag your photos here
+          </p>
+          <p className="text-washi-300 in-[[data-theme=paper]]:text-inkl-900/65 text-xs">{hint}</p>
           <label className="mt-2">
             <input
               type="file"
@@ -107,11 +111,15 @@ export function FileRow({
   onRetry?: () => void
 }) {
   return (
-    <div className="border-ink-700 bg-ink-900 flex flex-col gap-2 rounded-lg border p-3">
+    <div className="border-ink-700 bg-ink-900 in-[[data-theme=paper]]:border-inkl-900/12 in-[[data-theme=paper]]:bg-paper-100 flex flex-col gap-2 rounded-lg border p-3">
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-washi-50 truncate text-sm">{name}</p>
-          <p className="text-washi-300 font-mono text-xs">{formatBytes(size)}</p>
+          <p className="text-washi-50 in-[[data-theme=paper]]:text-inkl-900 truncate text-sm">
+            {name}
+          </p>
+          <p className="text-washi-300 in-[[data-theme=paper]]:text-inkl-900/60 font-mono text-xs">
+            {formatBytes(size)}
+          </p>
         </div>
 
         {state.kind === 'error' && onRetry ? (
@@ -125,7 +133,7 @@ export function FileRow({
             type="button"
             onClick={onRemove}
             aria-label={`Remove ${name}`}
-            className="text-ink-500 duration-press hover:text-washi-50 flex size-11 items-center justify-center rounded-full transition-colors ease-out"
+            className="text-ink-500 duration-press hover:text-washi-50 in-[[data-theme=paper]]:text-inkl-900/50 in-[[data-theme=paper]]:hover:text-inkl-900 flex size-11 items-center justify-center rounded-full transition-colors ease-out"
           >
             <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden>
               <path
@@ -141,7 +149,7 @@ export function FileRow({
 
       {state.kind === 'uploading' ? (
         <div
-          className="bg-ink-800 h-1 overflow-hidden rounded-full"
+          className="bg-ink-800 in-[[data-theme=paper]]:bg-inkl-900/10 h-1 overflow-hidden rounded-full"
           role="progressbar"
           aria-valuenow={Math.round(state.progress)}
           aria-valuemin={0}
@@ -150,13 +158,15 @@ export function FileRow({
         >
           {/* scaleX rather than width: transforms skip layout and paint. */}
           <div
-            className="bg-shu-500 duration-pop h-full origin-left transition-transform ease-out"
+            className="bg-shu-500 in-[[data-theme=paper]]:bg-shu-600 duration-pop h-full origin-left transition-transform ease-out"
             style={{ transform: `scaleX(${state.progress / 100})` }}
           />
         </div>
       ) : null}
 
-      {state.kind === 'error' ? <p className="text-err-500 text-xs">{state.message}</p> : null}
+      {state.kind === 'error' ? (
+        <p className="text-err-500 in-[[data-theme=paper]]:text-err-700 text-xs">{state.message}</p>
+      ) : null}
     </div>
   )
 }

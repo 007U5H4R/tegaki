@@ -57,15 +57,15 @@ export function ReuploadPanel({
   }
 
   return (
-    <div className="border-err-500/40 bg-err-500/5 flex flex-col gap-5 rounded-2xl border p-5">
+    <div className="border-err-700/40 bg-err-700/5 flex flex-col gap-5 rounded-2xl border p-5">
       <div>
         {/* Not a repeat of the status chip beside it — this label introduces
             the analyst's own words, which is what the panel is for. */}
         <MicroLabel tone="muted">What your analyst saw</MicroLabel>
-        {reason ? <p className="text-washi-50 mt-2">{reason}</p> : null}
+        {reason ? <p className="text-inkl-900 mt-2">{reason}</p> : null}
         {deadlineLabel ? (
-          <p className="text-washi-300 mt-2 text-sm">
-            Send a replacement by <strong className="text-washi-50">{deadlineLabel}</strong>. After
+          <p className="text-inkl-900/70 mt-2 text-sm">
+            Send a replacement by <strong className="text-inkl-900">{deadlineLabel}</strong>. After
             that the order is parked and you would need to get in touch.
           </p>
         ) : null}
@@ -80,7 +80,7 @@ export function ReuploadPanel({
       />
 
       {error ? (
-        <p role="alert" className="text-err-500 text-sm">
+        <p role="alert" className="text-err-700 text-sm">
           {error}
         </p>
       ) : null}
@@ -89,7 +89,9 @@ export function ReuploadPanel({
         <Button type="button" onClick={resubmit} loading={working} disabled={!added}>
           Send it back for review
         </Button>
-        {!added ? <p className="text-washi-300 text-sm">Add your replacement page first.</p> : null}
+        {!added ? (
+          <p className="text-inkl-900/70 text-sm">Add your replacement page first.</p>
+        ) : null}
       </div>
     </div>
   )

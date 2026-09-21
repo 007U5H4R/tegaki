@@ -83,7 +83,7 @@ export function ConfirmOrder({
       {error ? (
         <p
           role="alert"
-          className="border-err-500/40 bg-err-500/10 text-washi-50 rounded-lg border px-4 py-3 text-sm"
+          className="border-err-700/40 bg-err-700/10 text-inkl-900 rounded-lg border px-4 py-3 text-sm"
         >
           {error}
         </p>
