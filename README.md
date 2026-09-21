@@ -47,8 +47,8 @@ confirms an order without charging for it.
 
 ## Screenshots
 
-> Tegaki ships a single, committed warm-dark theme (Design.md §2) — there is no light mode, so these are the
-> real UI as customers see it.
+> Tegaki ships a single committed theme — a terracotta wall and one continuous sheet of cream paper, with no
+> light/dark toggle — so these are the real UI as customers see it.
 
 ### Landing — your handwriting holds a story
 ![Tegaki — landing hero](./docs/screenshots/hero.jpg)
