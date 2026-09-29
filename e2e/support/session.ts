@@ -26,7 +26,9 @@ const secretKey = process.env.SUPABASE_SECRET_KEY
 export const supabaseConfigured = Boolean(url && publishableKey && secretKey)
 
 const MAX_CHUNK_SIZE = 3180
-const PASSWORD = 'tegaki-e2e-fixture-0f41ad'
+// Generated per run: the throwaway user is created and signed in within one call, so nothing
+// needs a fixed password in the repo (a hard-coded one would be public once the repo is).
+const PASSWORD = `e2e-${crypto.randomUUID()}`
 
 export function adminClient(): SupabaseClient {
   return createClient(url!, secretKey!, {

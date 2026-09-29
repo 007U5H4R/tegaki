@@ -40,7 +40,7 @@ describe.skipIf(!configured)('deleting an account', () => {
   it('takes the whole trail with it, even after a sample was uploaded', async () => {
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email: `delete-me-${runId}@tegaki.test`,
-      password: 'tegaki-deletion-fixture-b3f7c1',
+      password: `t-${crypto.randomUUID()}`, // per run, never a fixed secret in the repo
       email_confirm: true,
     })
     if (createError) throw createError
