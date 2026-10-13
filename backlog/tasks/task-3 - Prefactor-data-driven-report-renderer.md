@@ -26,7 +26,7 @@ Tegaki Machine TKT-01. Related EVAL: EVAL-038, EVAL-004. Spec: Tegaki Machine/ti
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Rendering Isha's content from a JSON draft gives 2 / 5 / 9 pages after the cover for Express / Core / Comprehensive (golden test)
+- [ ] #1 Rendering the sample client's content from a JSON draft gives 2 / 5 / 9 pages after the cover for Express / Core / Comprehensive (golden test)
 - [ ] #2 The committed base.docx contains no client names or report prose (automated check)
 - [ ] #3 All existing build checks still run: no em dashes, 12 traits, tier sections, page budget, no leftovers
 - [ ] #4 The draft JSON shape is documented as a schema and validated before rendering
