@@ -48,3 +48,35 @@ export const EXCERPTS: readonly Excerpt[] = [
     body: 'The lower loops in your writing are full and returned cleanly to the baseline, which often suggests emotional energy that is available rather than withheld. Against that, your margins narrow sharply on the right, a pattern that tends to indicate reluctance to leave a page — or a day — unfinished. Your signature is markedly smaller than your everyday writing, and that difference is usually worth reading as a preference for being effective in private over being visible in public. Read together with the trait dashboard, these suggest someone whose limits are set by what they will not leave undone rather than by what they cannot do.',
   },
 ] as const
+
+/**
+ * The full report behind each depth, as a PDF. Unlike the excerpts above,
+ * these are a real client's reports with the name redacted out of the text
+ * layer (not just covered), so they carry their own label rather than
+ * borrowing the fictional one.
+ */
+export type SampleReport = {
+  href: string
+  preview: string
+  pageCount: number
+}
+
+export const SAMPLE_LABEL = 'Real report · shared with the client’s permission, name redacted'
+
+export const SAMPLE_REPORTS: Record<Tier, SampleReport> = {
+  express: {
+    href: '/samples/express-insight-sample.pdf',
+    preview: '/samples/express-insight-page-2.png',
+    pageCount: 3,
+  },
+  core: {
+    href: '/samples/core-personality-sample.pdf',
+    preview: '/samples/core-personality-page-2.png',
+    pageCount: 6,
+  },
+  comprehensive: {
+    href: '/samples/comprehensive-profile-sample.pdf',
+    preview: '/samples/comprehensive-profile-page-2.png',
+    pageCount: 10,
+  },
+}

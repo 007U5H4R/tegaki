@@ -1,8 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import { useId, useRef, useState } from 'react'
 import { cn } from '@/lib/cn'
-import { EXCERPTS, FICTIONAL_LABEL } from '@/content/excerpts'
+import { EXCERPTS, FICTIONAL_LABEL, SAMPLE_LABEL, SAMPLE_REPORTS } from '@/content/excerpts'
 import { TIER_DETAILS } from '@/lib/tiers'
 
 /**
@@ -35,9 +36,13 @@ export function Excerpts() {
 
   const excerpt = EXCERPTS[active]!
   const tier = TIER_DETAILS[excerpt.tier]
+  const sample = SAMPLE_REPORTS[excerpt.tier]
 
   return (
-    <section id="report" className="mx-auto w-full max-w-[84rem] scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]">
+    <section
+      id="report"
+      className="mx-auto w-full max-w-[84rem] scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]"
+    >
       <div className="grid gap-12 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-20">
         <div>
           <h2 className="font-display text-[clamp(2.2rem,4vw,3.6rem)] leading-[1] font-bold tracking-[-0.015em]">
@@ -109,8 +114,38 @@ export function Excerpts() {
             {excerpt.subject} · {excerpt.context} · {tier.name}
           </p>
 
-          <h3 className="font-display mt-3 text-[1.6rem] leading-tight font-semibold text-balance">{excerpt.heading}</h3>
-          <p className="mt-5 max-w-[62ch] text-[1.05rem] leading-[1.7] opacity-90">{excerpt.body}</p>
+          <h3 className="font-display mt-3 text-[1.6rem] leading-tight font-semibold text-balance">
+            {excerpt.heading}
+          </h3>
+          <p className="mt-5 max-w-[62ch] text-[1.05rem] leading-[1.7] opacity-90">
+            {excerpt.body}
+          </p>
+
+          {/* The whole report, a real one, labelled as such on its own line. */}
+          <a
+            href={sample.href}
+            target="_blank"
+            rel="noopener"
+            className="group border-inkl-900/15 mt-8 flex items-center gap-5 border-t pt-6"
+          >
+            <Image
+              src={sample.preview}
+              alt={`Page 2 of the ${tier.name} sample report`}
+              width={816}
+              height={1056}
+              sizes="6rem"
+              className="w-20 shrink-0 rotate-[1.2deg] shadow-[0_1px_3px_rgba(60,20,10,0.25)] transition-transform duration-200 group-hover:rotate-0 sm:w-24"
+            />
+            <span className="flex flex-col gap-1">
+              <span className="text-[0.85rem] font-semibold">{SAMPLE_LABEL}</span>
+              <span className="link-fine self-start text-[1rem]">
+                Open the full {tier.name} sample
+              </span>
+              <span className="text-[0.85rem] opacity-65">
+                {sample.pageCount} pages · PDF, opens in a new tab
+              </span>
+            </span>
+          </a>
         </div>
       </div>
     </section>
