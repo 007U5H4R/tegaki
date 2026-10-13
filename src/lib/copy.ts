@@ -35,4 +35,4 @@ export const RISK_REVERSAL = 'Sample not usable? Full refund.'
  * deep-link the PRD also mentions is NOT here — it needs a phone number
  * nobody has given, and a broken link is worse than one honest channel.
  */
-export const CONTACT_EMAIL = 'snowreaderofficial@gmail.com'
+export const CONTACT_EMAIL = 'tushar_pathak@outlook.com'
