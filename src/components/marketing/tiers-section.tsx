@@ -18,14 +18,17 @@ import { Reveal } from './reveal'
  */
 export function TiersSection() {
   return (
-    <section id="pricing" className="mx-auto w-full max-w-[84rem] scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]">
+    <section
+      id="pricing"
+      className="mx-auto w-full max-w-[84rem] scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]"
+    >
       <Reveal soft className="max-w-[44rem]">
         <h2 className="font-display text-[clamp(2.2rem,4vw,3.6rem)] leading-[1] font-bold tracking-[-0.015em] text-balance">
           How deep should we go?
         </h2>
         <p className="mt-5 max-w-[54ch] text-[1.05rem] leading-relaxed opacity-85">
-          Every depth is read by the same person — Tushar Pathak — from the same two pages. What changes
-          is how much of what he sees gets written up, and how long that takes.
+          Every depth is read by the same person — Tushar Pathak — from the same two pages. What
+          changes is how much of what he sees gets written up, and how long that takes.
         </p>
       </Reveal>
 
@@ -42,7 +45,8 @@ export function TiersSection() {
             className={cn(
               'relative flex list-none flex-col gap-7 px-1 pt-10 pb-2 lg:px-9 lg:pt-14 lg:pb-12',
               'border-inkl-900/15 lg:border-l lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0',
-              tier.popular && 'bg-terra-500/8 order-first lg:order-none lg:-mt-px lg:border-t lg:border-t-terra-500/50',
+              tier.popular &&
+                'bg-terra-500/8 lg:border-t-terra-500/50 order-first lg:order-none lg:-mt-px lg:border-t',
             )}
           >
             {tier.popular ? (
@@ -60,13 +64,20 @@ export function TiersSection() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M 4 6 C 18 8 28 18 32 34 M 24 28 L 32 36 L 38 26" pathLength="100" className="draw-on-reveal" style={{ '--at': '500ms' } as React.CSSProperties} />
+                  <path
+                    d="M 4 6 C 18 8 28 18 32 34 M 24 28 L 32 36 L 38 26"
+                    pathLength="100"
+                    className="draw-on-reveal"
+                    style={{ '--at': '500ms' } as React.CSSProperties}
+                  />
                 </svg>
               </span>
             ) : null}
 
             <div>
-              <h3 className="font-display text-[1.55rem] leading-tight font-semibold">{tier.name}</h3>
+              <h3 className="font-display text-[1.55rem] leading-tight font-semibold">
+                {tier.name}
+              </h3>
               <p className="font-display mt-4 text-[3rem] leading-none font-bold tracking-[-0.02em]">
                 {formatPrice(tier.priceInr)}
               </p>

@@ -18,20 +18,29 @@ import { Reveal } from './reveal'
  */
 export function Faq() {
   return (
-    <section id="faq" className="mx-auto w-full max-w-[84rem] scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]">
+    <section
+      id="faq"
+      className="mx-auto w-full max-w-[84rem] scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]"
+    >
       <div className="grid gap-12 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-20">
         <Reveal soft className="lg:sticky lg:top-28 lg:self-start">
           <h2 className="font-display text-[clamp(2.2rem,4vw,3.6rem)] leading-[1] font-bold tracking-[-0.015em] text-balance">
             Before you send anything.
           </h2>
-          <p className="font-hand text-pencil-600 mt-6 -rotate-2 text-[1.45rem] leading-[1.1] font-medium" aria-hidden>
+          <p
+            className="font-hand text-pencil-600 mt-6 -rotate-2 text-[1.45rem] leading-[1.1] font-medium"
+            aria-hidden
+          >
             the awkward ones
             <br />
             are answered first.
           </p>
           <p className="mt-10 max-w-[30ch] text-[0.98rem] leading-relaxed opacity-85">
             Something not covered? Write to Tushar Pathak directly at{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="link-fine break-all font-medium opacity-100">
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="link-fine font-medium break-all opacity-100"
+            >
               {CONTACT_EMAIL}
             </a>
             .
@@ -46,7 +55,9 @@ export function Faq() {
                   {item.q}
                   <Plus />
                 </summary>
-                <p className="max-w-[62ch] pb-7 text-[1.02rem] leading-[1.7] opacity-90">{item.a}</p>
+                <p className="max-w-[62ch] pb-7 text-[1.02rem] leading-[1.7] opacity-90">
+                  {item.a}
+                </p>
               </details>
             </Reveal>
           ))}

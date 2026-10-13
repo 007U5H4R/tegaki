@@ -19,7 +19,10 @@ import { Reveal } from './reveal'
 export function About() {
   return (
     <section className="mx-auto w-full max-w-[84rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-[4vw]">
-      <Reveal soft className="border-inkl-900/15 grid items-start gap-12 border-t pt-14 lg:grid-cols-[minmax(0,18rem)_1fr] lg:gap-20 lg:pt-16">
+      <Reveal
+        soft
+        className="border-inkl-900/15 grid items-start gap-12 border-t pt-14 lg:grid-cols-[minmax(0,18rem)_1fr] lg:gap-20 lg:pt-16"
+      >
         {/* the snapshot */}
         <figure className="relative mx-auto w-56 -rotate-[2.5deg] lg:mx-0 lg:w-full">
           <div className="border-paper-100 relative border bg-[#faf3e4] p-3 pb-10 shadow-[0_1px_0_rgba(60,20,10,0.25)]">
@@ -58,7 +61,10 @@ export function About() {
             rather than minutes, why there is a limit on how many samples are in the queue at once,
             and why nothing reaches you until it has been read through in full.
           </p>
-          <p className="font-hand text-pencil-600 mt-8 -rotate-2 text-[1.6rem] leading-none font-medium" aria-hidden>
+          <p
+            className="font-hand text-pencil-600 mt-8 -rotate-2 text-[1.6rem] leading-none font-medium"
+            aria-hidden
+          >
             — Tushar Pathak
           </p>
         </div>
