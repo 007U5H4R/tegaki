@@ -452,3 +452,10 @@ The three **sample report PDFs** are not built. They need C1 (the per-tier promp
 ### Known load flake
 
 `reupload-loop.spec.ts` failed once in a full 90-test run waiting for the status chip, and passed on both projects in isolation immediately after, and in the next full run. Four Playwright workers share one `next dev` server, and first-hit route compilation under that load can outrun a 30-second wait. Recorded rather than chased: the behaviour it covers is separately proven by `tests/rls/reupload.test.ts`.
+
+## Payments amendment v1.1 — Stage 7 (from 2026-10-14)
+
+Briefs: `plans/T16…T25-*.md` · architecture `technical-plan.md` · cases `test-cases.md` (TC-P*). One branch per ticket off `main`.
+
+- T24/R1 · evidence · — · `CRON_SECRET` created 2026-09-01 (with the project), never updated; Vercel sends it on every cron call, so H1 (missing secret) is ruled out. Production deploys: 09-21, 09-29, 10-13. Most likely H2 (Supabase didn't count the job's RPCs as activity). Awaiting Tushar's Supabase Usage chart (09-29 → 10-13) to confirm.
+- T24/A1–C1 · done (uncommitted, branch feat/t24-keepalive) · implementer Sonnet; review by orchestrator (Opus 5.5) · keep-alive route + heartbeat migration (pushed to Supabase, dry-run showed only it) + admin panel. Orchestrator re-ran gates: typecheck clean, eslint 0 errors, claims clean, vitest 81/81 (tests/lib + heartbeat + retention RLS). TC-P01–P05 pass. Pending: commit/merge approval, D1 production call, TC-P06 (cron listed), RCA1 (needs Supabase Usage chart).

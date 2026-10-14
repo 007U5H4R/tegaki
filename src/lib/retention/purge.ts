@@ -1,7 +1,6 @@
 import 'server-only'
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { supabaseSecretKey, supabaseUrl } from '@/lib/supabase/env'
+import { serviceClient } from '@/lib/supabase/service'
 import { SAMPLES_BUCKET } from '@/lib/uploads/constants'
 
 export type RetentionReport = {
@@ -12,20 +11,6 @@ export type RetentionReport = {
   parked: number
   undeliveredBacklog: number
   objectErrors: string[]
-}
-
-/**
- * The service-role client, used here and in the test suite only.
- *
- * The retention job has no user to act as — it runs at 03:30 with nobody
- * signed in — and the rows it must reach belong to every customer at once.
- * That is the one shape of work RLS cannot express, so it is the one place
- * in the app this key is allowed.
- */
-function serviceClient(): SupabaseClient {
-  return createClient(supabaseUrl(), supabaseSecretKey(), {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
 }
 
 /**
