@@ -71,7 +71,7 @@ const html = `<!doctype html>
 
   <div class="foot">
     <span>Read and written by hand · from ₹999</span>
-    <span class="mono">tegaki-one.vercel.app</span>
+    <span class="mono">tegaki.tusharpathak.com</span>
   </div>
 </body></html>`
 

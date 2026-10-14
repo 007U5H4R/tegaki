@@ -11,7 +11,7 @@
  * reached a build with the variable missing would cache a link to a machine
  * it cannot see, and cached failures are the expensive kind.
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tegaki-one.vercel.app')
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tegaki.tusharpathak.com')
   .trim()
   .replace(/\/+$/, '')
 
