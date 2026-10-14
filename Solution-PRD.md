@@ -1,6 +1,7 @@
 # Solution PRD — Tegaki (手書き)
 
-> **Status:** v1.0 — for Tushar's approval · **Date:** 2026-09-01 · **Owner:** Tushar Pathak
+> **Status:** v1.1 — payments amendment **approved** 2026-10-14 (v1.0 approved 2026-09-01) · **Owner:** Tushar Pathak
+> **v1.1 changes:** real payments via a self-generated per-order UPI QR with manual verification (§5, §6.3, §6.4, §6.5, §6.6, §6.7), hosting stays on Vercel Hobby with the Hobby terms recorded as an accepted pilot risk, served at `tegaki.tusharpathak.com` (§9), risks updated (§11). Decisions S1–S5, S7, S8 in `decisions.md` (S6 rejected).
 > Distilled from `Discovery-PRD.md` (3 grilling rounds, all decisions settled 2026-09-01 — that file remains the audit trail; this file states only the final truth and is the input to `t-design` and `/to-tickets`).
 
 ---
@@ -20,10 +21,11 @@ This is a **proof-of-concept pet project**: no launch deadline, no expected audi
 3. Experience reads trustworthy and premium on a phone (~375px).
 4. Zero handwriting samples or reports accessible to anyone except the subject's account and admin.
 5. Post-pilot: a written go/no-go note on investing in launch-grade upgrades (§10).
+6. **Real money, honestly handled:** at least one stranger pays through the UPI QR and the payment is verified end-to-end; **no sample is ever approved without a verified payment** (enforced in the database, not the UI); every agreed refund is recorded within 7 working days.
 
 ## 3. Non-goals (pilot)
 
-Payment-gateway integration (data model stays gateway-ready) · custom domain · transactional/lifecycle emails · WhatsApp Business API automation · in-app report generation · payment-screenshot OCR · client-side blur/lighting detection · testimonials until real ones exist · corporate packages · native mobile app · multi-analyst support · non-INR pricing.
+Payment-gateway integration (data model stays gateway-ready) · automatic payment verification · a dedicated domain such as tegaki.in (the pilot uses `tegaki.tusharpathak.com`) · GST invoicing · transactional/lifecycle emails · WhatsApp Business API automation · in-app report generation · payment-screenshot OCR · client-side blur/lighting detection · testimonials until real ones exist · corporate packages · native mobile app · multi-analyst support · non-INR pricing.
 
 ## 4. Users
 
@@ -39,7 +41,7 @@ Payment-gateway integration (data model stays gateway-ready) · custom domain ·
 | Length | 1–2 pages | 3–5 pages | 6+ pages |
 | Contents | Short intro · Executive Summary · 6-trait dashboard · top-3 strengths · one development insight · primary-signature note | Full 10–12-trait dashboard · **archetype title** · five core sections (Foundation / Independence / Discipline / Excellence / Emotional Awareness) · Strengths Profile · Development Opportunities · signature-vs-text comparison | All 16 Master-Prompt sections · MBTI correlation (indicative) · **radar chart** · public-projection signature analysis |
 
-Pilot checkout is **demo mode**: prices are displayed, but the payment step is clearly labeled "Pilot — no real payment taken" and marks the order paid. (Real payments are a post-pilot upgrade; see §10.)
+Checkout takes **real payment by UPI QR** (v1.1, replacing demo mode): a per-order QR for the exact tier price, paid to Tushar's UPI ID, verified by Tushar by hand. Details in §6.7. (Gateway payments remain a post-pilot upgrade; see §10.)
 
 ## 6. Product scope
 
@@ -57,17 +59,18 @@ Google OAuth only (Supabase Auth). Account required before the wizard (the dashb
 1. **Profile & subject** — name, age, gender (used only for report pronouns/language), city, country, email, phone (+WhatsApp preference toggle); "who is this analysis for?" (self / someone else → subject name + age + **consent checkbox**). Wizard progress persists as a draft order — the user can leave and resume.
 2. **Sample guidelines & upload** — interactive guardrails checklist (unlined paper · 2+ pages · 3 original signatures at the bottom · spontaneous original text, no poems/copied content); **ideal-vs-rejected scan gallery** (good lighting vs blur, unlined vs lined, full vs truncated signatures); multi-file upload, JPG/PNG/PDF, to private storage.
 3. **Tier selection** — three cards, Core anchored "Most Popular"; links to the sample excerpts.
-4. **Demo checkout** — order summary + price, pilot-mode notice, confirm → order created as paid (demo).
+4. **Pay by UPI** — order summary + price; a per-order QR plus an **Open in UPI app** button (phones cannot scan their own screen); the customer pays, then **attaches the payment screenshot (required)** and may type the UTR (optional) → order submitted with payment `awaiting_verification`. See §6.7.
 
 ### 6.4 Customer dashboard
 - All orders as cards: subject, tier, submitted date, status chip, expected-delivery date (approval + tier days).
+- Payment state on every card: *Verifying payment* · *Payment not found* (with Tushar's reason + re-attach screenshot control) · *Paid* · *Refunded*.
 - Completed orders: **report PDF download** (signed URL).
 - `Needs Re-upload` orders: inline re-upload action with the rejection reason.
 - "New Request" action always available.
 - **Every data view implements all four screen states — loading, empty (first-run trust moment), error with retry, working.**
 
 ### 6.5 Admin panel
-Order queue (newest first, filter by status) · sample viewer/download · **approve sample** (starts turnaround clock) / **reject with reason** (→ `Needs Re-upload`) · status controls · **upload report PDF** · **mark delivered** (after Tushar sends it manually) · **pause-new-orders switch** (wizard shows a "temporarily closed" notice).
+Order queue (newest first, filter by status **and payment state**) · **payment screenshot viewer + UTR** · **verify payment** / **payment not found (with reason)** · **mark refunded (refund UTR + note)** · sample viewer/download · **approve sample** (starts turnaround clock) / **reject with reason** (→ `Needs Re-upload`) · status controls · **upload report PDF** · **mark delivered** (after Tushar sends it manually) · **pause-new-orders switch** (wizard shows a "temporarily closed" notice).
 
 ### 6.6 Order status machine
 
@@ -81,6 +84,16 @@ Order queue (newest first, filter by status) · sample viewer/download · **appr
 | `parked` | Auto: >14 days in `needs_reupload` | "Order parked — contact us" |
 
 Re-upload returns the order to `sample_under_review`. No other transitions exist.
+
+**Payment gate (v1.1):** the admin cannot move an order out of `sample_under_review` to `analysis_in_progress` unless its payment is `verified` — enforced by the transition function, not the button. Rejecting a sample (`needs_reupload`) needs no payment. An order whose payment stays `not_found` for 14 days parks exactly like a stale re-upload. A refund is a payment state, not an order state: the order keeps its status and the card shows *Refunded*.
+
+### 6.7 Payment by UPI QR (v1.1)
+
+- **QR payload:** `upi://pay?pa=<UPI_VPA>&pn=<UPI_PAYEE_NAME>&am=<amount>&cu=INR&tn=Tegaki <order code>`. The VPA and payee name are environment config (Tushar's personal UPI ID for the pilot), never hard-coded. The amount comes from the server's `tier_price_inr()`, never the browser. The order code is short (e.g. `T-4F2A`) so a bank-app credit can be matched to its order.
+- **Payment states:** `awaiting_verification` → `verified` | `not_found` (with reason; customer re-attaches → back to `awaiting_verification`); `verified` → `refunded` (refund UTR + note). One payment row per order (existing unique constraint).
+- **Screenshot:** required, one image per attempt, stored in a **private** bucket under the same RLS, signed-URL and 90-day retention rules as samples. It is evidence to match against the bank app, **not proof**: verification means Tushar sees the credit in his bank. No OCR.
+- **Refunds:** sent manually from Tushar's UPI app to the payer, then recorded in admin; the 7-working-day promise on the Refunds page is measured from the agreement.
+- **Copy:** every "pilot — no real payment" string, the Refunds page's "once payments are real" line, and the FAQ are rewritten for real payment; the claims guard still runs over all of it.
 
 ## 7. Fulfillment runbook (offline — not part of the app)
 
@@ -101,8 +114,8 @@ Re-upload returns the order to `sample_under_review`. No other transitions exist
 
 ## 9. Architecture
 
-- **Stack:** Next.js (App Router) + Supabase (Google auth, Postgres, **private** storage buckets for samples/reports with signed URLs) + Vercel **Hobby** (free `*.vercel.app` subdomain; ToS-clean because the pilot transacts no real money).
-- **Entities:** `profiles` (auth mirror + role) · `orders` (buyer, subject fields, tier, status, timestamps, delivery prefs) · `order_files` (sample uploads, versioned for re-uploads) · `reports` (PDF ref, validated-at) · `payments` (demo record now; provider/reference/status fields **gateway-ready** for post-pilot Cashfree) · `settings` (pause switch).
+- **Stack:** Next.js (App Router) + Supabase (Google auth, Postgres, **private** storage buckets for samples/reports/payment screenshots with signed URLs) + Vercel **Hobby**, served at **`tegaki.tusharpathak.com`** (DNS already in Tushar's Vercel account; `tegaki-one.vercel.app` redirects to it). v1.1: Hobby is non-commercial-only and the site now takes real money — kept for the pilot as an **accepted risk** (S8), revisited at the go/no-go note; Vercel Pro is the remedy. The nightly retention job also serves as the Supabase keep-alive, logging loudly if the database does not answer. Supabase Auth redirect URLs and Google OAuth origins are updated for the new domain.
+- **Entities:** `profiles` (auth mirror + role) · `orders` (buyer, subject fields, tier, status, timestamps, delivery prefs) · `order_files` (sample uploads, versioned for re-uploads) · `reports` (PDF ref, validated-at) · `payments` (v1.1: provider `upi_qr`, UTR + screenshot ref, verification/refund fields; still **gateway-ready** for post-pilot Cashfree) · `settings` (pause switch).
 - **Enforcement at the data layer:** RLS — buyers read/write only their own orders; only admin mutates statuses; storage buckets private by default. Status transitions validated server-side against §6.6.
 - **Retention:** samples auto-deleted 90 days after delivery (scheduled job); reports persist in the dashboard; delete-my-data honored on request.
 - **Responsive gates (mandatory):** no horizontal scroll, usable nav, readable content at ~375px and ~768px; desktop unchanged.
@@ -116,7 +129,12 @@ Real payments via Cashfree (individuals onboard with PAN + Aadhaar + bank + Udya
 - **Single-operator turnaround** — mitigated by the pause switch + clock-starts-at-approval.
 - **Claims/positioning** — mitigated by the §1 guardrail + disclaimers on site, checkout, and every report footer.
 - **Sensitive data (handwriting)** — mitigated by private buckets, RLS, signed URLs, 90-day deletion.
-- **Demo checkout mistaken for a real purchase** — mitigated by explicit pilot labeling at the checkout step and on receipts/status copy.
+- **False or reused payment screenshots** — mitigated by verifying every payment against the bank app before sample approval (DB-enforced gate), the order code in the UPI note, and the unique payment-per-order constraint.
+- **Payer edits the amount in their UPI app** — mitigated by matching the credited amount at verification; short payments are marked *Payment not found* with the reason.
+- **Personal UPI ID flagged by the bank for business receipts** — accepted at pilot volume (~10 orders/month); the VPA is config, so switching to a merchant ID is a settings change.
+- **Vercel Hobby is non-commercial-only; the project could be suspended mid-order** — **accepted** for the pilot (S8). If it happens: refund every in-flight order from the admin record, upgrade to Pro (~$20/month), redeploy. Revisited at the go/no-go note.
+- **Domain move breaks Google sign-in** — mitigated by adding the new domain to Supabase redirect URLs and Google OAuth origins and verifying sign-in on it before redirecting the old URL.
+- **Silent outages** (Supabase paused unnoticed on 2026-10-13) — mitigated by the daily keep-alive that logs an error when the database does not answer.
 
 ## 12. Process
 

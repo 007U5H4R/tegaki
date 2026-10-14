@@ -319,3 +319,205 @@ T01 ─┬─ T02 ─┬─ T03 ─┬─ T04 ─┬─ T06 ─ T07 ─┬─ T0
 4. **Per-file tickets** — not published; this consolidated file + `plans/T*.md` are the build's briefs (per-file copies would drift; the ledger tracks per-task state instead).
 
 **Plans:** every ticket now has its implementation plan in `plans/` (T01–T15, C1–C4), plus `plans/BUILD-ORCHESTRATION.md` for the build itself. Hanko seal = **candidate B**; hero film (C5) = **shot and passed** (15s v3 master, see `Hero-Video-Prompts.md`).
+
+---
+---
+
+# Payments v1.1 — UPI QR (SIGNED OFF by Tushar 2026-10-14)
+
+> **Inputs:** `Solution-PRD.md` v1.1 (§6.3–§6.7, §9, §11) · `Design.md` §6 (frozen) · `decisions.md` S1–S8, EV5, D1–D3. No EVAL links: Stage 3 was skipped (EV5). Each ticket names its own tests instead.
+> **Campfire:** all of these sit under **TASK-22**. Provisional IDs T16–T25 until they're published.
+> **Standing gates** (above) apply to every UI ticket. The baseline gate applies to every ticket: typecheck + lint + claims guard + the relevant tests pass.
+> **Release rule (signed off):** every ticket ships to production as soon as it's done, behind a server-side switch `PAYMENTS_MODE` = `demo` | `admin_preview` | `live`, default `demo`.
+> - `demo`: every customer keeps today's checkout and copy.
+> - `admin_preview`: only allowlisted admins get the UPI flow, so Tushar can test with real QRs in production.
+> - `live`: customers get the UPI flow and the new copy.
+>
+> The site never shows a real QR beside demo copy, because both are chosen by the same switch. T24 and T25 ship first, on their own. **T23 flips the switch to `live`.**
+
+| Phase | Tickets | QA gate at the boundary |
+|---|---|---|
+| **6 · Ops (ships now)** | T24, T25 | Supabase can't pause silently again; sign-in works on the new domain |
+| **7 · Pay tracer** | T16, T17 | A customer pays from a phone and submits a receipt; the dashboard says "Checking your payment" |
+| **8 · Verify loop** | T18, T19, T20 | Tushar can verify, reject with a reason, or refund, and the database enforces the gate |
+| **9 · Ship set** | T21, T22, T23 | No demo wording anywhere; screenshots honour retention; full flow on a phone at 375px |
+
+## T24 · Supabase keep-alive and the pause RCA
+**Blocked by:** —
+
+**Delivers:** A daily scheduled job that does a real database read and logs `[keepalive]` at error level, with a non-2xx response, when Supabase doesn't answer. Plus a written root cause of the 2026-10-13 pause: did `/api/cron/retention` run, and does Supabase count it as activity?
+
+**Acceptance**
+- With the DB healthy: one real read, 2xx, one info log line. With the DB client failing: an error log and a non-2xx status (route test with a stubbed client).
+- The cron schedule is in `vercel.json` and protected by `CRON_SECRET`, like retention.
+- The RCA is recorded in `decisions.md` as RCA1, and a regression test guards the cause it finds.
+
+**Verification:** route tests for both branches · a manual call to the deployed route returns 2xx · the RCA note.
+
+## T25 · Move to tegaki.tusharpathak.com
+**Blocked by:** —
+
+**Delivers:** The app served at `tegaki.tusharpathak.com` on the existing Vercel project. `tegaki-one.vercel.app` 308-redirects to it with path and query preserved. Supabase Auth site URL + redirect URLs, Google OAuth authorised origins, and `NEXT_PUBLIC_SITE_URL` all updated.
+
+**Acceptance**
+- Google sign-in completes back to the dashboard on the new domain (verified on production).
+- Old-URL deep links (e.g. `/dashboard`, `/sign-in?tier=core`) land on the same path on the new domain.
+- Link previews (OG tags) use the new absolute URLs.
+
+**Verification:** a production sign-in walk-through · `curl -I` on three old paths · re-check in an OG inspector.
+
+## T16 · Pay screen: per-order UPI QR and app link (riskiest slice)
+**Blocked by:** —
+
+**Delivers:** The **`PAYMENTS_MODE` switch** (server-only env var, default `demo`; `admin_preview` shows the UPI flow only to `ADMIN_EMAILS`), and wizard stage 4's **pay screen** (Design.md §6.1). Headline "₹X to <payee>"; on phones an "Open in UPI app" `upi://pay` link with the QR behind a disclosure; on desktop the QR; UPI ID + Copy. The amount comes from `tier_price_inr()` on the server, and the payee and VPA from `UPI_VPA` / `UPI_PAYEE_NAME`. Each order gets a short stable **order code** (e.g. `T-4F2A`), carried in the UPI note `Tegaki T-4F2A`.
+
+**Acceptance**
+- The decoded QR string equals the link string and contains `pa`, `pn`, `am` = the server price, `cu=INR`, and `tn=Tegaki <code>`, all URL-encoded (unit test decodes the rendered QR).
+- A client-supplied amount or tier price is never used (test).
+- With `UPI_VPA` unset, no QR or link renders anywhere; the card shows the "Payments are paused" message (test).
+- The VPA appears in no tracked file (grep check in the test suite).
+- `demo` mode renders today's checkout unchanged, for everyone. `admin_preview` shows the pay screen to admins only. An unknown value fails closed to `demo` (tests).
+- **Manual:** Tushar scans each tier's QR in GPay or PhonePe on a real Android phone, confirms payee, amount and note, then cancels. Same for the app link.
+
+**Verification:** unit tests · the manual scan-and-cancel · screenshots at 375 / 768 / 1280.
+
+## T17 · Receipt screen and submit with proof
+**Blocked by:** T16
+
+**Delivers:** The **receipt screen** (Design.md §6.1), plus the backing data:
+- **Payments schema:** `provider` gains `'upi_qr'`; status gains `awaiting_verification`; new columns for UTR, screenshot path and order code.
+- **Storage:** a private `payment-screenshots` bucket with owner-and-admin-only RLS.
+- **`submit_order()`:** requires a screenshot and creates the payment as `awaiting_verification`.
+- **Dashboard:** the order card shows the PAYMENT line "Checking your payment".
+
+**Acceptance**
+- Submit without a screenshot is refused server-side, even via a direct RPC (RLS test). The order stays draft.
+- Another buyer and anonymous users can't list, read or sign a screenshot; owner and admin can (RLS test).
+- Only allowed image types (JPG/PNG/HEIC) up to 10 MB are accepted, with a clear error otherwise.
+- UTR is optional; when given it must be 12 digits.
+- Returning from the UPI app, or reloading, resumes on the receipt screen.
+- The seal stamp plays on "Send for review"; the existing double-submit guarantees still hold (unique payment per order).
+
+**Verification:** RLS tests · e2e submit loop on a phone viewport · screenshots of the dashboard line.
+
+## T18 · Admin verify and the approval gate
+**Blocked by:** T17
+
+**Delivers:**
+- **Payment status:** `verified`, set only by an admin-only RPC that records who and when.
+- **The approval gate:** the transition `sample_under_review → analysis_in_progress` is **refused by the database** unless the payment is `verified` **or legacy `demo_paid`**, so demo orders, existing and still being placed while the switch is on `demo`, keep working.
+- **Admin order page:** the screenshot viewer (signed URL), the "Find it in your bank app" panel, "Found it, mark paid", and "Approve sample" disabled with "Mark the payment as paid first."
+- **Admin queue:** filter pills, starting with "Payments to check".
+- **Dashboard:** the order card shows "Paid".
+
+**Acceptance**
+- The approve transition is refused for `awaiting_verification`, `not_found` and `refunded`, and allowed for `verified` and `demo_paid` (RLS tests on the function, not the button).
+- A buyer can't set or change any payment status, amount or verification field (RLS test).
+- Rejecting a sample (needs_reupload) still works without a verified payment.
+
+**Verification:** RLS tests · e2e admin verify → approve.
+
+## T19 · Payment not found, re-attach, and parking
+**Blocked by:** T18
+
+**Delivers:** The admin action "Not found…" with a required reason the customer sees (`not_found`). The customer's err panel quotes that reason verbatim and has an inline re-attach dropzone, which sets the payment back to `awaiting_verification` and keeps the old screenshot for admin history. The scheduled job parks orders whose payment has been `not_found` for 14 days. The admin queue gets the "Not found" filter.
+
+**Acceptance**
+- A reason is required.
+- Only the owner can re-attach, and only while the payment is `not_found`.
+- Parking happens at 14 days, not 13 (fixture tests on both sides of the boundary).
+- The customer sees "paused, not lost" copy with the contact address.
+
+**Verification:** RLS + job fixture tests · e2e reject → re-attach → verify.
+
+## T20 · Refunds recorded in admin
+**Blocked by:** T18
+
+**Delivers:** An admin-only "Record refund" form (refund UTR required, note) on paid payments → `refunded`, with `refunded_at`. The order card shows "Refunded ₹X on <date> · ref …". The order status itself doesn't change. The queue gets "Paid" and "Refunded" filters.
+
+**Acceptance**
+- A refund is allowed only from `verified` and only by an admin; the refund UTR is required (RLS tests).
+- The customer's card shows the refund line.
+
+**Verification:** RLS tests · e2e refund on a parked order.
+
+## T21 · Copy and policies for real payment
+**Blocked by:** T17
+
+**Delivers:** Real-payment copy, selected by `PAYMENTS_MODE` (demo copy stays while the switch is `demo`; T23 deletes the demo strings after launch). It replaces every demo-payment string: `PILOT_NOTICE_*` and `PILOT_ORDER_NOTE` in `copy.ts`, the FAQ, the Refunds page ("Once payments are real…" → real UPI refunds within 7 working days), and the Terms where they mention the pilot taking no money. The claims guard still passes.
+
+**Acceptance**
+- In `live` mode no customer-visible page renders demo-payment wording ("no real payment", "pilot — no payment", demo checkout). In `demo` mode nothing changes (render tests for both).
+- Tushar reads and approves the changed policy text before release.
+
+**Verification:** grep test · claims guard · Tushar's read-through.
+
+## T22 · Retention and delete-my-data cover payment screenshots
+**Blocked by:** T17
+
+**Delivers:** The nightly retention job and the delete-my-data path delete payment screenshots on the same schedule as samples (90 days after delivery). The payment row keeps its amount and status but no resolvable screenshot path.
+
+**Acceptance**
+- Fixture tests at 89 / 90 / 91 days for screenshots.
+- Delete-my-data removes the screenshots.
+- Both runs are idempotent and logged with counts.
+
+**Verification:** extended retention tests.
+
+## T23 · Release: full phone walk-through and ship
+**Blocked by:** T16–T22, T24, T25
+
+**Delivers:** A production walk-through at 375px in `admin_preview`. Then `PAYMENTS_MODE=live`, followed by removing the now-dead demo checkout code and strings. The walk-through:
+1. Sign in.
+2. Submit an order and pay screen.
+3. Scan-and-cancel the QR.
+4. Attach a receipt.
+5. Admin verifies and approves.
+6. Refund recorded on a test order.
+
+Production test data is cleaned up afterwards.
+
+**Acceptance**
+- All tests, typecheck, lint and the claims guard pass on the release commit.
+- The RLS and payment suites actually ran: a release run fails if the Supabase env vars are missing rather than skipping.
+- The walk-through passes and Tushar signs it off.
+
+**Verification:** CI output on the merge commit · the walk-through checklist · deploy URL.
+
+## Dependency graph (payments)
+
+```
+T24 ─────────────────────────────────────────────┐
+T25 ─────────────────────────────────────────────┤
+T16 ─ T17 ─┬─ T18 ─┬─ T19 ───────────────────────┤
+           │       └─ T20 ───────────────────────┼─ T23 (release)
+           ├─ T21 ───────────────────────────────┤
+           └─ T22 ───────────────────────────────┘
+```
+**Frontier at kickoff:** T24 · T25 · T16 (all independent).
+
+## Sign-off record — payments (2026-10-14)
+1. **Granularity:** approved as drafted, 10 tickets (T16–T25) in 2 milestones (M-005, M-006).
+2. **Release:** ship each ticket when done, behind `PAYMENTS_MODE` (`demo` → `admin_preview` → `live`). Consequence found while applying it: the T18 approval gate must accept legacy `demo_paid`.
+3. **Ops first:** T24 (keep-alive + RCA) and T25 (domain) ship ahead of payments.
+4. **Published to Campfire** under TASK-22: T24 = TASK-22.1 · T25 = TASK-22.2 · T16 = TASK-22.3 · T17 = TASK-22.4 · T18 = TASK-22.5 · T19 = TASK-22.6 · T20 = TASK-22.7 · T21 = TASK-22.8 · T22 = TASK-22.9 · T23 = TASK-22.10. Milestones M-005 = m-4, M-006 = m-5. Dependencies mirror the graph above.
+
+## Stage 6 links — payments (2026-10-14)
+| Ticket | Campfire | Plan | Test cases |
+|---|---|---|---|
+| T24 | TASK-22.1 | `plans/T24-keepalive-rca.md` | TC-P01–P07 |
+| T25 | TASK-22.2 | `plans/T25-domain-move.md` | TC-P08–P10 |
+| T16 | TASK-22.3 | `plans/T16-upi-pay-screen.md` | TC-P11–P21 |
+| T17 | TASK-22.4 | `plans/T17-receipt-submit.md` | TC-P22–P26 |
+| T18 | TASK-22.5 | `plans/T18-admin-verify-gate.md` | TC-P27–P31 |
+| T19 | TASK-22.6 | `plans/T19-not-found-reattach-park.md` | TC-P32–P35 |
+| T20 | TASK-22.7 | `plans/T20-refunds.md` | TC-P36–P37 |
+| T21 | TASK-22.8 | `plans/T21-copy-policies.md` | TC-P38–P39 |
+| T22 | TASK-22.9 | `plans/T22-screenshot-retention.md` | TC-P40–P42 |
+| T23 | TASK-22.10 | `plans/T23-release-walkthrough.md` | TC-P43–P45 |
+
+**Scope changes from Stage 6** (`decisions.md`):
+- **TP1 (T16):** `PAYMENTS_MODE` is a database setting, not an env var.
+- **TP6 (T17):** HEIC is no longer accepted.
+- **TP7 (T24):** the keep-alive writes a heartbeat, and admin shows how old it is.
+- **TP11 (T16):** a real-device payment spike comes first. Proposed, pending Tushar.

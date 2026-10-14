@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared · Dashboard + admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Manrope:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style type="text/tailwindcss">
+@theme {
+  --color-ink-950: oklch(0.15 0.012 85); --color-ink-900: oklch(0.2 0.015 80); --color-ink-800: oklch(0.25 0.018 80);
+  --color-ink-700: oklch(0.32 0.018 78); --color-ink-500: oklch(0.58 0.03 78);
+  --color-washi-50: oklch(0.94 0.03 85); --color-washi-300: oklch(0.78 0.04 82);
+  --color-shu-500: oklch(0.6 0.19 32); --color-shu-600: oklch(0.53 0.175 31); --color-shu-700: oklch(0.46 0.155 30); --color-shu-900: oklch(0.25 0.06 30);
+  --color-ok-500: oklch(0.65 0.1 150); --color-warn-500: oklch(0.75 0.12 80); --color-err-500: oklch(0.68 0.17 30);
+  --color-ok-700: oklch(0.48 0.1 150); --color-warn-700: oklch(0.5 0.1 72); --color-err-700: oklch(0.5 0.16 30);
+  --color-inkl-900: #173b43; --color-paper-50: #f4ebd6; --color-paper-100: #e9dcc2; --color-teal-900: #123f43; --color-pencil-600: #a8433a;
+  --font-serif: 'Instrument Serif', Georgia, serif; --font-sans: 'Manrope', system-ui, sans-serif; --font-mono: 'Geist Mono', ui-monospace, monospace; --font-hand: 'Caveat', cursive;
+}
+@layer base { body { font-family: var(--font-sans); } :focus-visible { outline: 2px solid var(--color-shu-700); outline-offset: 2px; } }
+@utility card-paper { @apply border border-inkl-900/12 bg-paper-100 rounded-2xl p-6 shadow-[0_1px_2px_rgba(23,59,67,0.06),0_8px_20px_-12px_rgba(23,59,67,0.18)]; }
+@utility card-ink { @apply border border-ink-700 bg-ink-900 rounded-2xl p-6; }
+@utility btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold select-none; }
+@utility btn-primary { @apply btn bg-shu-600 text-washi-50 hover:bg-shu-700; }
+@utility btn-line { @apply btn border border-inkl-900/30 text-inkl-900 hover:bg-inkl-900/5; }
+@utility btn-line-ink { @apply btn border border-ink-700 text-washi-50 hover:bg-ink-800; }
+button[disabled] { opacity:.45; cursor:not-allowed; }
+@utility micro { @apply font-mono text-xs tracking-[0.08em] uppercase; }
+</style>
+<style>
+.proto-banner{position:relative;background:#111;color:#f4ebd6;font:500 11px/1 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:7px 8px}
+.grain{background-image:radial-gradient(rgba(23,59,67,.05) 1px,transparent 1px);background-size:3px 3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="bg-paper-50 text-inkl-900 grain min-h-dvh">
+<div class="proto-banner">Design prototype — not production · FINAL · dashboard payment states + admin (approved 2026-10-14)</div>
+
+<main data-theme="paper" class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+  <p class="micro text-shu-700">Customer dashboard</p>
+  <h1 class="mt-2 font-serif text-4xl">Your assessments</h1>
+  <p class="mt-2 text-sm text-inkl-900/70">One card per payment state, then the loading and error states. (The empty, first-run state is unchanged.)</p>
+
+  <div class="mt-8 flex flex-col gap-6">
+    <!-- VERIFYING -->
+    <article class="card-paper flex flex-col gap-4">
+      <header class="flex flex-wrap items-start justify-between gap-3">
+        <div><h2 class="font-serif text-xl">Meera</h2><p class="mt-1 font-mono text-xs text-inkl-900/70">CORE · T-4F2A</p></div>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-warn-500/40 bg-warn-500/10 px-3 py-1 text-xs font-semibold text-warn-700">◷ Sample under review</span>
+      </header>
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-inkl-900/12 pt-4 text-sm">
+        <span class="micro text-inkl-900/60">Payment</span>
+        <span class="inline-flex items-center gap-1.5 font-semibold text-warn-700">◷ Checking your payment</span>
+        <span class="text-inkl-900/70">₹1,999 · receipt received 14 Oct</span>
+      </div>
+      <p class="text-sm text-inkl-900/70">Tushar checks every payment against his bank by hand. The analysis starts once it shows up.</p>
+    </article>
+
+    <!-- NOT FOUND -->
+    <article class="card-paper flex flex-col gap-4">
+      <header class="flex flex-wrap items-start justify-between gap-3">
+        <div><h2 class="font-serif text-xl">Rahul</h2><p class="mt-1 font-mono text-xs text-inkl-900/70">EXPRESS · T-9C1D</p></div>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-warn-500/40 bg-warn-500/10 px-3 py-1 text-xs font-semibold text-warn-700">◷ Sample under review</span>
+      </header>
+      <div role="alert" class="flex flex-col gap-3 rounded-2xl border border-err-500/40 bg-err-500/10 p-5">
+        <p class="text-sm font-semibold text-err-700">⚠ We couldn’t find this payment yet</p>
+        <blockquote class="border-l-2 border-err-700/40 pl-3 text-sm">“The screenshot shows ₹99, not ₹999. Could you check and send the right one?”</blockquote>
+        <button type="button" class="flex w-full flex-col items-center gap-1 rounded-xl border border-dashed border-inkl-900/30 bg-paper-50 px-4 py-5 text-center">
+          <span class="text-sm font-semibold">Attach a new screenshot</span><span class="text-xs text-inkl-900/60">JPG, PNG or HEIC · up to 10 MB</span>
+        </button>
+        <p class="text-xs text-inkl-900/70">Not sure what went wrong? Write to <a class="underline underline-offset-2" href="#">tushar_pathak@outlook.com</a>. Orders without a found payment for 14 days are paused, not lost.</p>
+      </div>
+    </article>
+
+    <!-- PAID -->
+    <article class="card-paper flex flex-col gap-4">
+      <header class="flex flex-wrap items-start justify-between gap-3">
+        <div><h2 class="font-serif text-xl">Anjali</h2><p class="mt-1 font-mono text-xs text-inkl-900/70">COMPREHENSIVE · T-2B7E</p></div>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-warn-500/40 bg-warn-500/10 px-3 py-1 text-xs font-semibold text-warn-700">◷ Analysis in progress</span>
+      </header>
+      <p class="text-sm text-inkl-900/70">Expected by <strong class="text-inkl-900">Tue 21 Oct</strong></p>
+      <div class="flex flex-wrap items-baseline gap-x-3 border-t border-inkl-900/12 pt-4 text-sm">
+        <span class="micro text-inkl-900/60">Payment</span>
+        <span class="font-semibold text-ok-700">✓ Paid</span><span class="text-inkl-900/70">₹2,999 · 14 Oct</span>
+      </div>
+    </article>
+
+    <!-- REFUNDED -->
+    <article class="card-paper flex flex-col gap-4">
+      <header class="flex flex-wrap items-start justify-between gap-3">
+        <div><h2 class="font-serif text-xl">Dev</h2><p class="mt-1 font-mono text-xs text-inkl-900/70">EXPRESS · T-7A30</p></div>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-inkl-900/20 bg-inkl-900/8 px-3 py-1 text-xs font-semibold text-inkl-900/70">‖ Parked</span>
+      </header>
+      <div class="flex flex-col gap-1 rounded-2xl border border-inkl-900/12 bg-inkl-900/5 p-5 text-sm">
+        <p><span class="micro mr-2 text-inkl-900/60">Payment</span><strong>Refunded ₹999</strong> on 16 Oct</p>
+        <p class="text-inkl-900/70">Sent back to the UPI account you paid from · ref <span class="font-mono">630112348871</span></p>
+      </div>
+    </article>
+
+    <!-- LOADING -->
+    <div aria-busy="true" aria-label="Loading your assessments" class="card-paper flex flex-col gap-4">
+      <div class="h-5 w-32 animate-pulse rounded bg-inkl-900/10"></div><div class="h-3 w-24 animate-pulse rounded bg-inkl-900/10"></div>
+      <div class="h-px bg-inkl-900/12"></div><div class="h-4 w-56 animate-pulse rounded bg-inkl-900/10"></div>
+    </div>
+    <!-- ERROR -->
+    <div role="alert" class="card-paper flex flex-wrap items-center justify-between gap-4">
+      <p class="text-sm">We couldn’t load your assessments. Nothing is lost.</p>
+      <button type="button" class="btn-line">Try again</button>
+    </div>
+  </div>
+</main>
+
+<!-- ADMIN (dark ink surfaces, as today) -->
+<section class="bg-ink-950 text-washi-50">
+  <div class="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
+    <p class="micro text-shu-500">Admin · queue</p>
+    <h2 class="mt-2 font-serif text-4xl">Work waiting on you</h2>
+    <div role="group" aria-label="Filter by payment" class="mt-6 flex flex-wrap gap-2 text-sm">
+      <button class="min-h-11 rounded-full border border-ink-700 px-4">All</button>
+      <button aria-pressed="true" class="min-h-11 rounded-full border border-shu-500 bg-shu-900 px-4">Payments to check · 2</button>
+      <button class="min-h-11 rounded-full border border-ink-700 px-4">Not found · 1</button>
+      <button class="min-h-11 rounded-full border border-ink-700 px-4">Paid</button>
+      <button class="min-h-11 rounded-full border border-ink-700 px-4">Refunded</button>
+    </div>
+    <ul class="mt-4 divide-y divide-ink-700 overflow-hidden rounded-2xl border border-ink-700 bg-ink-900">
+      <li class="flex flex-wrap items-center justify-between gap-3 p-4"><span><span class="font-serif text-lg">Meera</span> <span class="ml-2 font-mono text-xs text-washi-300">CORE · T-4F2A</span></span><span class="text-sm text-warn-500">◷ Payment to check · ₹1,999</span></li>
+      <li class="flex flex-wrap items-center justify-between gap-3 p-4"><span><span class="font-serif text-lg">Kabir</span> <span class="ml-2 font-mono text-xs text-washi-300">EXPRESS · T-5E9B</span></span><span class="text-sm text-warn-500">◷ Payment to check · ₹999</span></li>
+    </ul>
+
+    <p class="micro mt-14 text-shu-500">Admin · order T-4F2A</p>
+    <h2 class="mt-2 font-serif text-3xl">Meera · Core Personality</h2>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[18rem_1fr]">
+      <figure class="card-ink">
+        <div class="mx-auto aspect-[9/16] w-full max-w-[14rem] rounded-lg bg-washi-50/95 p-4 text-ink-950">
+          <p class="text-center text-xs">Payment successful</p><p class="mt-6 text-center font-serif text-3xl">₹1,999</p>
+          <p class="mt-2 text-center text-xs">to Tushar Pathak</p><p class="mt-8 text-[10px] text-ink-700">UPI ref 4321 8765 0912<br>Note: Tegaki T-4F2A</p>
+        </div>
+        <figcaption class="mt-3 flex justify-between text-sm text-washi-300"><span>Customer’s screenshot</span><a href="#" class="underline underline-offset-2">Open full size</a></figcaption>
+      </figure>
+      <div class="flex flex-col gap-6">
+        <div class="card-ink">
+          <h3 class="font-serif text-2xl">Find it in your bank app</h3>
+          <dl class="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+            <dt class="text-washi-300">Amount due</dt><dd class="font-semibold">₹1,999</dd>
+            <dt class="text-washi-300">Note to look for</dt><dd class="font-mono">Tegaki T-4F2A</dd>
+            <dt class="text-washi-300">UTR they typed</dt><dd class="font-mono">432187650912</dd>
+            <dt class="text-washi-300">Receipt sent</dt><dd>14 Oct, 10:42</dd>
+          </dl>
+          <div class="mt-6 flex flex-wrap items-center justify-between gap-6">
+            <button class="btn bg-ok-500/90 text-ink-950 hover:bg-ok-500">Found it, mark paid</button>
+            <button class="min-h-11 text-sm text-washi-300 underline underline-offset-2">Not found…</button>
+          </div>
+          <div class="mt-5 rounded-lg border border-ink-700 bg-ink-800 p-4">
+            <label for="nf" class="text-sm font-semibold">Why couldn’t you find it? <span class="font-normal text-washi-300">(the customer sees this)</span></label>
+            <textarea id="nf" rows="2" class="mt-2 w-full rounded-lg border border-ink-700 bg-ink-900 p-3 text-sm" placeholder="e.g. The screenshot shows ₹99, not ₹999."></textarea>
+            <button class="btn-line-ink mt-3">Send to the customer</button>
+          </div>
+        </div>
+        <div class="card-ink">
+          <h3 class="font-serif text-2xl">The sample</h3>
+          <div class="mt-4 flex flex-wrap items-center gap-4">
+            <button disabled class="btn bg-ok-500/90 text-ink-950 opacity-45 cursor-not-allowed" aria-describedby="gate">Approve sample</button>
+            <p id="gate" class="text-sm text-warn-500">Mark the payment as paid first.</p>
+          </div>
+        </div>
+        <div class="card-ink">
+          <h3 class="font-serif text-2xl">Refund <span class="text-base text-washi-300">(only after a payment is marked paid)</span></h3>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <label class="text-sm">Refund UTR<input class="mt-1 w-full rounded-lg border border-ink-700 bg-ink-800 p-3 font-mono" placeholder="12 digits"></label>
+            <label class="text-sm">Note<input class="mt-1 w-full rounded-lg border border-ink-700 bg-ink-800 p-3" placeholder="Sample unreadable, customer chose refund"></label>
+          </div>
+          <button class="btn-line-ink mt-4">Record refund</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body></html>

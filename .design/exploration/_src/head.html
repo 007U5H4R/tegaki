@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Manrope:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style type="text/tailwindcss">
+@theme {
+  --color-ink-950: oklch(0.15 0.012 85); --color-ink-900: oklch(0.2 0.015 80); --color-ink-800: oklch(0.25 0.018 80);
+  --color-ink-700: oklch(0.32 0.018 78); --color-ink-500: oklch(0.58 0.03 78);
+  --color-washi-50: oklch(0.94 0.03 85); --color-washi-300: oklch(0.78 0.04 82);
+  --color-shu-500: oklch(0.6 0.19 32); --color-shu-600: oklch(0.53 0.175 31); --color-shu-700: oklch(0.46 0.155 30); --color-shu-900: oklch(0.25 0.06 30);
+  --color-ok-500: oklch(0.65 0.1 150); --color-warn-500: oklch(0.75 0.12 80); --color-err-500: oklch(0.68 0.17 30);
+  --color-ok-700: oklch(0.48 0.1 150); --color-warn-700: oklch(0.5 0.1 72); --color-err-700: oklch(0.5 0.16 30);
+  --color-inkl-900: #173b43; --color-paper-50: #f4ebd6; --color-paper-100: #e9dcc2; --color-teal-900: #123f43; --color-pencil-600: #a8433a;
+  --font-serif: 'Instrument Serif', Georgia, serif; --font-sans: 'Manrope', system-ui, sans-serif; --font-mono: 'Geist Mono', ui-monospace, monospace; --font-hand: 'Caveat', cursive;
+}
+@layer base { body { font-family: var(--font-sans); } :focus-visible { outline: 2px solid var(--color-shu-700); outline-offset: 2px; } }
+@utility card-paper { @apply border border-inkl-900/12 bg-paper-100 rounded-2xl p-6 shadow-[0_1px_2px_rgba(23,59,67,0.06),0_8px_20px_-12px_rgba(23,59,67,0.18)]; }
+@utility card-ink { @apply border border-ink-700 bg-ink-900 rounded-2xl p-6; }
+@utility btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold select-none; }
+@utility btn-primary { @apply btn bg-shu-600 text-washi-50 hover:bg-shu-700; }
+@utility btn-line { @apply btn border border-inkl-900/30 text-inkl-900 hover:bg-inkl-900/5; }
+@utility btn-line-ink { @apply btn border border-ink-700 text-washi-50 hover:bg-ink-800; }
+button[disabled] { opacity:.45; cursor:not-allowed; }
+@utility micro { @apply font-mono text-xs tracking-[0.08em] uppercase; }
+</style>
+<style>
+.proto-banner{position:relative;background:#111;color:#f4ebd6;font:500 11px/1 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:7px 8px}
+.grain{background-image:radial-gradient(rgba(23,59,67,.05) 1px,transparent 1px);background-size:3px 3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>

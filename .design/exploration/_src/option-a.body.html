@@ -1,0 +1,63 @@
+<body class="bg-paper-50 text-inkl-900 grain min-h-dvh">
+<div class="proto-banner">Design prototype — not production · Option A: one sheet, three numbered marks</div>
+<main id="a" data-theme="paper" class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+  {{STEPPER}}
+  <header class="mt-10">
+    <p class="micro text-shu-700">Step 4 of 4</p>
+    <h1 class="mt-2 font-serif text-4xl leading-tight">Pay, then send us the receipt</h1>
+    <p class="mt-3 text-inkl-900/75">Core Personality for <strong class="text-inkl-900">Meera</strong> · <span class="font-mono text-sm">T-4F2A</span></p>
+  </header>
+
+  <ol class="mt-10 flex flex-col gap-10">
+    <!-- 1 PAY -->
+    <li class="card-paper">
+      <div class="flex items-baseline justify-between gap-4">
+        <h2 class="flex items-baseline gap-3 font-serif text-2xl"><span class="font-hand text-pencil-600 text-3xl" aria-hidden>1</span>Pay by UPI</h2>
+        <p class="font-serif text-4xl" aria-label="Amount: 1,999 rupees">₹1,999</p>
+      </div>
+      <div class="mt-6 grid gap-6 sm:grid-cols-[13rem_1fr] sm:items-start">
+        <!-- On a phone the app button leads; the QR is for paying from a second phone. -->
+        <div class="order-2 sm:order-1">
+          <div data-qr class="mx-auto w-44 rounded-lg border border-inkl-900/15 bg-white p-2 sm:w-full"></div>
+          <p class="mt-2 text-center text-xs text-inkl-900/60 sm:text-left">Scan with any UPI app</p>
+        </div>
+        <div class="order-1 flex flex-col gap-4 sm:order-2">
+          <a href="#" class="btn-primary w-full sm:hidden">Pay ₹1,999 in your UPI app</a>
+          <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+            <dt class="text-inkl-900/65">Paying</dt><dd>Tushar Pathak <span class="text-inkl-900/60">(the name your app will show)</span></dd>
+            <dt class="text-inkl-900/65">UPI ID</dt><dd class="flex flex-wrap items-center gap-x-3"><span class="font-mono">yourname@okbank</span><button type="button" data-copy class="text-sm underline underline-offset-2 min-h-6">Copy</button></dd>
+            <dt class="text-inkl-900/65">Note</dt><dd><span class="font-mono">Tegaki T-4F2A</span> <span class="text-inkl-900/60">(already filled in)</span></dd>
+          </dl>
+          <p class="text-sm text-inkl-900/70">The amount is set for you. If your app lets you change it, please don’t, or we won’t be able to match the payment.</p>
+        </div>
+      </div>
+    </li>
+
+    <!-- 2 PROOF -->
+    <li class="card-paper">
+      <h2 class="flex items-baseline gap-3 font-serif text-2xl"><span class="font-hand text-pencil-600 text-3xl" aria-hidden>2</span>Attach the payment screenshot</h2>
+      <p class="mt-2 text-sm text-inkl-900/70">The “payment successful” screen from your UPI app. Tushar matches it against his bank before the analysis starts.</p>
+      <button type="button" data-drop onclick="attach('#a')" class="mt-5 flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-inkl-900/30 px-4 py-8 text-center hover:bg-inkl-900/5">
+        <span class="font-semibold">Choose a screenshot</span>
+        <span class="text-xs text-inkl-900/60">JPG, PNG or HEIC · up to 10 MB</span>
+      </button>
+      <div data-file class="hidden mt-5 flex items-center gap-4 rounded-lg border border-inkl-900/15 bg-paper-50 p-3">
+        <div class="h-16 w-10 shrink-0 rounded bg-[linear-gradient(#e7f3ec,#cfe6d8)] border border-inkl-900/10" aria-hidden></div>
+        <div class="min-w-0 flex-1"><p class="truncate text-sm">Screenshot_2026-10-14.png</p><p class="text-xs text-inkl-900/60">412 KB · ready</p></div>
+        <button type="button" onclick="detach('#a')" class="min-h-11 px-3 text-sm underline underline-offset-2">Remove</button>
+      </div>
+      <label class="mt-5 block text-sm font-semibold" for="utr-a">UPI reference (UTR) <span class="font-normal text-inkl-900/60">· optional</span></label>
+      <input id="utr-a" inputmode="numeric" autocomplete="off" placeholder="12 digits, on the same screen" class="mt-2 w-full rounded-lg border border-inkl-900/25 bg-paper-50 px-4 py-3 font-mono placeholder:font-sans placeholder:text-inkl-900/45">
+    </li>
+
+    <!-- 3 SEND -->
+    <li class="flex flex-col gap-4">
+      <h2 class="sr-only">Send for review</h2>
+      <button type="button" data-submit disabled class="btn-primary w-full sm:w-auto sm:self-start">Send for review</button>
+      <p class="text-sm text-inkl-900/70">Your sample review starts now. The analysis starts once your payment shows in Tushar’s bank.</p>
+      <p class="text-sm text-inkl-900/70">Sample not usable? Full refund to the same UPI account.</p>
+    </li>
+  </ol>
+</main>
+<script src="../_src/common.js"></script>
+</body></html>

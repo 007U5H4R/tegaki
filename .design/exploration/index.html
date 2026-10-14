@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pay step · design gallery</title>
+<style>
+:root{--paper:#f4ebd6;--ink:#173b43;--card:#e9dcc2}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,sans-serif}
+.b{background:#111;color:var(--paper);font:500 11px/1 ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:7px}
+main{max-width:72rem;margin:0 auto;padding:32px 16px}
+h1{font:400 2.4rem/1.1 Georgia,serif;margin:.2em 0}
+.grid{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));margin-top:24px}
+.opt{background:var(--card);border:1px solid rgba(23,59,67,.12);border-radius:16px;padding:20px}
+.opt h2{font:400 1.6rem/1.2 Georgia,serif;margin:0}
+.shots{display:flex;gap:12px;align-items:flex-start;margin-top:12px}
+.shots img{border:1px solid rgba(23,59,67,.2);border-radius:8px;max-width:100%;height:auto}
+.shots img.m{width:34%}.shots img.d{width:62%}
+a{color:var(--ink);font-weight:600}
+</style></head><body><div class="b">Design prototype — not production</div><main>
+<p style="font:500 12px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:#9c271b">Tegaki · payments v1.1 · Stage 4</p>
+<h1>The pay step: two ways to sequence it</h1>
+<p>Both use the same tokens, copy and controls. They differ in <b>sequence</b> (everything at once vs. pay first, then prove), <b>density</b>, and <b>what leads on a phone</b>. The dashboard card and admin screens are shared by both.</p>
+<div class="grid">
+<section class="opt"><h2>A · One sheet, three numbered marks</h2>
+<p><b>Hypothesis:</b> seeing pay → receipt → send together sets expectations and needs the fewest taps.</p>
+<div class="shots"><img class="m" src="shots/option-a-375.png" alt="Option A at 375px"><img class="d" src="shots/option-a-1280.png" alt="Option A at 1280px"></div>
+<p><a href="option-a/index.html">Open A →</a></p></section>
+<section class="opt"><h2>B · Pay, then prove</h2>
+<p><b>Hypothesis:</b> on a phone the payment happens in another app; one job per screen lowers load, and the receipt step meets them when they come back.</p>
+<div class="shots"><img class="m" src="shots/option-b-375.png" alt="Option B pay screen at 375px"><img class="m" src="shots/option-b-proof-375.png" alt="Option B receipt screen at 375px"></div>
+<p><a href="option-b/index.html">Open B →</a> · <a href="option-b/index.html#proof">receipt screen</a></p></section>
+<section class="opt"><h2>Shared · dashboard + admin</h2>
+<p>Payment states on the order card (checking · not found · paid · refunded), loading and error, then the admin queue filter, the "find it in your bank" panel and the approval gate.</p>
+<div class="shots"><img class="d" src="shots/shared-1280.png" alt="Shared screens at 1280px"></div>
+<p><a href="shared/index.html">Open shared →</a></p></section>
+</div></main></body></html>

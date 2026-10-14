@@ -262,3 +262,73 @@ Hero copy over photography requires a scrim layer to ≥7:1 — verify per break
 2. **Higgsfield generation approval** — ~4 stills + 8 gallery tiles ≈ 60–100 credits of the 411 available; or supply own photography.
 3. Real photo of you for §3.2-7 (or ship the section with an honest placeholder frame at pilot).
 ```
+
+---
+
+## 6. Payments v1.1 — UPI QR (Stage 4 amendment, 2026-10-14)
+
+> **DESIGN FROZEN — 2026-10-14, approved by Tushar.** Frozen: the pay step's two-screen sequence (pay, then prove) · the payment line on the order card and its four states · the admin queue payment filter · the "Find it in your bank app" panel · the approval gate · the refund form · CTA hierarchy on each · approved mockup `.design/exploration/final/` (`pay-step.html`, `dashboard-admin.html`).
+> Implementation may adjust technical details, pixel-level issues, browser constraints, and accessibility fixes. Changing any frozen item goes back to design review; delegated design skills never override it.
+
+**Theme note.** §2's dark ink/washi tokens describe the original build. The authenticated customer surfaces were re-skinned onto the paper-world theme (commit `66697df`): `data-theme="paper"`, `bg-paper-50`, `text-inkl-900`, paper cards (`bg-paper-100` + hairline + soft shadow), and the `-700` state hues for text on cream. **The live code is the token reference for these surfaces.** Admin stays on the dark ink theme. Rewriting §2 for paper is a separate, unscheduled docs task.
+
+### 6.1 Wizard stage 4 — "Pay, then prove" (replaces §3.4 S4 demo checkout)
+Single column, `max-w-xl`, the existing stepper with stage 4 labelled **Pay**. Two screens, one job each:
+- **Pay screen.**
+  - Micro-label "Step 4 of 4 · Pay". The H1 *is* the transaction: **"₹1,999 to Tushar Pathak"** (price from the server, payee name from config).
+  - Sub-line: tier + subject, and "note `Tegaki T-4F2A` is filled in for you" (nowrap code).
+  - A paper card holds the method:
+    - **< 640px:** primary pill **"Pay ₹1,999 in your UPI app"** (the `upi://pay` intent link). Below it, a `<details>` disclosure: "Paying from another phone? Show the QR".
+    - **≥ 640px:** the QR (white tile, ~14rem) + "Scan with GPay, PhonePe, Paytm or any UPI app".
+    - Always: "UPI ID `<vpa>` · Copy".
+  - Under the card, a secondary line-pill **"I've paid, attach the receipt"**, then "Payment didn't go through? Nothing was taken. Just try again."
+- **Receipt screen.**
+  - "Step 4 of 4 · Receipt"; H1 "Send us the receipt"; a line explaining Tushar matches it against his bank.
+  - Card: dashed dropzone ("Choose a screenshot · JPG, PNG or HEIC · up to 10 MB"), which becomes a file row with thumbnail, name, size and **Remove** once chosen. Then the **UPI reference (UTR) · optional** field (`inputmode=numeric`, mono value).
+  - Primary **"Send for review"**, disabled until a screenshot is attached. Copy: review starts now; the analysis starts once the payment shows in the bank; "Sample not usable? Full refund to the same UPI account."
+  - **"Back to the QR"** link.
+  - Switching screens moves focus to the new H1 (`tabindex=-1`, no visible outline) and scrolls to top. The receipt screen must be reachable directly (returning from the UPI app or a reload resumes there, since the draft is persisted).
+- The seal-stamp success beat (§4.3) plays on "Send for review", as it did on the old confirm.
+- **Fail closed:** with the UPI config missing, neither screen renders a QR or link. The card shows "Payments are paused for a moment. Write to `<contact>`" and the submit stays disabled.
+
+### 6.2 Order card — payment line (extends §3.5–§3.6)
+Below the header (and status chip), a hairline-separated row: micro-label **PAYMENT** + state.
+- **Checking your payment** (warn-700, clock): "₹X · receipt received <date>". Plus one line: Tushar checks every payment against his bank by hand; the analysis starts once it shows up.
+- **We couldn't find this payment yet** (err panel, `role=alert`, same pattern as needs-reupload): Tushar's reason **verbatim** as a quote, an inline "Attach a new screenshot" dropzone, the contact email, and "Orders without a found payment for 14 days are paused, not lost."
+- **Paid** (ok-700, check): "₹X · <date>". No panel.
+- **Refunded** (neutral inkl/5 panel): "Refunded ₹X on <date> · sent back to the UPI account you paid from · ref `<utr>`".
+- Screen states: loading = skeleton card shaped like the real one; error = "We couldn't load your assessments. Nothing is lost." + **Try again**; empty = the existing first-run state (§3.5).
+- Every state is icon + text, never colour alone.
+
+### 6.3 Admin (dark ink, extends §3.7)
+- **Queue:** filter pills **All · Payments to check · Not found · Paid · Refunded**, with counts, `aria-pressed`, min 44px. Rows show "◷ Payment to check · ₹X".
+- **Order detail:**
+  - **Screenshot viewer:** a washi surface capped at 14rem wide, "Open full size", via a signed URL.
+  - **"Find it in your bank app"** panel lists: amount due, the note to look for (mono), the UTR they typed, and when the receipt was sent.
+  - **Primary:** **"Found it, mark paid"** (ok fill).
+  - **Trailing, separated ≥24px:** the small link **"Not found…"**. It opens a required textarea labelled "the customer sees this", plus **"Send to the customer"**.
+- **The sample:** "Approve sample" stays disabled with "Mark the payment as paid first." until the payment is verified. The UI mirrors the database gate; it doesn't replace it.
+- **Refund** (only for paid payments): Refund UTR (required, mono) + Note + **"Record refund"**.
+
+### 6.4 Gates passed (on the rendered mockup, 375 / 768 / 1280 px)
+- **Responsive:** no horizontal scroll and no console errors at any width. Phone leads with the app link; desktop leads with the QR.
+- **Ethical gate:**
+  - The flow serves the customer's goal: pay and get the reading.
+  - Truthful: the payee is named, there's no invented verification time, and refunds are stated plainly.
+  - The customer can leave and come back: the draft persists.
+  - No urgency, scarcity, or confirmshaming.
+  - The honest path is the easy path: the amount is fixed, and the customer is asked not to change it.
+- **Anti-slop:**
+  - Domain-specific objects throughout: UPI note, UTR, bank matching.
+  - No card-everything: one card per job.
+  - Badges are semantic.
+  - The grayscale order is intact (headline → method → next step).
+- **Accessibility:**
+  - Every field is labelled.
+  - The QR has an `aria-label` stating payee, amount and note.
+  - Errors use `role=alert`.
+  - Focus moves on screen change.
+  - Primary targets are ≥44px; inline Copy and Remove links are ≥24px.
+  - Icon + text everywhere.
+  - Reduced motion: no transitions beyond the existing seal beat, which already honours `prefers-reduced-motion`.
+- **Social preview:** N/A (authenticated screens).
